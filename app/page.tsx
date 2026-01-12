@@ -4,6 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Users, DollarSign, Clock, ArrowRight, CheckCircle, Sparkles, Zap, Shield, BarChart3, Star, Award, TrendingUp, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
+import SplashCursor from '@/components/SplashCursor';
+// @ts-ignore
+import LightPillar from '@/components/LightPillar';
 
 export default function LandingPage() {
   return (
@@ -52,6 +55,37 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative py-12 sm:py-20 px-4 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <SplashCursor
+            SIM_RESOLUTION={128}
+            DYE_RESOLUTION={1440}
+            DENSITY_DISSIPATION={3.5}
+            VELOCITY_DISSIPATION={2}
+            PRESSURE={0.1}
+            CURL={3}
+            SPLAT_RADIUS={0.2}
+            SPLAT_FORCE={6000}
+            COLOR_UPDATE_SPEED={10}
+          />
+        </div>
+
+        {/* LightPillar Background Effect */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-60">
+          <div style={{ width: '100%', maxWidth: '1080px', height: '100%', maxHeight: '1080px', position: 'relative' }}>
+            <LightPillar
+              topColor="#18af2a"
+              bottomColor="#89a20b"
+              intensity={1}
+              rotationSpeed={0.3}
+              interactive={false}
+              glowAmount={0.005}
+              pillarWidth={3}
+              pillarHeight={0.4}
+              noiseIntensity={0.5}
+              pillarRotation={0}
+            />
+          </div>
+        </div>
         <div className="container mx-auto text-center relative z-10 max-w-6xl">
           {/* Premium badge */}
           <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in">
@@ -61,7 +95,7 @@ export default function LandingPage() {
               <Star className="w-4 h-4 text-green-400" />
             </div>
           </div>
-          
+
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in leading-tight">
             Transform Your Business with
             <br />
@@ -69,12 +103,12 @@ export default function LandingPage() {
               Smart Invoicing
             </span>
           </h1>
-          
+
           <p className="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: '0.2s' }}>
-            Create stunning invoices, automate payments, and grow your business with our 
+            Create stunning invoices, automate payments, and grow your business with our
             AI-powered platform trusted by thousands of professionals worldwide.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Link href="/auth/signup">
               <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-bold text-lg px-8 py-4 shadow-2xl green-glow">
@@ -114,7 +148,7 @@ export default function LandingPage() {
               Comprehensive invoicing solution with intelligent features designed for modern businesses
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             <Card className="bg-green-900/20 border-green-500/30 hover:border-green-400/50 transition-all duration-300 hover:transform hover:scale-105 backdrop-blur-sm group hover:bg-green-900/30">
               <CardHeader className="pb-4">
@@ -192,7 +226,7 @@ export default function LandingPage() {
               <div className="text-white font-medium">Sarah Johnson</div>
               <div className="text-green-muted text-sm">Freelance Designer</div>
             </Card>
-            
+
             <Card className="bg-green-900/20 border-green-500/30 p-6 backdrop-blur-sm hover:bg-green-900/30 transition-all duration-300">
               <div className="flex items-center justify-center mb-4">
                 {[...Array(5)].map((_, i) => (
@@ -205,7 +239,7 @@ export default function LandingPage() {
               <div className="text-white font-medium">Michael Chen</div>
               <div className="text-green-muted text-sm">Marketing Agency</div>
             </Card>
-            
+
             <Card className="bg-green-900/20 border-green-500/30 p-6 backdrop-blur-sm hover:bg-green-900/30 transition-all duration-300">
               <div className="flex items-center justify-center mb-4">
                 {[...Array(5)].map((_, i) => (

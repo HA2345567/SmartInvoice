@@ -115,32 +115,32 @@ export class DatabaseService {
       .select('*')
       .eq('email', email.toLowerCase())
       .single();
-    
+
     if (error) return null;
     return data;
   }
 
   static async getUserById(id: string): Promise<any | null> {
     console.log('Looking for user with ID:', id);
-    
+
     const { data, error } = await supabase
       .from('users')
       .select('id, email, name, company, avatar, createdat, updatedat, company_address, company_gst, company_phone, company_website')
       .eq('id', id)
       .single();
-    
+
     if (error) {
       console.error('Database error when getting user by ID:', error);
       return null;
     }
-    
+
     if (!data) {
       console.log('No user found with ID:', id);
       return null;
     }
-    
+
     console.log('User found:', data.email);
-    
+
     // Transform to camelCase for consistency
     return {
       id: data.id,
@@ -180,7 +180,7 @@ export class DatabaseService {
         .single();
 
       if (error) throw error;
-      
+
       // Transform back to camelCase for consistency
       return {
         id: data.id,
@@ -208,9 +208,9 @@ export class DatabaseService {
         .select('*')
         .eq('userid', userId)
         .order('createdat', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Transform to camelCase
       return (data || []).map(client => ({
         id: client.id,
@@ -239,9 +239,9 @@ export class DatabaseService {
         .eq('userid', userId)
         .eq('id', id)
         .single();
-      
+
       if (error) return null;
-      
+
       // Transform to camelCase
       return {
         id: data.id,
@@ -282,9 +282,9 @@ export class DatabaseService {
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
+
       // Transform back to camelCase
       return {
         id: data.id,
@@ -312,7 +312,7 @@ export class DatabaseService {
         .delete()
         .eq('userid', userId)
         .eq('id', id);
-      
+
       return !error;
     } catch (error) {
       console.error('Error deleting client:', error);
@@ -328,7 +328,7 @@ export class DatabaseService {
         .eq('userid', userId)
         .eq('clientid', clientId)
         .limit(1);
-      
+
       if (error) throw error;
       return data && data.length > 0;
     } catch (error) {
@@ -383,7 +383,7 @@ export class DatabaseService {
         .single();
 
       if (error) throw error;
-      
+
       // Transform back to camelCase
       return this.transformInvoiceToCamelCase(data);
     } catch (error) {
@@ -463,9 +463,9 @@ export class DatabaseService {
         .select('*')
         .eq('userid', userId)
         .order('createdat', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Transform to camelCase
       return (data || []).map(invoice => this.transformInvoiceToCamelCase(invoice));
     } catch (error) {
@@ -482,9 +482,9 @@ export class DatabaseService {
         .eq('userid', userId)
         .eq('id', id)
         .single();
-      
+
       if (error) return null;
-      
+
       return this.transformInvoiceToCamelCase(data);
     } catch (error) {
       console.error('Error getting invoice by id:', error);
@@ -499,9 +499,9 @@ export class DatabaseService {
         .select('*')
         .eq('id', id)
         .single();
-      
+
       if (error) return null;
-      
+
       return this.transformInvoiceToCamelCase(data);
     } catch (error) {
       console.error('Error getting public invoice by id:', error);
@@ -548,9 +548,9 @@ export class DatabaseService {
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
+
       return this.transformInvoiceToCamelCase(data);
     } catch (error) {
       console.error('Error updating invoice:', error);
@@ -565,7 +565,7 @@ export class DatabaseService {
         .delete()
         .eq('userid', userId)
         .eq('id', id);
-      
+
       return !error;
     } catch (error) {
       console.error('Error deleting invoice:', error);
@@ -586,19 +586,19 @@ export class DatabaseService {
         .from('invoices')
         .select('*')
         .eq('userid', userId);
-      
+
       if (error) throw error;
-      
+
       const invoices = (allInvoices || []).map(invoice => this.transformInvoiceToCamelCase(invoice));
       const totalRevenue = invoices
         .filter((inv: any) => inv.status === 'paid')
         .reduce((sum: number, inv: any) => sum + inv.amount, 0);
-      
+
       const totalInvoices = invoices.length;
       const paidInvoices = invoices.filter((inv: any) => inv.status === 'paid').length;
       const pendingInvoices = invoices.filter((inv: any) => inv.status === 'sent' || inv.status === 'overdue').length;
       const averageInvoiceValue = totalInvoices > 0 && paidInvoices > 0 ? totalRevenue / paidInvoices : 0;
-      
+
       const monthlyData = this.calculateMonthlyData(invoices);
       const topClients = this.calculateTopClients(invoices);
       const invoiceStatusDistribution = {
@@ -674,9 +674,9 @@ export class DatabaseService {
         .select('*')
         .eq('userid', userId)
         .order('createdat', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       if (!invoices || invoices.length === 0) {
         return '';
       }
@@ -708,9 +708,9 @@ export class DatabaseService {
         .select('*')
         .eq('userid', userId)
         .order('createdat', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       if (!clients || clients.length === 0) {
         return '';
       }
@@ -749,18 +749,40 @@ export class DatabaseService {
   }
 
   static async addFeedback(feedback: any) {
-    const db = await import('better-sqlite3');
-    const database = new db.default('./data/smartinvoice.db');
-    const stmt = database.prepare(`INSERT INTO feedback (type, rating, title, description, email, category, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)`);
-    stmt.run(feedback.type, feedback.rating, feedback.title, feedback.description, feedback.email, feedback.category, feedback.createdAt);
-    database.close();
+    // Using Supabase for feedback
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .insert([{
+          type: feedback.type,
+          rating: feedback.rating,
+          title: feedback.title,
+          description: feedback.description,
+          email: feedback.email,
+          category: feedback.category,
+          created_at: feedback.createdAt
+        }]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error adding feedback:', error);
+      // Fallback to console log if table doesn't exist
+      console.log('Feedback received:', feedback);
+    }
   }
 
   static async getAllFeedback() {
-    const db = await import('better-sqlite3');
-    const database = new db.default('./data/smartinvoice.db');
-    const rows = database.prepare('SELECT * FROM feedback ORDER BY createdAt DESC').all();
-    database.close();
-    return rows;
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting feedback:', error);
+      return [];
+    }
   }
 } 
