@@ -24,25 +24,21 @@ export default function DashboardLayout({
 
   useEffect(() => {
     // Only check authentication after loading is complete
+    // Only check authentication after loading is complete
     if (!loading) {
       // Check if we have a stored token as a fallback
       const storedToken = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('auth_user');
-      
-      // If we have stored data but context doesn't have user/token, 
-      // wait a bit more for the context to sync
-      if (storedToken && storedUser && !user && !token) {
-        // Give the context a moment to sync from localStorage
-        const timeoutId = setTimeout(() => {
-          if (!user && !token) {
-            router.push('/auth/login');
-          }
-        }, 1000);
-        
-        return () => clearTimeout(timeoutId);
+
+      // If we have a token but no user/token in context, it might be syncing.
+      // Do NOT redirect if we have a stored token.
+      if (storedToken && !user) {
+        // We are likely in a state where localStorage has the token (from callback)
+        // but AuthContext hasn't picked it up or verified it yet.
+        // Let AuthContext's verifyAndRefreshToken handle this.
+        return;
       }
-      
-      // If no stored data and no user/token, redirect to login
+
+      // If no stored data AND no user context, then we are truly logged out.
       if (!storedToken && !user && !token) {
         router.push('/auth/login');
       }
@@ -78,7 +74,7 @@ export default function DashboardLayout({
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         toast({
           title: 'Success',
           description: 'Invoices exported successfully',
@@ -116,7 +112,7 @@ export default function DashboardLayout({
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         toast({
           title: 'Success',
           description: 'Clients exported successfully',
@@ -158,7 +154,7 @@ export default function DashboardLayout({
     // Check localStorage as a fallback
     const storedToken = localStorage.getItem('auth_token');
     const storedUser = localStorage.getItem('auth_user');
-    
+
     if (!storedToken || !storedUser) {
       return null;
     }
@@ -180,9 +176,9 @@ export default function DashboardLayout({
     <div className="dashboard-layout">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
-          onClick={() => setSidebarOpen(false)} 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 
@@ -205,7 +201,7 @@ export default function DashboardLayout({
             <X className="w-5 h-5" />
           </Button>
         </div>
-        
+
         {/* Navigation - Scrollable */}
         <div className="flex-1 flex flex-col min-h-0">
           <nav className="flex-1 px-2 sm:px-4 py-4 sm:py-6 overflow-y-auto">
@@ -216,9 +212,8 @@ export default function DashboardLayout({
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`nav-item-dark flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base ${
-                      isActive ? 'active' : ''
-                    }`}
+                    className={`nav-item-dark flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base ${isActive ? 'active' : ''
+                      }`}
                     onClick={() => setSidebarOpen(false)}
                   >
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 flex-shrink-0" />

@@ -24,6 +24,9 @@ function SplashCursor({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Ensure canvas doesn't block interactions
+    canvas.style.pointerEvents = 'none';
+
     // Track if the effect is still active for cleanup
     let isActive = true;
 

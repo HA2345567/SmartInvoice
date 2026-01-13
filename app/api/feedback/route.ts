@@ -11,8 +11,11 @@ export async function POST(request: NextRequest) {
     await DatabaseService.addFeedback(data);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to submit feedback.' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Feedback submission error:', error);
+    return NextResponse.json({
+      error: error.message || 'Failed to submit feedback.'
+    }, { status: 500 });
   }
 }
 

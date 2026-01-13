@@ -1,10 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+console.log('Initializing Supabase client with key type:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE' : 'ANON');
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 export interface Invoice {
   id: string;
@@ -192,8 +197,8 @@ export class DatabaseService {
         gstNumber: data.gstnumber,
         currency: data.currency,
         isActive: data.isactive,
-        createdAt: data.createdat,
-        updatedAt: data.updatedat,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
       };
     } catch (error) {
       console.error('Error creating client:', error);
@@ -253,8 +258,8 @@ export class DatabaseService {
         gstNumber: data.gstnumber,
         currency: data.currency,
         isActive: data.isactive,
-        createdAt: data.createdat,
-        updatedAt: data.updatedat,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
       };
     } catch (error) {
       console.error('Error getting client by id:', error);
@@ -296,8 +301,8 @@ export class DatabaseService {
         gstNumber: data.gstnumber,
         currency: data.currency,
         isActive: data.isactive,
-        createdAt: data.createdat,
-        updatedAt: data.updatedat,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
       };
     } catch (error) {
       console.error('Error updating client:', error);
@@ -751,23 +756,27 @@ export class DatabaseService {
   static async addFeedback(feedback: any) {
     // Using Supabase for feedback
     try {
+      const payload: any = {
+        type: feedback.type,
+        rating: feedback.rating,
+        title: feedback.title,
+        description: feedback.description,
+        email: feedback.email,
+        category: feedback.category,
+      };
+
+      if (feedback.createdAt) {
+        payload.created_at = feedback.createdAt;
+      }
+
       const { error } = await supabase
         .from('feedback')
-        .insert([{
-          type: feedback.type,
-          rating: feedback.rating,
-          title: feedback.title,
-          description: feedback.description,
-          email: feedback.email,
-          category: feedback.category,
-          created_at: feedback.createdAt
-        }]);
+        .insert([payload]);
 
       if (error) throw error;
     } catch (error) {
       console.error('Error adding feedback:', error);
-      // Fallback to console log if table doesn't exist
-      console.log('Feedback received:', feedback);
+      throw error;
     }
   }
 

@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
+import SplashCursor from '@/components/SplashCursor';
 
 export const metadata: Metadata = {
   title: 'SmartInvoice - Professional Invoice Management',
@@ -23,8 +24,13 @@ export default function RootLayout({
       </head>
       <body className="bg-black text-white">
         <AuthProvider>
-          {children}
-          <Toaster />
+          <div className="fixed inset-0 z-50 pointer-events-none">
+            <SplashCursor />
+          </div>
+          <div className="relative z-10">
+            {children}
+            <Toaster />
+          </div>
         </AuthProvider>
       </body>
     </html>

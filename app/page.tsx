@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Users, DollarSign, Clock, ArrowRight, CheckCircle, Sparkles, Zap, Shield, BarChart3, Star, Award, TrendingUp, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
-import SplashCursor from '@/components/SplashCursor';
+
 // @ts-ignore
 import LightPillar from '@/components/LightPillar';
 
@@ -55,19 +55,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative py-12 sm:py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <SplashCursor
-            SIM_RESOLUTION={128}
-            DYE_RESOLUTION={1440}
-            DENSITY_DISSIPATION={3.5}
-            VELOCITY_DISSIPATION={2}
-            PRESSURE={0.1}
-            CURL={3}
-            SPLAT_RADIUS={0.2}
-            SPLAT_FORCE={6000}
-            COLOR_UPDATE_SPEED={10}
-          />
-        </div>
+
 
         {/* LightPillar Background Effect */}
         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-60">
