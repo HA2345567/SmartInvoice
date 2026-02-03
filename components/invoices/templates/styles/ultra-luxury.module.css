@@ -1,0 +1,133 @@
+/* CorporateMinimal.module.css */
+.container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1D1D1F;
+    background-color: white;
+    padding: 60px;
+    max-width: 210mm;
+    /* A4 width */
+    margin: 0 auto;
+    min-height: 297mm;
+    /* A4 height */
+    box-sizing: border-box;
+}
+
+.header {
+    margin-bottom: 60px;
+}
+
+.title {
+    font-size: 48pt;
+    font-weight: 300;
+    /* Light */
+    color: #1D1D1F;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.subtitle {
+    font-size: 14pt;
+    color: #86868B;
+    margin-top: 10px;
+}
+
+.metaGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 60px;
+    border-top: 1px solid #D2D2D7;
+    padding-top: 20px;
+}
+
+.metaItem label {
+    display: block;
+    font-size: 10pt;
+    color: #86868B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.metaItem span {
+    font-size: 12pt;
+    color: #1D1D1F;
+}
+
+.addressSection {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 60px;
+}
+
+.addressBlock h3 {
+    font-size: 10pt;
+    color: #86868B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.addressBlock div {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1D1D1F;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+.table th {
+    text-align: left;
+    font-size: 10pt;
+    color: #86868B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 0;
+    border-bottom: 1px solid #D2D2D7;
+    font-weight: 500;
+}
+
+.table td {
+    padding: 16px 0;
+    font-size: 11pt;
+    border-bottom: 1px solid #F5F5F7;
+    color: #1D1D1F;
+}
+
+.table td:last-child,
+.table th:last-child {
+    text-align: right;
+}
+
+.totals {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    font-size: 11pt;
+}
+
+.totalRow.final {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #D2D2D7;
+    font-weight: 600;
+    font-size: 14pt;
+}
+
+.notes {
+    margin-top: 60px;
+    font-size: 10pt;
+    color: #86868B;
+    line-height: 1.5;
+}

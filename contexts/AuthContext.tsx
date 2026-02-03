@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/database';
 
 interface User {
   id: string;
@@ -9,6 +10,7 @@ interface User {
   name: string;
   company?: string;
   avatar?: string;
+  subscriptionTier?: 'free' | 'pro' | 'business';
 }
 
 interface AuthContextType {
@@ -31,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyAndRefreshToken = useCallback(async () => {
     const storedToken = localStorage.getItem('auth_token');
     console.log('Verifying token from localStorage:', storedToken ? 'Token exists' : 'No token');
-    
+
     if (!storedToken) {
       setLoading(false);
       return;
@@ -79,25 +81,90 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    // Initialize from localStorage first
-    const storedToken = localStorage.getItem('auth_token');
-    const storedUser = localStorage.getItem('auth_user');
-    
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setToken(storedToken);
-      } catch (error) {
-        console.error('Failed to parse stored user data:', error);
+    // 1. Initialize Authentication
+    const initializeAuth = async () => {
+      // First, check for an active Supabase session (for Google/OAuth users)
+      // This is crucial because Supabase tokens expire in 1h, but the client auto-refreshes them.
+      // We must prefer the fresh token from the client over any stale 'auth_token' in localStorage.
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        console.log('AuthContext: Recovered active Supabase session for', session.user.email);
+        const appUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
+          avatar: session.user.user_metadata.avatar_url,
+        };
+
+        setUser(appUser);
+        setToken(session.access_token);
+        localStorage.setItem('auth_token', session.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(appUser));
+        setLoading(false);
+      } else {
+        // Fallback: Check for Local JWT (for Email/Password users who use our custom 7-day tokens)
+        const storedToken = localStorage.getItem('auth_token');
+        const storedUser = localStorage.getItem('auth_user');
+
+        if (storedToken && storedUser) {
+          // We have a stored token, but no Supabase session. 
+          // This is likely a Local JWT user. Verify it.
+          try {
+            // Optimistically set user to avoid flash (will be corrected by verify if invalid)
+            setUser(JSON.parse(storedUser));
+          } catch (e) { /* ignore parse error */ }
+
+          verifyAndRefreshToken(); // This controls 'loading' state
+        } else {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // 2. Listen for Supabase Auth changes (handles OAuth redirects, Token Refreshes, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Supabase Auth State Change:', event);
+
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
+        const appUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
+          avatar: session.user.user_metadata.avatar_url,
+        };
+        setUser(appUser);
+        setToken(session.access_token);
+        localStorage.setItem('auth_token', session.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(appUser));
+        setLoading(false);
+
+        // Redirect logic for SIGNED_IN only (avoid redirecting on just a refresh)
+        if (event === 'SIGNED_IN') {
+          const path = window.location.pathname;
+          if (path === '/auth/login' || path === '/auth/signup' || path === '/') {
+            router.push('/dashboard');
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        // Only clear if we actually received a definite sign out event
+        // (Sometimes 'initial' is null, don't wipe just yet)
+        console.log('AuthContext: Signed out event received.');
+        setUser(null);
+        setToken(null);
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
+        router.push('/');
+        setLoading(false);
       }
-    }
-    
-    // Then verify the token with the server
-    verifyAndRefreshToken();
-  }, [verifyAndRefreshToken]);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [verifyAndRefreshToken, router]);
 
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string; userNotFound?: boolean }> => {
     try {
@@ -112,7 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Login response not ok:', response.status, errorText);
-        
+
         // Try to parse as JSON, fallback to text
         let errorData;
         try {
@@ -120,11 +187,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           errorData = { error: `Server error: ${response.status}` };
         }
-        
-        return { 
-          success: false, 
+
+        return {
+          success: false,
           error: errorData.error || `Server error: ${response.status}`,
-          userNotFound: errorData.userNotFound 
+          userNotFound: errorData.userNotFound
         };
       }
 
@@ -133,24 +200,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user && data.token) {
         setUser(data.user);
         setToken(data.token);
-        
+
         // Store in localStorage
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
-        
+
         return { success: true };
       }
-      
-      return { 
-        success: false, 
+
+      return {
+        success: false,
         error: data.error || 'Login failed',
-        userNotFound: data.userNotFound 
+        userNotFound: data.userNotFound
       };
     } catch (error) {
       console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: 'Network error. Please check your connection and try again.' 
+      return {
+        success: false,
+        error: 'Network error. Please check your connection and try again.'
       };
     }
   }, []);
@@ -168,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Signup response not ok:', response.status, errorText);
-        
+
         // Try to parse as JSON, fallback to text
         let errorData;
         try {
@@ -176,11 +243,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           errorData = { error: `Server error: ${response.status}` };
         }
-        
-        return { 
-          success: false, 
+
+        return {
+          success: false,
           error: errorData.error || `Server error: ${response.status}`,
-          userExists: errorData.userExists 
+          userExists: errorData.userExists
         };
       }
 
@@ -189,24 +256,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user && data.token) {
         setUser(data.user);
         setToken(data.token);
-        
+
         // Store in localStorage
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
-        
+
         return { success: true };
       }
-      
-      return { 
-        success: false, 
+
+      return {
+        success: false,
         error: data.error || 'Signup failed',
-        userExists: data.userExists 
+        userExists: data.userExists
       };
     } catch (error) {
       console.error('Signup error:', error);
-      return { 
-        success: false, 
-        error: 'Network error. Please check your connection and try again.' 
+      return {
+        success: false,
+        error: 'Network error. Please check your connection and try again.'
       };
     }
   }, []);

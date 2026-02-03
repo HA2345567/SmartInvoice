@@ -7,6 +7,8 @@ import { BarChart3, TrendingUp, DollarSign, FileText, Users, Calendar, AlertCirc
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { AiCashFlowForecast } from '@/components/ai/analytics/AiCashFlowForecast';
+
 interface Analytics {
   totalRevenue: number;
   totalInvoices: number;
@@ -151,10 +153,9 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">{stat.value}</div>
-              <p className={`text-xs mt-1 ${
-                stat.changeType === 'positive' ? 'text-green-400' : 
+              <p className={`text-xs mt-1 ${stat.changeType === 'positive' ? 'text-green-400' :
                 stat.changeType === 'negative' ? 'text-red-400' : 'text-green-muted'
-              }`}>
+                }`}>
                 {stat.change}
               </p>
             </CardContent>
@@ -164,6 +165,13 @@ export default function AnalyticsPage() {
 
       {/* Charts and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        {/* AI Cash Flow Forecast */}
+        {/* AI Cash Flow Forecast */}
+        <div className="lg:col-span-2">
+          <AiCashFlowForecast monthlyData={analytics.monthlyData} />
+        </div>
+
         {/* Monthly Revenue Chart */}
         <Card className="card-green-mist">
           <CardHeader>
@@ -186,11 +194,11 @@ export default function AnalyticsPage() {
                     <span className="text-sm text-green-muted">{month.month}</span>
                     <div className="flex items-center space-x-4">
                       <div className="w-32 bg-green-500/20 rounded h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded" 
-                          style={{ 
-                            width: `${analytics.monthlyData.length > 0 ? 
-                              (month.revenue / Math.max(...analytics.monthlyData.map(m => m.revenue))) * 100 : 0}%` 
+                        <div
+                          className="bg-green-500 h-2 rounded"
+                          style={{
+                            width: `${analytics.monthlyData.length > 0 ?
+                              (month.revenue / Math.max(...analytics.monthlyData.map(m => m.revenue))) * 100 : 0}%`
                           }}
                         ></div>
                       </div>
@@ -261,23 +269,23 @@ export default function AnalyticsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                <div className="text-2xl font-bold text-green-primary">{analytics.invoiceStatusDistribution.paid}</div>
-                <div className="text-sm text-green-muted">Paid</div>
-              </div>
-              <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                <div className="text-2xl font-bold text-blue-400">{analytics.invoiceStatusDistribution.pending}</div>
-                <div className="text-sm text-green-muted">Pending</div>
-              </div>
-              <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-                <div className="text-2xl font-bold text-red-400">{analytics.invoiceStatusDistribution.overdue}</div>
-                <div className="text-sm text-green-muted">Overdue</div>
-              </div>
-              <div className="text-center p-4 bg-gray-500/10 rounded-lg border border-gray-500/20">
-                <div className="text-2xl font-bold text-gray-400">{analytics.invoiceStatusDistribution.draft}</div>
-                <div className="text-sm text-green-muted">Drafts</div>
-              </div>
+            <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+              <div className="text-2xl font-bold text-green-primary">{analytics.invoiceStatusDistribution.paid}</div>
+              <div className="text-sm text-green-muted">Paid</div>
             </div>
+            <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+              <div className="text-2xl font-bold text-blue-400">{analytics.invoiceStatusDistribution.pending}</div>
+              <div className="text-sm text-green-muted">Pending</div>
+            </div>
+            <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
+              <div className="text-2xl font-bold text-red-400">{analytics.invoiceStatusDistribution.overdue}</div>
+              <div className="text-sm text-green-muted">Overdue</div>
+            </div>
+            <div className="text-center p-4 bg-gray-500/10 rounded-lg border border-gray-500/20">
+              <div className="text-2xl font-bold text-gray-400">{analytics.invoiceStatusDistribution.draft}</div>
+              <div className="text-sm text-green-muted">Drafts</div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -63,6 +63,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -84,22 +85,24 @@ body {
 
 /* Enhanced Mobile Touch Targets */
 @media (max-width: 768px) {
-  button, 
-  [role="button"], 
-  input[type="button"], 
-  input[type="submit"], 
+
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
   input[type="reset"] {
     min-height: 44px;
     min-width: 44px;
   }
-  
-  input, 
-  select, 
+
+  input,
+  select,
   textarea {
     min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+    /* Prevents zoom on iOS */
   }
-  
+
   .nav-item-dark {
     min-height: 48px;
     padding: 12px 16px;
@@ -112,7 +115,7 @@ body {
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.3),
     0 2px 4px -1px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -121,7 +124,7 @@ body {
 .card-dark:hover {
   background: rgba(25, 25, 25, 0.98);
   border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
+  box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.4),
     0 4px 6px -2px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -134,9 +137,10 @@ body {
     border-radius: 12px;
     margin-bottom: 1rem;
   }
-  
+
   .card-dark:hover {
-    transform: none; /* Disable hover effects on mobile */
+    transform: none;
+    /* Disable hover effects on mobile */
   }
 }
 
@@ -147,7 +151,7 @@ body {
   font-weight: 600;
   border: none;
   border-radius: 12px;
-  box-shadow: 
+  box-shadow:
     0 4px 14px 0 rgba(34, 197, 94, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -155,7 +159,7 @@ body {
 
 .btn-dark-primary:hover {
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-  box-shadow: 
+  box-shadow:
     0 6px 20px 0 rgba(34, 197, 94, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
@@ -182,16 +186,18 @@ body {
 
 /* Mobile Button Improvements */
 @media (max-width: 768px) {
+
   .btn-dark-primary,
   .btn-dark-secondary {
     border-radius: 10px;
     padding: 12px 20px;
     font-size: 14px;
   }
-  
+
   .btn-dark-primary:hover,
   .btn-dark-secondary:hover {
-    transform: none; /* Disable hover effects on mobile */
+    transform: none;
+    /* Disable hover effects on mobile */
   }
 }
 
@@ -207,7 +213,7 @@ body {
 
 .input-dark:focus {
   border-color: #22c55e;
-  box-shadow: 
+  box-shadow:
     0 0 0 3px rgba(34, 197, 94, 0.1),
     0 1px 3px 0 rgba(0, 0, 0, 0.1);
   background: rgba(20, 20, 20, 0.95);
@@ -259,7 +265,7 @@ body {
     border-radius: 10px;
     margin-bottom: 4px;
   }
-  
+
   .nav-item-dark.active {
     border-left: none;
     border-bottom: 2px solid #22c55e;
@@ -353,6 +359,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -368,6 +375,7 @@ body {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -375,14 +383,22 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -505,7 +521,7 @@ body {
   .mobile-grid-2 {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .mobile-grid-3 {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -515,11 +531,11 @@ body {
   .mobile-grid-1 {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .mobile-grid-2 {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .mobile-grid-3 {
     grid-template-columns: repeat(6, 1fr);
   }
@@ -529,11 +545,11 @@ body {
   .mobile-grid-1 {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .mobile-grid-2 {
     grid-template-columns: repeat(6, 1fr);
   }
-  
+
   .mobile-grid-3 {
     grid-template-columns: repeat(8, 1fr);
   }
@@ -554,15 +570,15 @@ body {
   .mobile-table-responsive {
     display: block;
   }
-  
+
   .mobile-table-responsive thead {
     display: none;
   }
-  
+
   .mobile-table-responsive tbody {
     display: block;
   }
-  
+
   .mobile-table-responsive tr {
     display: block;
     margin-bottom: 1rem;
@@ -571,7 +587,7 @@ body {
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   .mobile-table-responsive td {
     display: flex;
     justify-content: space-between;
@@ -579,11 +595,11 @@ body {
     padding: 0.5rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
-  
+
   .mobile-table-responsive td:last-child {
     border-bottom: none;
   }
-  
+
   .mobile-table-responsive td::before {
     content: attr(data-label);
     font-weight: 600;
@@ -713,6 +729,7 @@ body {
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -736,7 +753,7 @@ body {
   .content-area-responsive {
     padding: 0.75rem;
   }
-  
+
   .mobile-fab {
     bottom: 1rem;
     right: 1rem;

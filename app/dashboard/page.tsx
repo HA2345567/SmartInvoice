@@ -67,6 +67,11 @@ const safeFormatCurrency = (amount: number | null | undefined) => {
   return Number(amount).toFixed(2);
 };
 
+import { StatsGrid } from './components/StatsGrid';
+import { IncomeTrend } from './components/IncomeTrend';
+import { RecentInvoices } from './components/RecentInvoices';
+import { PendingInvoices } from './components/PendingInvoices';
+
 export default function Dashboard() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
@@ -104,9 +109,9 @@ export default function Dashboard() {
       if (invoicesResponse.ok) {
         const invoicesData = await invoicesResponse.json();
         setRecentInvoices(invoicesData.slice(0, 5));
-        
+
         // Filter pending invoices (sent + overdue)
-        const pending = invoicesData.filter((inv: Invoice) => 
+        const pending = invoicesData.filter((inv: Invoice) =>
           inv.status === 'sent' || inv.status === 'overdue'
         ).slice(0, 10);
         setPendingInvoices(pending);
@@ -121,88 +126,6 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
-  const handleDownloadPDF = async (invoiceId: string, invoiceNumber: string) => {
-    try {
-      const response = await fetch(`/api/invoices/${invoiceId}/pdf`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `invoice-${invoiceNumber}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to download PDF',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'sent':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'overdue':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
-      case 'draft':
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return CheckCircle;
-      case 'sent':
-        return Send;
-      case 'overdue':
-        return AlertCircle;
-      case 'draft':
-        return FileText;
-      default:
-        return FileText;
-    }
-  };
-
-  const getDaysOverdue = (dueDate: string) => {
-    if (!dueDate) return 0;
-    try {
-      const due = new Date(dueDate);
-      const today = new Date();
-      const diffTime = today.getTime() - due.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
-    } catch (error) {
-      return 0;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="spinner-dark w-12 h-12 mx-auto mb-4"></div>
-          <p className="text-dark-muted">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   const currentMonth = new Date().toLocaleString('default', { month: 'short', year: '2-digit' });
   const currentMonthRevenue = analytics?.monthlyData.find(m => m.month === currentMonth)?.revenue || 0;
@@ -242,6 +165,39 @@ export default function Dashboard() {
     },
   ] : [];
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-500/20 text-green-300 border-green-500/30';
+      case 'sent': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'overdue': return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'draft': return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    }
+  };
+
+  const getDaysOverdue = (dueDate: string) => {
+    if (!dueDate) return 0;
+    try {
+      const due = new Date(dueDate);
+      const today = new Date();
+      const diffTime = today.getTime() - due.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    } catch (error) {
+      return 0;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="spinner-dark w-12 h-12 mx-auto mb-4"></div>
+          <p className="text-dark-muted">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Header */}
@@ -253,7 +209,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex-shrink-0">
-          <Link href="/dashboard/create">
+          <Link href="/dashboard/create/select-type">
             <Button className="btn-dark-primary dark-glow w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Create Invoice
@@ -262,77 +218,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="card-dark-mist group animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-dark-muted">
-                {stat.title}
-              </CardTitle>
-              <div className={`w-8 h-8 bg-${stat.color}-500/20 rounded-lg flex items-center justify-center group-hover:dark-glow transition-all duration-300`}>
-                <stat.icon className={`h-4 w-4 text-${stat.color}-400`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-              <p className={`text-xs mt-1 ${
-                stat.changeType === 'positive' ? 'text-green-400' : 
-                stat.changeType === 'negative' ? 'text-red-400' : 'text-dark-muted'
-              }`}>
-                {stat.change}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Stats Grid Component */}
+      <StatsGrid stats={stats} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        {/* Monthly Income Trend */}
-        <Card className="card-dark-mist lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-white flex items-center">
-                <BarChart3 className="w-5 h-5 mr-2 text-dark-primary" />
-                Monthly Income Trend
-              </CardTitle>
-              <CardDescription className="text-dark-muted">Revenue from paid invoices over the last 6 months</CardDescription>
-            </div>
-            <Link href="/dashboard/analytics">
-              <Button variant="ghost" className="text-dark-muted hover:text-dark-primary">View Details</Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {analytics && analytics.monthlyData && analytics.monthlyData.length > 0 ? (
-              <div className="h-64 sm:h-80 w-full">
-                {/* A proper chart component should be used here. For now, a simple representation: */}
-                <div className="flex h-full items-end justify-around space-x-2">
-                  {analytics.monthlyData.slice(-6).map((month, i) => {
-                    const maxRevenue = Math.max(...analytics.monthlyData.map(m => m.revenue));
-                    const height = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0;
-                    return (
-                      <div key={i} className="flex flex-col items-center justify-end h-full">
-                        <div 
-                          className="w-8 sm:w-12 bg-green-500 rounded-t-lg hover:bg-green-400 transition-all"
-                          style={{ height: `${height}%` }}
-                          title={`$${safeFormatCurrency(month.revenue)}`}
-                        ></div>
-                        <p className="text-xs text-dark-muted mt-2">{month.month}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="h-64 sm:h-80 flex flex-col items-center justify-center text-center">
-                <BarChart3 className="w-12 h-12 text-dark-muted mb-4" />
-                <h3 className="font-semibold text-white">No revenue data yet</h3>
-                <p className="text-dark-muted">Paid invoices will be shown here.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
+        {/* Income Trend Component */}
+        <IncomeTrend analytics={analytics} safeFormatCurrency={safeFormatCurrency} />
+
         {/* Quick Actions */}
         <Card className="card-dark-mist">
           <CardHeader>
@@ -342,26 +234,26 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col space-y-3">
-            <Link href="/dashboard/create">
+            <Link href="/dashboard/create/select-type">
               <Button className="w-full justify-start btn-subtle-dark">
                 <Plus className="w-4 h-4 mr-2" />
                 New Invoice
               </Button>
             </Link>
             <Link href="/dashboard/clients">
-               <Button className="w-full justify-start btn-subtle-dark">
+              <Button className="w-full justify-start btn-subtle-dark">
                 <Users className="w-4 h-4 mr-2" />
                 Manage Clients
               </Button>
             </Link>
-             <Link href="/dashboard/reminders">
-               <Button className="w-full justify-start btn-subtle-dark">
+            <Link href="/dashboard/reminders">
+              <Button className="w-full justify-start btn-subtle-dark">
                 <Clock className="w-4 h-4 mr-2" />
                 Payment Reminders
               </Button>
             </Link>
-             <Link href="/dashboard/analytics">
-               <Button className="w-full justify-start btn-subtle-dark">
+            <Link href="/dashboard/analytics">
+              <Button className="w-full justify-start btn-subtle-dark">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 View Analytics
               </Button>
@@ -371,104 +263,22 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-        {/* Recent Invoices */}
-        <Card className="card-dark-mist">
-          <CardHeader>
-            <CardTitle className="text-white">Recent Invoices</CardTitle>
-            <CardDescription className="text-dark-muted">Your 5 most recently created invoices.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentInvoices.length > 0 ? (
-              <div className="flow-root">
-                <ul role="list" className="-mb-8">
-                  {recentInvoices.map((invoice, invoiceIdx) => (
-                    <li key={invoice.id}>
-                      <div className="relative pb-8">
-                        {invoiceIdx !== recentInvoices.length - 1 ? (
-                          <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-dark-border" aria-hidden="true" />
-                        ) : null}
-                        <div className="relative flex space-x-3 items-start">
-                          <div>
-                            <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-dark-bg bg-dark-border`}>
-                              <FileText className="h-4 w-4 text-dark-muted" />
-                            </span>
-                          </div>
-                          <div className="min-w-0 flex-1 pt-1.5">
-                            <div className="flex justify-between items-center">
-                              <p className="text-sm text-dark-muted">
-                                Invoice <span className="font-medium text-dark-primary">#{invoice.invoiceNumber}</span> to <span className="font-medium text-white">{invoice.clientName || "N/A"}</span>
-                              </p>
-                              <time dateTime={invoice.createdAt} className="flex-shrink-0 text-xs text-dark-muted">{safeFormatDate(invoice.createdAt)}</time>
-                            </div>
-                            <div className="mt-2 flex justify-between items-center">
-                                <Badge className={`${getStatusColor(invoice.status)} text-xs font-semibold`}>{invoice.status}</Badge>
-                                <p className="text-lg font-bold text-white">${safeFormatCurrency(invoice.amount)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-dark-muted" />
-                <h3 className="mt-2 text-sm font-medium text-white">No recent invoices</h3>
-                <p className="mt-1 text-sm text-dark-muted">Get started by creating a new invoice.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Recent Invoices Component */}
+        <RecentInvoices
+          recentInvoices={recentInvoices}
+          safeFormatDate={safeFormatDate}
+          safeFormatCurrency={safeFormatCurrency}
+          getStatusColor={getStatusColor}
+        />
 
-        {/* Pending Invoices */}
-        <Card className="card-dark-mist">
-          <CardHeader>
-            <CardTitle className="text-white">Pending Invoices</CardTitle>
-            <CardDescription className="text-dark-muted">Invoices that are due or overdue.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {pendingInvoices.length > 0 ? (
-              <ul role="list" className="divide-y divide-dark-border">
-                {pendingInvoices.map((invoice) => (
-                  <li key={invoice.id} className="py-3 sm:py-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                           invoice.status === 'overdue' ? 'bg-red-500/20' : 'bg-blue-500/20'
-                         }`}>
-                          <AlertCircle className={`w-4 h-4 ${
-                            invoice.status === 'overdue' ? 'text-red-400' : 'text-blue-400'
-                          }`} />
-                         </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
-                          {invoice.clientName || 'No Client'}
-                        </p>
-                        <p className="text-sm text-dark-muted truncate">
-                          Due {safeFormatDate(invoice.dueDate)}
-                          {invoice.status === 'overdue' && ` (${getDaysOverdue(invoice.dueDate)} days overdue)`}
-                        </p>
-                      </div>
-                      <div className="inline-flex items-center text-base font-semibold text-white">
-                        ${safeFormatCurrency(invoice.amount)}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-center py-8">
-                <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                <h3 className="mt-2 text-sm font-medium text-white">All caught up!</h3>
-                <p className="mt-1 text-sm text-dark-muted">You have no pending or overdue invoices.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Pending Invoices Component */}
+        <PendingInvoices
+          pendingInvoices={pendingInvoices}
+          safeFormatDate={safeFormatDate}
+          safeFormatCurrency={safeFormatCurrency}
+          getDaysOverdue={getDaysOverdue}
+        />
       </div>
-
     </div>
   );
 }

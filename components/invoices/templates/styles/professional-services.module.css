@@ -1,0 +1,179 @@
+/* ProfessionalServices.module.css */
+.container {
+    font-family: "Times New Roman", Times, serif;
+    color: #000;
+    background-color: white;
+    max-width: 210mm;
+    margin: 0 auto;
+    min-height: 297mm;
+    padding: 0;
+    /* Header takes full width */
+    box-sizing: border-box;
+    position: relative;
+}
+
+.headerBar {
+    background-color: #002147;
+    /* Navy Blue */
+    height: 18mm;
+    width: 100%;
+    margin-bottom: 2mm;
+}
+
+.accentBar {
+    background-color: #CD7F32;
+    /* Bronze/Gold accent */
+    height: 1mm;
+    width: 100%;
+    margin-bottom: 15mm;
+}
+
+.content {
+    padding: 0 20mm;
+}
+
+.header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.title {
+    font-size: 32pt;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.companyInfo {
+    font-size: 10pt;
+    color: #444;
+    line-height: 1.4;
+    margin-top: 5px;
+}
+
+.metaBox {
+    background-color: #F8F9FA;
+    border: 1px solid #E9ECEF;
+    padding: 15px 25px;
+    min-width: 200px;
+    text-align: right;
+}
+
+.metaBox label {
+    display: block;
+    font-family: "Helvetica", sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: #002147;
+    margin-bottom: 2px;
+}
+
+.metaBox span {
+    display: block;
+    font-size: 12pt;
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+.metaBox span:last-child {
+    margin-bottom: 0;
+}
+
+.addressSection {
+    margin-bottom: 50px;
+    display: flex;
+}
+
+.clientBlock {
+    border-left: 4px solid #002147;
+    padding-left: 15px;
+}
+
+.clientBlock label {
+    font-family: "Helvetica", sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.clientBlock h3 {
+    font-size: 14pt;
+    margin: 0 0 5px 0;
+}
+
+.clientBlock div {
+    font-size: 10pt;
+    color: #444;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+.table th {
+    background-color: #002147;
+    color: white;
+    font-family: "Helvetica", sans-serif;
+    font-size: 9pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px 15px;
+    text-align: left;
+}
+
+.table td {
+    padding: 12px 15px;
+    font-size: 11pt;
+    border-bottom: 1px solid #E9ECEF;
+    color: #333;
+}
+
+.table th:last-child,
+.table td:last-child {
+    text-align: right;
+}
+
+.totals {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.totalsTable {
+    width: 300px;
+    border-collapse: collapse;
+}
+
+.totalsTable td {
+    padding: 8px 0;
+    text-align: right;
+    font-size: 10pt;
+}
+
+.totalsTable tr.final td {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #002147;
+    border-top: 2px solid #002147;
+    padding-top: 15px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 20mm;
+    left: 20mm;
+    right: 20mm;
+    text-align: center;
+    border-top: 1px solid #E9ECEF;
+    padding-top: 10px;
+    font-size: 9pt;
+    color: #888;
+}

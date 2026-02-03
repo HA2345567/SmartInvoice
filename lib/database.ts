@@ -68,6 +68,24 @@ export interface InvoiceItem {
 }
 
 export class DatabaseService {
+  private static transformUserToCamelCase(data: any): any {
+    if (!data) return null;
+    return {
+      id: data.id,
+      email: data.email,
+      name: data.name,
+      company: data.company,
+      companyAddress: data.company_address,
+      companyGST: data.company_gst,
+      companyPhone: data.company_phone,
+      companyWebsite: data.company_website,
+      avatar: data.avatar,
+      createdAt: data.createdat,
+      updatedAt: data.updatedat, // Ensure consistency with Auth interface
+      password: data.password // Include password for internal auth checks
+    };
+  }
+
   // User operations
   static async createUser(userData: {
     email: string;
@@ -84,7 +102,8 @@ export class DatabaseService {
         .single();
 
       if (existingUser) {
-        const { password, ...userWithoutPassword } = existingUser;
+        const transformed = this.transformUserToCamelCase(existingUser);
+        const { password, ...userWithoutPassword } = transformed;
         return { user: userWithoutPassword, exists: true };
       }
 
@@ -106,7 +125,8 @@ export class DatabaseService {
 
       if (error) throw error;
 
-      const { password, ...userWithoutPassword } = data;
+      const transformed = this.transformUserToCamelCase(data);
+      const { password, ...userWithoutPassword } = transformed;
       return { user: userWithoutPassword, exists: false };
     } catch (error) {
       console.error('Error creating user:', error);
@@ -122,7 +142,7 @@ export class DatabaseService {
       .single();
 
     if (error) return null;
-    return data;
+    return this.transformUserToCamelCase(data);
   }
 
   static async getUserById(id: string): Promise<any | null> {
@@ -146,20 +166,7 @@ export class DatabaseService {
 
     console.log('User found:', data.email);
 
-    // Transform to camelCase for consistency
-    return {
-      id: data.id,
-      email: data.email,
-      name: data.name,
-      company: data.company,
-      companyAddress: data.company_address,
-      companyGST: data.company_gst,
-      companyPhone: data.company_phone,
-      companyWebsite: data.company_website,
-      avatar: data.avatar,
-      createdAt: data.createdat,
-      updatedAt: data.updatedat,
-    };
+    return this.transformUserToCamelCase(data);
   }
 
   static async createClient(userId: string, clientData: Omit<Client, 'id' | 'userId' | 'isActive' | 'createdAt' | 'updatedAt'>): Promise<Client> {
@@ -426,38 +433,39 @@ export class DatabaseService {
   }
 
   private static transformInvoiceToCamelCase(data: any): any {
+    if (!data) return null;
     return {
       id: data.id,
-      userId: data.userid,
-      invoiceNumber: data.invoicenumber,
-      clientId: data.clientid,
-      clientName: data.clientname,
-      clientEmail: data.clientemail,
-      clientCompany: data.clientcompany,
-      clientAddress: data.clientaddress,
-      clientGST: data.clientgst,
-      clientCurrency: data.clientcurrency,
+      userId: data.userid || data.user_id,
+      invoiceNumber: data.invoicenumber || data.invoice_number,
+      clientId: data.clientid || data.client_id,
+      clientName: data.clientname || data.client_name,
+      clientEmail: data.clientemail || data.client_email,
+      clientCompany: data.clientcompany || data.client_company,
+      clientAddress: data.clientaddress || data.client_address,
+      clientGST: data.clientgst || data.client_gst,
+      clientCurrency: data.clientcurrency || data.client_currency,
       amount: data.amount,
       subtotal: data.subtotal,
-      taxAmount: data.taxamount,
-      discountAmount: data.discountamount,
+      taxAmount: data.taxamount || data.tax_amount,
+      discountAmount: data.discountamount || data.discount_amount,
       status: data.status,
       date: data.date,
-      dueDate: data.duedate,
-      paidDate: data.paiddate,
-      paymentMethod: data.paymentmethod,
-      paymentNotes: data.paymentnotes,
+      dueDate: data.duedate || data.due_date,
+      paidDate: data.paiddate || data.paid_date,
+      paymentMethod: data.paymentmethod || data.payment_method,
+      paymentNotes: data.paymentnotes || data.payment_notes,
       items: data.items,
       notes: data.notes,
       terms: data.terms,
-      taxRate: data.taxrate,
-      discountRate: data.discountrate,
-      paymentLink: data.paymentlink,
-      emailSent: data.emailsent,
-      remindersSent: data.reminderssent,
-      lastReminderSent: data.lastremindersent,
-      createdAt: data.createdat,
-      updatedAt: data.updatedat,
+      taxRate: data.taxrate || data.tax_rate,
+      discountRate: data.discountrate || data.discount_rate,
+      paymentLink: data.paymentlink || data.payment_link,
+      emailSent: data.emailsent || data.email_sent,
+      remindersSent: data.reminderssent || data.reminders_sent || 0,
+      lastReminderSent: data.lastremindersent || data.last_reminder_sent,
+      createdAt: data.createdat || data.created_at,
+      updatedAt: data.updatedat || data.updated_at,
     };
   }
 

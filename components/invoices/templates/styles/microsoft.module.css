@@ -1,0 +1,168 @@
+/* CorporateStructured.module.css */
+.container {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #333;
+    background-color: white;
+    max-width: 210mm;
+    margin: 0 auto;
+    min-height: 297mm;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.topBar {
+    height: 8px;
+    background-color: #0078D4;
+    /* Microsoft Blue */
+    width: 100%;
+}
+
+.content {
+    padding: 40px 50px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 50px;
+}
+
+.title {
+    font-size: 36pt;
+    font-weight: 600;
+    color: #0078D4;
+    margin: 0;
+}
+
+.subHeader {
+    color: #666;
+    font-size: 14pt;
+    margin-top: 5px;
+}
+
+.companyDetails {
+    text-align: right;
+    font-size: 10pt;
+    color: #555;
+    line-height: 1.4;
+}
+
+.detailsGrid {
+    display: flex;
+    background-color: #F3F2F1;
+    padding: 20px;
+    gap: 40px;
+    margin-bottom: 40px;
+    border-left: 4px solid #0078D4;
+}
+
+.detailsCol h4 {
+    margin: 0 0 5px 0;
+    color: #0078D4;
+    font-size: 10pt;
+    text-transform: uppercase;
+}
+
+.detailsCol p {
+    margin: 0;
+    font-size: 11pt;
+    font-weight: 500;
+}
+
+.addresses {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.addressCol {
+    flex: 1;
+}
+
+.addressCol h3 {
+    background-color: #F3F2F1;
+    padding: 8px 12px;
+    margin: 0 0 10px 0;
+    font-size: 11pt;
+    color: #333;
+    font-weight: 600;
+}
+
+.addressCol div {
+    padding: 0 12px;
+    font-size: 10pt;
+    line-height: 1.5;
+}
+
+.tableContainer {
+    margin-bottom: 30px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 12px;
+    background-color: #0078D4;
+    color: white;
+    font-weight: 600;
+    font-size: 10pt;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #E1DFDD;
+    font-size: 10pt;
+}
+
+.table tr:nth-child(even) {
+    background-color: #F9F9F9;
+}
+
+.table td:last-child,
+.table th:last-child {
+    text-align: right;
+}
+
+.summarySection {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.summaryTable {
+    width: 300px;
+    border-collapse: collapse;
+}
+
+.summaryRow td {
+    padding: 8px 12px;
+    text-align: right;
+    border-bottom: 1px solid #E1DFDD;
+}
+
+.summaryRow td:first-child {
+    color: #666;
+    font-weight: 500;
+}
+
+.totalRow td {
+    padding: 12px;
+    background-color: #0078D4;
+    color: white;
+    font-weight: bold;
+    font-size: 12pt;
+    text-align: right;
+}
+
+.footer {
+    margin-top: 60px;
+    border-top: 1px solid #E1DFDD;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 9pt;
+    color: #666;
+}

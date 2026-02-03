@@ -38,17 +38,19 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <Link href="/auth/login">
-              <Button variant="ghost" className="text-gray-300 hover:text-green-400 hover:bg-green-500/10 font-medium text-sm sm:text-base">
-                Login
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-semibold shadow-lg green-glow text-sm sm:text-base">
-                Get Started
-                <Sparkles className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Link href="/auth/login">
+                <Button variant="ghost" className="text-gray-300 hover:text-green-400 hover:bg-green-500/10 font-medium text-sm sm:text-base">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-semibold shadow-lg green-glow text-sm sm:text-base">
+                  Get Started
+                  <Sparkles className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>

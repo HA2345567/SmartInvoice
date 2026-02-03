@@ -188,6 +188,11 @@ export class AuthService {
         }
       }
 
+      if (user && 'password' in user) {
+        const { password, ...userWithoutPassword } = user as any;
+        return userWithoutPassword;
+      }
+
       return user;
     } catch (error) {
       console.error('Error in getUserFromRequest:', error);

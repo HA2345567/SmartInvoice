@@ -289,8 +289,21 @@ const LightPillar = ({
         const newHeight = containerRef.current.clientHeight;
         rendererRef.current.setSize(newWidth, newHeight);
         materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
+
+        // Adjust pillar width for mobile to ensure it's visible and scaled correctly
+        const isMobile = window.innerWidth < 768;
+        // On mobile, the pillar needs to be narrower in UV space because the view is "zoomed in"
+        const mobileAdjustedWidth = isMobile ? pillarWidth * 0.4 : pillarWidth;
+        materialRef.current.uniforms.uPillarWidth.value = mobileAdjustedWidth;
       }, 150);
     };
+
+    // Initial sizing check
+    if (materialRef.current) {
+      const isMobile = window.innerWidth < 768;
+      const mobileAdjustedWidth = isMobile ? pillarWidth * 0.4 : pillarWidth;
+      materialRef.current.uniforms.uPillarWidth.value = mobileAdjustedWidth;
+    }
 
     window.addEventListener('resize', handleResize, { passive: true });
 

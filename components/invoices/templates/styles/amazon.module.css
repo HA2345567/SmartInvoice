@@ -1,0 +1,153 @@
+/* EcommerceEfficient.module.css */
+.container {
+    font-family: Arial, sans-serif;
+    color: #111;
+    background-color: white;
+    padding: 40px;
+    max-width: 210mm;
+    margin: 0 auto;
+    min-height: 297mm;
+    box-sizing: border-box;
+}
+
+.logoArea {
+    margin-bottom: 20px;
+    /* Placeholder for logo */
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.header {
+    border-bottom: 1px solid #DDD;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.title {
+    font-size: 20pt;
+    font-weight: bold;
+    color: #111;
+    margin: 0;
+}
+
+.orderInfo {
+    text-align: right;
+}
+
+.orderInfo div {
+    font-size: 10pt;
+    margin-bottom: 2px;
+}
+
+.columns {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.column {
+    flex: 1;
+}
+
+.column h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.column div {
+    font-size: 10pt;
+    line-height: 1.4;
+    color: #333;
+}
+
+.paymentSection {
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.paymentTitle {
+    font-weight: bold;
+    font-size: 11pt;
+    margin-bottom: 5px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th {
+    text-align: left;
+    background-color: #F0F2F2;
+    border: 1px solid #DDD;
+    padding: 10px;
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+.table td {
+    border: 1px solid #DDD;
+    padding: 10px;
+    font-size: 10pt;
+    vertical-align: top;
+}
+
+.table td:last-child {
+    text-align: right;
+    font-weight: bold;
+}
+
+.table th:last-child {
+    text-align: right;
+}
+
+/* Specific amazon-like styling for item description */
+.itemDesc {
+    font-weight: bold;
+    color: #007185;
+    /* Amazon link colorish */
+    margin-bottom: 4px;
+}
+
+.itemMeta {
+    font-size: 9pt;
+    color: #565959;
+}
+
+.totals {
+    width: 300px;
+    margin-left: auto;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 10pt;
+}
+
+.grandTotal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #DDD;
+    font-weight: bold;
+    font-size: 13pt;
+    color: #B12704;
+    /* Amazon price red */
+}
+
+.footer {
+    margin-top: 40px;
+    font-size: 9pt;
+    text-align: center;
+    color: #565959;
+}
