@@ -1,30 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Users, DollarSign, Clock, ArrowRight, CheckCircle, Sparkles, Zap, Shield, BarChart3, Star, Award, TrendingUp, MessageSquare } from 'lucide-react';
+import { FileText, ArrowRight, CircleCheck as CheckCircle, Sparkles, Zap, Shield, ChartBar as BarChart3, Star, Award, TrendingUp, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
-
-// @ts-ignore
-import LightPillar from '@/components/LightPillar';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Enhanced particles for premium feel */}
-      <div className="particles">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 8}s`,
-              animationDuration: `${6 + Math.random() * 4}s`
-            }}
-          />
-        ))}
-      </div>
 
       {/* Premium Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-green-500/20">
@@ -38,91 +21,136 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Link href="/auth/login">
-                <Button variant="ghost" className="text-gray-300 hover:text-green-400 hover:bg-green-500/10 font-medium text-sm sm:text-base">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-semibold shadow-lg green-glow text-sm sm:text-base">
-                  Get Started
-                  <Sparkles className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
+            <Link href="/auth/login">
+              <Button variant="ghost" className="text-gray-300 hover:text-green-400 hover:bg-green-500/10 font-medium text-sm sm:text-base">
+                Login
+              </Button>
+            </Link>
+            <Link href="/auth/signup">
+              <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-semibold shadow-lg green-glow text-sm sm:text-base">
+                Get Started
+                <Sparkles className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-20 px-4 overflow-hidden">
+      <section className="relative py-20 sm:py-32 px-4 overflow-hidden">
 
+        {/* Background grid */}
+        <div className="absolute inset-0 z-0" style={{
+          backgroundImage: `
+            linear-gradient(rgba(34,197,94,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(34,197,94,0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px'
+        }} />
 
-        {/* LightPillar Background Effect */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-60">
-          <div style={{ width: '100%', maxWidth: '1080px', height: '100%', maxHeight: '1080px', position: 'relative' }}>
-            <LightPillar
-              topColor="#18af2a"
-              bottomColor="#89a20b"
-              intensity={1}
-              rotationSpeed={0.3}
-              interactive={false}
-              glowAmount={0.005}
-              pillarWidth={3}
-              pillarHeight={0.4}
-              noiseIntensity={0.5}
-              pillarRotation={0}
-            />
-          </div>
+        {/* Radial green glow center */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '900px',
+            height: '600px',
+            background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.12) 0%, rgba(16,185,129,0.06) 40%, transparent 70%)',
+            borderRadius: '50%'
+          }} />
         </div>
-        <div className="container mx-auto text-center relative z-10 max-w-6xl">
+
+        {/* Top-left glow accent */}
+        <div className="absolute top-0 left-0 w-80 h-80 pointer-events-none z-0" style={{
+          background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)'
+        }} />
+
+        {/* Bottom-right glow accent */}
+        <div className="absolute bottom-0 right-0 w-96 h-96 pointer-events-none z-0" style={{
+          background: 'radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%)'
+        }} />
+
+        {/* Horizontal scan lines for depth */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-gradient-to-r from-transparent via-green-500/20 to-transparent z-0" />
+        <div className="absolute inset-x-0 top-1/3 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent z-0" />
+        <div className="absolute inset-x-0 top-2/3 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent z-0" />
+
+        {/* Corner accent lines */}
+        <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-green-500/30 z-0" />
+        <div className="absolute top-8 right-8 w-16 h-16 border-r-2 border-t-2 border-green-500/30 z-0" />
+        <div className="absolute bottom-8 left-8 w-16 h-16 border-l-2 border-b-2 border-green-500/30 z-0" />
+        <div className="absolute bottom-8 right-8 w-16 h-16 border-r-2 border-b-2 border-green-500/30 z-0" />
+
+        {/* Floating orbs */}
+        <div className="absolute top-24 left-[10%] w-3 h-3 rounded-full bg-green-400/40 blur-[2px] z-0" />
+        <div className="absolute top-40 right-[15%] w-2 h-2 rounded-full bg-green-500/50 z-0" />
+        <div className="absolute bottom-32 left-[20%] w-2 h-2 rounded-full bg-green-400/30 z-0" />
+        <div className="absolute bottom-20 right-[25%] w-3 h-3 rounded-full bg-green-500/40 blur-[2px] z-0" />
+
+        <div className="container mx-auto text-center relative z-10 max-w-5xl">
           {/* Premium badge */}
-          <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full backdrop-blur-sm">
-              <Award className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 font-medium text-sm">Professional Invoice Management</span>
-              <Star className="w-4 h-4 text-green-400" />
+          <div className="flex justify-center mb-8 animate-fade-in">
+            <div className="inline-flex items-center space-x-2 px-5 py-2.5 bg-green-500/8 border border-green-500/25 rounded-full backdrop-blur-sm" style={{ background: 'rgba(34,197,94,0.06)' }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <Award className="w-3.5 h-3.5 text-green-400" />
+              <span className="text-green-400 font-medium text-sm tracking-wide">Professional Invoice Management</span>
+              <Star className="w-3.5 h-3.5 text-green-400" />
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in leading-tight">
-            Transform Your Business with
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in leading-[1.05] tracking-tight">
+            Transform Your Business
             <br />
-            <span className="bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
-              Smart Invoicing
+            <span className="relative">
+              <span className="bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 bg-clip-text text-transparent">
+                with Smart Invoicing
+              </span>
+              {/* Underline glow */}
+              <span className="absolute -bottom-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-400/50 to-transparent" />
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: '0.2s' }}>
+          <p className="text-lg sm:text-xl text-gray-400 mb-10 sm:mb-12 max-w-2xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: '0.2s' }}>
             Create stunning invoices, automate payments, and grow your business with our
             AI-powered platform trusted by thousands of professionals worldwide.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Link href="/auth/signup">
-              <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-bold text-lg px-8 py-4 shadow-2xl green-glow">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-5 h-5" />
+              <Button size="lg" className="group relative w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black font-bold text-base px-10 py-4 shadow-2xl transition-all duration-300 overflow-hidden" style={{ boxShadow: '0 0 40px rgba(34,197,94,0.3), 0 0 80px rgba(34,197,94,0.1)' }}>
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </span>
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button size="lg" variant="ghost" className="w-full sm:w-auto border border-green-500/20 hover:border-green-500/40 hover:bg-green-500/5 text-gray-300 hover:text-green-300 font-medium text-base px-10 py-4 transition-all duration-300">
+                View Demo
               </Button>
             </Link>
           </div>
 
-          {/* Trust indicators */}
-          <div className="mt-12 sm:mt-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-            <p className="text-gray-400 text-sm mb-6">Trusted by 10,000+ businesses worldwide</p>
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 text-gray-400">
-              <div className="flex items-center space-x-2">
+          {/* Stats row */}
+          <div className="mt-16 sm:mt-20 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <p className="text-gray-600 text-xs uppercase tracking-widest mb-8 font-medium">Trusted by businesses worldwide</p>
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-green-500/10 bg-green-500/3" style={{ background: 'rgba(34,197,94,0.02)' }}>
                 <Star className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm">4.9/5 Rating</span>
+                <span className="text-white font-bold text-lg">4.9/5</span>
+                <span className="text-gray-500 text-xs">Rating</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-green-500/10 bg-green-500/3" style={{ background: 'rgba(34,197,94,0.02)' }}>
                 <Shield className="w-4 h-4 text-green-400" />
-                <span className="text-sm">Bank-Level Security</span>
+                <span className="text-white font-bold text-lg">Bank</span>
+                <span className="text-gray-500 text-xs">Level Security</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-green-500/10 bg-green-500/3" style={{ background: 'rgba(34,197,94,0.02)' }}>
                 <TrendingUp className="w-4 h-4 text-green-400" />
-                <span className="text-sm">99.9% Uptime</span>
+                <span className="text-white font-bold text-lg">99.9%</span>
+                <span className="text-gray-500 text-xs">Uptime</span>
               </div>
             </div>
           </div>

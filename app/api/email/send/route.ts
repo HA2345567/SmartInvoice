@@ -1,18 +1,16 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-// Initialize Resend with API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
     try {
         const { to, subject, html, invoiceId } = await request.json();
 
         if (!process.env.RESEND_API_KEY) {
             console.warn('RESEND_API_KEY is missing. Simulating email send.');
-            // If no key, return success to prevent app crash during demo
             return NextResponse.json({ success: true, simulated: true });
         }
+
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
         const { data, error } = await resend.emails.send({
             from: 'SmartInvoice AI <ai@onboarding.resend.dev>', // Use verified domain later

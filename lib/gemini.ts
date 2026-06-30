@@ -1,21 +1,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GOOGLE_API_KEY;
-
-if (!apiKey) {
-    throw new Error("GOOGLE_API_KEY is not defined in environment variables");
+function getGenAI() {
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+        throw new Error("GOOGLE_API_KEY is not configured");
+    }
+    return new GoogleGenerativeAI(apiKey);
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+function getModel(modelName = "gemini-2.0-flash") {
+    return getGenAI().getGenerativeModel({ model: modelName });
+}
 
-// Using 'gemini-2.0-flash' to resolve regional availability issues with 1.5-flash
-export const geminiModel = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash"
-});
-
-export const geminiModelVision = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash"
-});
+export const geminiModel = { generateContent: (...args: Parameters<ReturnType<typeof getModel>['generateContent']>) => getModel().generateContent(...args) };
+export const geminiModelVision = { generateContent: (...args: Parameters<ReturnType<typeof getModel>['generateContent']>) => getModel().generateContent(...args) };
 
 export async function enhanceText(text: string, mode: 'formal' | 'friendly' | 'detailed'): Promise<string> {
     const prompt = `Enhance the following text to be more ${mode} for an invoice description or notes. 
