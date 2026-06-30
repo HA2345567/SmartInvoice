@@ -65,4 +65,10 @@ export type InvoiceStyle =
     | 'microsoft'
     | 'amazon'
     | 'creative-agency'
-    | 'professional-services';
+    | 'professional-services'
+    | 'stripe'
+    | 'google'
+    | 'salesforce'
+    | 'shopify'
+    | 'slack'
+    | 'notion';

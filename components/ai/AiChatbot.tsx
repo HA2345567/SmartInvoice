@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, Send, X, sparkle, Loader2, Sparkles, User as UserIcon, Minimize2, maximize2 } from 'lucide-react';
+import { Bot, Send, X, Loader2, Sparkles, User as UserIcon, Minimize2, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 

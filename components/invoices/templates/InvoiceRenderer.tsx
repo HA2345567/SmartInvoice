@@ -11,13 +11,19 @@ const RecurringInvoice = dynamic(() => import('./types/RecurringInvoice'));
 const CreditNote = dynamic(() => import('./types/CreditNote'));
 const PastDueInvoice = dynamic(() => import('./types/PastDueInvoice'));
 
-// Import Styles (Static imports are fine for small CSS modules, or we could dynamic import them if they were huge)
+// Import Styles
 import ultraLuxury from './styles/ultra-luxury.module.css';
 import financial from './styles/financial.module.css';
 import microsoft from './styles/microsoft.module.css';
 import amazon from './styles/amazon.module.css';
 import creativeAgency from './styles/creative-agency.module.css';
 import professionalServices from './styles/professional-services.module.css';
+import stripe from './styles/stripe.module.css';
+import google from './styles/google.module.css';
+import salesforce from './styles/salesforce.module.css';
+import shopify from './styles/shopify.module.css';
+import slack from './styles/slack.module.css';
+import notion from './styles/notion.module.css';
 
 const INVOICE_TYPES: Record<InvoiceType, any> = {
     'sales': SalesInvoice,
@@ -40,7 +46,13 @@ const STYLE_CLASSES: Record<InvoiceStyle, { readonly [key: string]: string }> = 
     'microsoft': microsoft,
     'amazon': amazon,
     'creative-agency': creativeAgency,
-    'professional-services': professionalServices
+    'professional-services': professionalServices,
+    'stripe': stripe,
+    'google': google,
+    'salesforce': salesforce,
+    'shopify': shopify,
+    'slack': slack,
+    'notion': notion,
 };
 
 interface InvoiceRendererProps {

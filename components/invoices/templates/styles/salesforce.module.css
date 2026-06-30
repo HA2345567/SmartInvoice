@@ -1,0 +1,438 @@
+/* Salesforce-Style Invoice - Enterprise CRM billing style */
+.container {
+  font-family: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffffff;
+  padding: 0;
+  max-width: 210mm;
+  margin: 0 auto;
+  min-height: 297mm;
+  box-sizing: border-box;
+}
+
+.sfdcHeader {
+  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  padding: 32px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sfdcLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+}
+
+.logoCloud {
+  width: 36px;
+  height: 24px;
+  position: relative;
+}
+
+.logoCloud::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 12px;
+  background: white;
+  border-radius: 20px;
+  top: 8px;
+  left: 0;
+}
+
+.logoCloud::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 10px;
+  background: white;
+  border-radius: 20px;
+  top: 4px;
+  left: 12px;
+}
+
+.sfdcLogo span {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.headerRight {
+  text-align: right;
+  color: white;
+}
+
+.invoiceLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.invoiceNumber {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.content {
+  padding: 40px 48px;
+}
+
+.accountsBar {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f3f3f3;
+}
+
+.accountCard {
+  flex: 1;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #1a73e8;
+}
+
+.accountCard h3 {
+  font-size: 10px;
+  font-weight: 700;
+  color: #707070;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.accountCard .name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #181818;
+  margin-bottom: 8px;
+}
+
+.accountCard div {
+  font-size: 13px;
+  color: #514f4f;
+  line-height: 1.5;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.metaItem {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.metaItem label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: #707070;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.metaItem span {
+  font-size: 14px;
+  color: #181818;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusDraft {
+  background: #fef0e3;
+  color: #b45a12;
+}
+
+.statusSent {
+  background: #e0f4ff;
+  color: #0a5bad;
+}
+
+.statusPaid {
+  background: #e3f7ed;
+  color: #256d41;
+}
+
+.statusOverdue {
+  background: #fde7e7;
+  color: #ba0f0f;
+}
+
+.opportunityLink {
+  font-size: 12px;
+  color: #1a73e8;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.lineItemsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lineItemsHeader h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #181818;
+  margin: 0;
+}
+
+.productFilter {
+  display: flex;
+  gap: 8px;
+}
+
+.filterChip {
+  padding: 6px 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #514f4f;
+}
+
+.tableWrapper {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: #f8fafc;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #707070;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #181818;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background: #f8fafc;
+}
+
+.table td:last-child,
+.table th:last-child {
+  text-align: right;
+}
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.productIcon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.productName {
+  font-weight: 500;
+}
+
+.productCode {
+  font-size: 11px;
+  color: #8b8b8b;
+  font-family: monospace;
+}
+
+.quantityCell {
+  text-align: center;
+}
+
+.unitPrice,
+.extendedPrice {
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryPanel {
+  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.summaryLeft {
+  color: white;
+}
+
+.summaryLeft h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  opacity: 0.9;
+}
+
+.paymentTerms {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.summaryRight {
+  text-align: right;
+}
+
+.subtotalRow,
+.taxRow,
+.discountRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  color: white;
+  font-size: 13px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.grandTotal span {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.chatterSection {
+  margin-top: 32px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.chatterHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chatterHeader h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #181818;
+  margin: 0;
+}
+
+.chatterItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.chatterAvatar {
+  width: 32px;
+  height: 32px;
+  background: #c9d6e3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #181818;
+}
+
+.chatterContent {
+  flex: 1;
+}
+
+.chatterContent .author {
+  font-size: 13px;
+  font-weight: 600;
+  color: #181818;
+}
+
+.chatterContent .time {
+  font-size: 11px;
+  color: #8b8b8b;
+}
+
+.chatterContent p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #514f4f;
+}
+
+.footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e5e5;
+  font-size: 11px;
+  color: #8b8b8b;
+  text-align: center;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.footerLink {
+  color: #1a73e8;
+  text-decoration: none;
+}

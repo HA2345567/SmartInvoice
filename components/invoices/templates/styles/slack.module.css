@@ -1,0 +1,507 @@
+/* Slack-Style Invoice - Communication platform enterprise billing */
+.container {
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fff;
+  padding: 0;
+  max-width: 210mm;
+  margin: 0 auto;
+  min-height: 297mm;
+  box-sizing: border-box;
+}
+
+.headerBar {
+  background: linear-gradient(90deg, #611f69 0%, #4a154b 100%);
+  padding: 40px 56px;
+  color: white;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.slackLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slackMark {
+  display: flex;
+  gap: 2px;
+}
+
+.slackBar {
+  width: 8px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.bar1 { background: #e01e5a; height: 24px; margin-top: 2px; }
+.bar2 { background: #36c5f0; height: 12px; margin-top: 10px; }
+.bar3 { background: #2eb67d; height: 14px; margin-top: -4px; }
+.bar4 { background: #ecb22e; height: 18px; margin-top: 2px; }
+
+.slackText {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.invoiceLabel {
+  text-align: right;
+}
+
+.labelText {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.invoiceNumber {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.workspaceInfo {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.workspace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspaceIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #611f69, #4a154b);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.workspaceName {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.workspacePlan {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.billingContact {
+  text-align: right;
+}
+
+.billingContact h4 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+  margin: 0 0 8px 0;
+}
+
+.billingContact div {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.content {
+  padding: 40px 56px;
+}
+
+.channelsSection {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.channelsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.channelsHeader h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1c1d;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channelCount {
+  font-size: 12px;
+  color: #616061;
+  font-weight: 400;
+}
+
+.channelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.channelPill {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 100px;
+  font-size: 13px;
+  color: #1d1c1d;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.channelPill::before {
+  content: '#';
+  color: #616061;
+}
+
+.tableSection {
+  margin-bottom: 32px;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  padding: 12px 20px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.tableHeader span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #616061;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.lineItem {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  padding: 16px 20px;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.lineItem:hover {
+  background: #fafafa;
+}
+
+.productInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.iconPro { background: #e01e5a; }
+.iconPlus { background: #36c5f0; }
+.iconBiz { background: #2eb67d; }
+.iconEnt { background: #611f69; }
+
+.productDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.productName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1c1d;
+}
+
+.productType {
+  font-size: 12px;
+  color: #616061;
+}
+
+.memberCount,
+.monthlyRate,
+.discountApplied,
+.totalAmount {
+  font-size: 14px;
+  color: #1d1c1d;
+}
+
+.discountApplied {
+  color: #2eb67d;
+  font-weight: 600;
+}
+
+.totalAmount {
+  font-weight: 700;
+  text-align: right;
+}
+
+.summarySection {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.summaryDetails {
+  flex: 1;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #616061;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryRow.discount {
+  color: #2eb67d;
+}
+
+.grandTotalRow {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid #1d1c1d;
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1c1d;
+}
+
+.paymentActions {
+  margin-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.paymentButton {
+  padding: 16px 32px;
+  background: #2eb67d;
+  color: white;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.paymentButton:hover {
+  background: #258f65;
+}
+
+.paymentMethods {
+  display: flex;
+  gap: 12px;
+}
+
+.paymentMethod {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #616061;
+  cursor: pointer;
+}
+
+.paymentMethod.active {
+  border-color: #1d1c1d;
+  color: #1d1c1d;
+}
+
+.reactionsSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e1e1e1;
+}
+
+.reactionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.reactionsHeader h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1c1d;
+  margin: 0;
+}
+
+.reactionsList {
+  display: flex;
+  gap: 8px;
+}
+
+.reaction {
+  padding: 6px 12px;
+  background: #f8f8f8;
+  border-radius: 100px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reactionEmoji {
+  font-size: 16px;
+}
+
+.reactionCount {
+  color: #616061;
+}
+
+.messageInput {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.messageAvatar {
+  width: 32px;
+  height: 32px;
+  background: #611f69;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.messagePlaceholder {
+  flex: 1;
+  padding: 12px 16px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  color: #616061;
+  font-size: 14px;
+}
+
+.footer {
+  margin-top: 40px;
+  padding: 24px 56px;
+  background: #f8f8f8;
+  border-top: 1px solid #e1e1e1;
+  font-size: 12px;
+  color: #616061;
+}
+
+.footerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.footerLink {
+  color: #1264a3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footerText {
+  display: flex;
+  gap: 24px;
+}
+
+.footerText span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.helpBox {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.helpIcon {
+  width: 32px;
+  height: 32px;
+  background: #1264a3;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.helpContent h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d1c1d;
+  margin: 0 0 2px 0;
+}
+
+.helpContent p {
+  font-size: 12px;
+  color: #616061;
+  margin: 0;
+}
+
+.helpLink {
+  margin-left: auto;
+  color: #1264a3;
+  font-weight: 600;
+  text-decoration: none;
+}

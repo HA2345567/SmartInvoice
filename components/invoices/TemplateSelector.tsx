@@ -65,10 +65,10 @@ const SAMPLE_DATA: InvoiceData = {
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     onSelect,
     initialType = 'sales',
-    initialStyle = 'corporateMinimal'
+    initialStyle = 'ultra-luxury'
 }) => {
     const [activeType, setActiveType] = useState<InvoiceType>(initialType);
-    const [activeStyle, setActiveStyle] = useState<InvoiceStyle>(initialStyle);
+    const [activeStyle, setActiveStyle] = useState<InvoiceStyle>(initialStyle as InvoiceStyle);
 
     const handleApply = () => {
         onSelect(activeType, activeStyle);
