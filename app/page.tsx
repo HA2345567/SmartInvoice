@@ -6,7 +6,7 @@ import { FileText, ArrowRight, CircleCheck as CheckCircle, Sparkles, Zap, Shield
 
 // ─── Tiny helpers ────────────────────────────────────────────────────────────
 const Pill = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 uppercase tracking-widest">
+  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 uppercase tracking-widest">
     {children}
   </span>
 );
@@ -42,7 +42,7 @@ const DashboardMock = () => (
       {/* Sidebar */}
       <div className="w-12 sm:w-44 border-r border-white/[0.06] bg-black/20 flex flex-col py-4 px-2 sm:px-3 gap-1 shrink-0">
         <div className="flex items-center gap-2 mb-4 px-1">
-          <div className="w-6 h-6 rounded-lg bg-green-500 flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
             <FileText className="w-3.5 h-3.5 text-black" />
           </div>
           <span className="hidden sm:block text-xs font-bold text-white">SmartInvoice</span>
@@ -54,7 +54,7 @@ const DashboardMock = () => (
           { icon: DollarSign, label: 'Payments', active: false },
           { icon: PieChart, label: 'Reports', active: false },
         ].map(({ icon: Icon, label, active }) => (
-          <div key={label} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${active ? 'bg-green-500/15 text-green-400' : 'text-gray-500'}`}>
+          <div key={label} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${active ? 'bg-emerald-500/15 text-emerald-400' : 'text-gray-500'}`}>
             <Icon className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:block">{label}</span>
           </div>
@@ -82,14 +82,14 @@ const DashboardMock = () => (
           <div className="text-[10px] text-gray-500 mb-2">Monthly Revenue</div>
           <div className="flex items-end gap-1 h-14">
             {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 100].map((h, i) => (
-              <div key={i} className="flex-1 rounded-sm" style={{ height: `${h}%`, background: i === 11 ? '#22c55e' : `rgba(34,197,94,${0.15 + h / 300})` }} />
+              <div key={i} className="flex-1 rounded-sm" style={{ height: `${h}%`, background: i === 11 ? '#10b981' : `rgba(16,185,129,${0.15 + h / 300})` }} />
             ))}
           </div>
         </div>
         {/* Recent rows */}
         <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
           {[
-            { name: 'Acme Corp', amount: '$2,400', status: 'Paid', color: 'text-green-400 bg-green-500/10' },
+            { name: 'Acme Corp', amount: '$2,400', status: 'Paid', color: 'text-emerald-400 bg-emerald-500/10' },
             { name: 'TechFlow Inc', amount: '$1,850', status: 'Pending', color: 'text-yellow-400 bg-yellow-500/10' },
           ].map((r, i) => (
             <div key={i} className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.04] last:border-0">
@@ -111,7 +111,7 @@ const InvoiceMock = ({ style }: { style: 'stripe' | 'minimal' | 'bold' }) => {
   const styles = {
     stripe: { bg: 'from-violet-900/30 to-black', accent: 'bg-violet-500', label: 'Stripe Style' },
     minimal: { bg: 'from-gray-900/30 to-black', accent: 'bg-white', label: 'Minimal' },
-    bold: { bg: 'from-green-900/30 to-black', accent: 'bg-green-500', label: 'Green Bold' },
+    bold: { bg: 'from-emerald-900/30 to-black', accent: 'bg-emerald-500', label: 'Emerald Bold' },
   };
   const s = styles[style];
   return (
@@ -139,7 +139,7 @@ const InvoiceMock = ({ style }: { style: 'stripe' | 'minimal' | 'bold' }) => {
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-2xl overflow-hidden hover:border-green-500/20 transition-colors">
+    <div className="border border-white/[0.08] rounded-2xl overflow-hidden hover:border-emerald-500/20 transition-colors">
       <button className="w-full flex items-center justify-between px-6 py-5 text-left" onClick={() => setOpen(!open)}>
         <span className="text-white font-medium text-sm sm:text-base">{q}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 ml-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
@@ -166,7 +166,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center shadow-lg" style={{ boxShadow: '0 0 20px rgba(34,197,94,0.4)' }}>
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg" style={{ boxShadow: '0 0 20px rgba(16,185,129,0.4)' }}>
                 <FileText className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">SmartInvoice</span>
@@ -186,7 +186,7 @@ export default function LandingPage() {
               <Link href="/auth/login" className="text-sm text-gray-400 hover:text-white px-4 py-2 transition-colors">
                 Sign in
               </Link>
-              <Link href="/auth/signup" className="flex items-center gap-2 text-sm font-semibold text-black bg-green-500 hover:bg-green-400 px-5 py-2 rounded-lg transition-all duration-200" style={{ boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}>
+              <Link href="/auth/signup" className="flex items-center gap-2 text-sm font-semibold text-black bg-emerald-500 hover:bg-emerald-400 px-5 py-2 rounded-lg transition-all duration-200" style={{ boxShadow: '0 0 20px rgba(16,185,129,0.35)' }}>
                 Get started free
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -209,7 +209,7 @@ export default function LandingPage() {
             ))}
             <div className="pt-3 flex flex-col gap-2">
               <Link href="/auth/login" className="text-center py-3 text-sm text-gray-300 border border-white/10 rounded-xl hover:bg-white/5 transition-all">Sign in</Link>
-              <Link href="/auth/signup" className="text-center py-3 text-sm font-semibold text-black bg-green-500 rounded-xl">Get started free</Link>
+              <Link href="/auth/signup" className="text-center py-3 text-sm font-semibold text-black bg-emerald-500 rounded-xl">Get started free</Link>
             </div>
           </div>
         )}
@@ -219,15 +219,15 @@ export default function LandingPage() {
       <section className="relative pt-20 pb-16 sm:pt-28 sm:pb-24 px-4 overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px]" style={{ background: 'radial-gradient(ellipse at center top, rgba(34,197,94,0.1) 0%, transparent 60%)' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-[400px]" style={{ background: 'linear-gradient(to bottom, transparent, rgba(34,197,94,0.2), transparent)' }} />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px]" style={{ background: 'radial-gradient(ellipse at center top, rgba(16,185,129,0.1) 0%, transparent 60%)' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-[400px]" style={{ background: 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.2), transparent)' }} />
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>
 
         <div className="relative max-w-5xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/25 bg-green-500/8 text-green-400 text-sm font-medium mb-8" style={{ background: 'rgba(34,197,94,0.05)' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/25 bg-emerald-500/8 text-emerald-400 text-sm font-medium mb-8" style={{ background: 'rgba(16,185,129,0.05)' }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             New: AI-powered invoice generation
             <ChevronRight className="w-3.5 h-3.5" />
           </div>
@@ -236,7 +236,7 @@ export default function LandingPage() {
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
             <span className="text-white">Invoice smarter.</span>
             <br />
-            <span className="bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-500 bg-clip-text text-transparent">
               Get paid faster.
             </span>
           </h1>
@@ -248,12 +248,12 @@ export default function LandingPage() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-14">
-            <Link href="/auth/signup" className="group flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-400 text-black font-bold rounded-xl text-base transition-all duration-200 w-full sm:w-auto justify-center" style={{ boxShadow: '0 0 40px rgba(34,197,94,0.3)' }}>
+            <Link href="/auth/signup" className="group flex items-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-base transition-all duration-200 w-full sm:w-auto justify-center" style={{ boxShadow: '0 0 40px rgba(16,185,129,0.3)' }}>
               Start for free — no card needed
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link href="/auth/login" className="flex items-center gap-2 px-8 py-4 border border-white/10 text-white hover:border-white/20 hover:bg-white/5 rounded-xl text-base font-medium transition-all duration-200 w-full sm:w-auto justify-center">
-              <Play className="w-4 h-4 text-green-400" /> Watch demo
+              <Play className="w-4 h-4 text-emerald-400" /> Watch demo
             </Link>
           </div>
 
@@ -261,7 +261,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
-                {['#22c55e', '#16a34a', '#4ade80', '#86efac'].map((c, i) => (
+                {['#10b981', '#059669', '#34d399', '#6ee7b7'].map((c, i) => (
                   <div key={i} className="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center text-[9px] font-bold text-black" style={{ background: c }}>
                     {['JS', 'MC', 'ER', 'AK'][i]}
                   </div>
@@ -278,7 +278,7 @@ export default function LandingPage() {
 
         {/* Dashboard preview */}
         <div className="relative max-w-4xl mx-auto mt-16 px-4">
-          <div className="absolute -inset-4 rounded-3xl" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.08) 0%, transparent 70%)' }} />
+          <div className="absolute -inset-4 rounded-3xl" style={{ background: 'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 70%)' }} />
           <DashboardMock />
         </div>
       </section>
@@ -312,10 +312,10 @@ export default function LandingPage() {
 
           {/* Feature highlight - large card */}
           <div className="grid lg:grid-cols-2 gap-4 mb-4">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-green-950/30 to-black p-8 group hover:border-green-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)' }} />
-              <div className="w-10 h-10 rounded-xl bg-green-500/15 border border-green-500/20 flex items-center justify-center mb-5">
-                <Sparkles className="w-5 h-5 text-green-400" />
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-emerald-950/30 to-black p-8 group hover:border-emerald-500/20 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)' }} />
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center mb-5">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">AI-Powered Generation</h3>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
@@ -351,7 +351,7 @@ export default function LandingPage() {
               { icon: BarChart3, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20', title: 'Analytics', desc: 'Revenue trends, aging reports, P&L statements, and cash flow forecasts.' },
               { icon: Clock, color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', title: 'Auto-Reminders', desc: 'Schedule payment reminders and follow-ups automatically.' },
               { icon: Globe, color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', title: 'Multi-Currency', desc: 'Bill clients in any currency with live exchange rates.' },
-              { icon: Shield, color: 'text-green-400 bg-green-500/10 border-green-500/20', title: 'Bank-Level Security', desc: 'SOC 2 compliant, end-to-end encrypted, GDPR ready.' },
+              { icon: Shield, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', title: 'Bank-Level Security', desc: 'SOC 2 compliant, end-to-end encrypted, GDPR ready.' },
               { icon: Users, color: 'text-pink-400 bg-pink-500/10 border-pink-500/20', title: 'Client Portal', desc: 'Give clients a branded portal to view and pay invoices.' },
               { icon: Repeat, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', title: 'Recurring Billing', desc: 'Set-and-forget recurring invoices for retainer clients.' },
               { icon: Download, color: 'text-teal-400 bg-teal-500/10 border-teal-500/20', title: 'PDF Export', desc: 'Download pixel-perfect PDFs for any invoice template.' },
@@ -380,7 +380,7 @@ export default function LandingPage() {
 
           <div className="relative">
             {/* Connector line */}
-            <div className="hidden lg:block absolute top-10 left-[16.67%] right-[16.67%] h-px bg-gradient-to-r from-transparent via-green-500/20 to-transparent" />
+            <div className="hidden lg:block absolute top-10 left-[16.67%] right-[16.67%] h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
 
             <div className="grid lg:grid-cols-3 gap-8">
               {[
@@ -408,8 +408,8 @@ export default function LandingPage() {
               ].map(({ step, icon: Icon, title, desc, detail }) => (
                 <div key={step} className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-full border border-green-500/30 bg-green-500/10 flex items-center justify-center relative z-10">
-                      <Icon className="w-4.5 h-4.5 text-green-400" />
+                    <div className="w-10 h-10 rounded-full border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-center relative z-10">
+                      <Icon className="w-4.5 h-4.5 text-emerald-400" />
                     </div>
                     <span className="text-5xl font-black text-white/5 select-none">{step}</span>
                   </div>
@@ -418,7 +418,7 @@ export default function LandingPage() {
                   <ul className="space-y-1.5">
                     {detail.map(d => (
                       <li key={d} className="flex items-center gap-2 text-xs text-gray-500">
-                        <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         {d}
                       </li>
                     ))}
@@ -431,7 +431,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── TEMPLATES ── */}
-      <section id="templates" className="py-20 sm:py-28 px-4 border-t border-white/[0.06]" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.04) 0%, transparent 60%)' }}>
+      <section id="templates" className="py-20 sm:py-28 px-4 border-t border-white/[0.06]" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.04) 0%, transparent 60%)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <SectionLabel>Templates</SectionLabel>
@@ -471,7 +471,7 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-8">
-            <Link href="/auth/signup" className="inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300 font-medium transition-colors">
+            <Link href="/auth/signup" className="inline-flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
               Browse all templates <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -490,8 +490,8 @@ export default function LandingPage() {
             ].map(({ val, label, icon: Icon }) => (
               <div key={label} className="text-center">
                 <div className="flex justify-center mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-green-500/10 border border-green-500/15 flex items-center justify-center">
-                    <Icon className="w-4.5 h-4.5 text-green-400" />
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center">
+                    <Icon className="w-4.5 h-4.5 text-emerald-400" />
                   </div>
                 </div>
                 <div className="text-3xl sm:text-4xl font-black text-white mb-1">{val}</div>
@@ -525,7 +525,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-sm text-gray-300 leading-relaxed mb-5">{text}</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-xs font-bold text-black shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-bold text-black shrink-0">
                     {name.charAt(0)}
                   </div>
                   <div>
@@ -540,7 +540,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-20 sm:py-28 px-4 border-t border-white/[0.06]" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.04) 0%, transparent 50%)' }}>
+      <section id="pricing" className="py-20 sm:py-28 px-4 border-t border-white/[0.06]" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.04) 0%, transparent 50%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <SectionLabel>Pricing</SectionLabel>
@@ -572,7 +572,7 @@ export default function LandingPage() {
                 ].map(([feat, inc]) => (
                   <li key={feat as string} className="flex items-center gap-3 text-sm">
                     {inc
-                      ? <Check className="w-4 h-4 text-green-400 shrink-0" />
+                      ? <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                       : <X className="w-4 h-4 text-gray-700 shrink-0" />}
                     <span className={inc ? 'text-gray-300' : 'text-gray-600'}>{feat as string}</span>
                   </li>
@@ -581,17 +581,17 @@ export default function LandingPage() {
             </div>
 
             {/* Pro - featured */}
-            <div className="rounded-2xl border border-green-500/30 bg-gradient-to-b from-green-950/30 to-black p-7 relative" style={{ boxShadow: '0 0 60px rgba(34,197,94,0.08)' }}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-green-500 text-black text-xs font-bold">Most popular</div>
+            <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-emerald-950/30 to-black p-7 relative" style={{ boxShadow: '0 0 60px rgba(16,185,129,0.08)' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-500 text-black text-xs font-bold">Most popular</div>
               <div className="mb-5">
-                <div className="text-sm font-semibold text-green-400 mb-1">Pro</div>
+                <div className="text-sm font-semibold text-emerald-400 mb-1">Pro</div>
                 <div className="flex items-baseline gap-1">
                   <div className="text-4xl font-black text-white">₹299</div>
                   <div className="text-gray-400 text-sm">/month</div>
                 </div>
                 <div className="text-xs text-gray-500 mt-1">Billed monthly · Cancel anytime</div>
               </div>
-              <Link href="/auth/signup" className="block w-full text-center py-3 rounded-xl bg-green-500 hover:bg-green-400 text-sm font-bold text-black transition-all mb-6" style={{ boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}>
+              <Link href="/auth/signup" className="block w-full text-center py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-sm font-bold text-black transition-all mb-6" style={{ boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}>
                 Start Pro trial
               </Link>
               <ul className="space-y-3">
@@ -607,7 +607,7 @@ export default function LandingPage() {
                 ].map(([feat, inc]) => (
                   <li key={feat as string} className="flex items-center gap-3 text-sm">
                     {inc
-                      ? <Check className="w-4 h-4 text-green-400 shrink-0" />
+                      ? <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                       : <X className="w-4 h-4 text-gray-700 shrink-0" />}
                     <span className={inc ? 'text-gray-300' : 'text-gray-600'}>{feat as string}</span>
                   </li>
@@ -641,7 +641,7 @@ export default function LandingPage() {
                 ].map(([feat, inc]) => (
                   <li key={feat as string} className="flex items-center gap-3 text-sm">
                     {inc
-                      ? <Check className="w-4 h-4 text-green-400 shrink-0" />
+                      ? <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                       : <X className="w-4 h-4 text-gray-700 shrink-0" />}
                     <span className={inc ? 'text-gray-300' : 'text-gray-600'}>{feat as string}</span>
                   </li>
@@ -652,9 +652,9 @@ export default function LandingPage() {
 
           {/* Money back */}
           <div className="mt-8 flex items-center justify-center gap-6 text-xs text-gray-500">
-            <div className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-green-500" /> 14-day money-back guarantee</div>
-            <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-green-500" /> No credit card required</div>
-            <div className="flex items-center gap-2"><X className="w-3.5 h-3.5 text-green-500" /> Cancel anytime</div>
+            <div className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-500" /> 14-day money-back guarantee</div>
+            <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-emerald-500" /> No credit card required</div>
+            <div className="flex items-center gap-2"><X className="w-3.5 h-3.5 text-emerald-500" /> Cancel anytime</div>
           </div>
         </div>
       </section>
@@ -666,7 +666,7 @@ export default function LandingPage() {
           <div className="rounded-2xl border border-white/[0.08] overflow-hidden">
             <div className="grid grid-cols-4 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-white/[0.03] border-b border-white/[0.06]">
               <div className="p-4">Feature</div>
-              <div className="p-4 text-center text-green-400">SmartInvoice</div>
+              <div className="p-4 text-center text-emerald-400">SmartInvoice</div>
               <div className="p-4 text-center">FreshBooks</div>
               <div className="p-4 text-center">Wave</div>
             </div>
@@ -685,7 +685,7 @@ export default function LandingPage() {
                 {[si, fb, wave].map((v, i) => (
                   <div key={i} className="p-4 flex justify-center">
                     {v
-                      ? <Check className="w-4 h-4 text-green-400" />
+                      ? <Check className="w-4 h-4 text-emerald-400" />
                       : <Minus className="w-4 h-4 text-gray-700" />}
                   </div>
                 ))}
@@ -719,13 +719,13 @@ export default function LandingPage() {
       {/* ── CTA BANNER ── */}
       <section className="py-20 sm:py-28 px-4 border-t border-white/[0.06]">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl border border-green-500/15 bg-gradient-to-br from-green-950/40 via-black to-black p-10 sm:p-16 text-center" style={{ boxShadow: '0 0 80px rgba(34,197,94,0.06)' }}>
+          <div className="relative overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-emerald-950/40 via-black to-black p-10 sm:p-16 text-center" style={{ boxShadow: '0 0 80px rgba(16,185,129,0.06)' }}>
             {/* BG effect */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px]" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.1) 0%, transparent 60%)' }} />
-            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%)' }} />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px]" style={{ background: 'radial-gradient(ellipse at center, rgba(16,185,129,0.1) 0%, transparent 60%)' }} />
+            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full" style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%)' }} />
 
             <div className="relative">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/20 bg-green-500/5 text-green-400 text-xs font-semibold mb-6 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs font-semibold mb-6 uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" /> Join 10,000+ professionals
               </div>
               <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-5 leading-tight">
@@ -735,7 +735,7 @@ export default function LandingPage() {
                 Start sending professional invoices today. Free forever, no credit card required.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link href="/auth/signup" className="flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-400 text-black font-bold rounded-xl text-base transition-all w-full sm:w-auto justify-center" style={{ boxShadow: '0 0 40px rgba(34,197,94,0.4)' }}>
+                <Link href="/auth/signup" className="flex items-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-base transition-all w-full sm:w-auto justify-center" style={{ boxShadow: '0 0 40px rgba(16,185,129,0.4)' }}>
                   Create your free account
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -744,10 +744,10 @@ export default function LandingPage() {
                 </Link>
               </div>
               <div className="mt-8 flex flex-wrap justify-center gap-5 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-500" /> Free forever plan</span>
-                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-500" /> No credit card</span>
-                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-500" /> Cancel anytime</span>
-                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-500" /> GDPR compliant</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> Free forever plan</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> No credit card</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> Cancel anytime</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> GDPR compliant</span>
               </div>
             </div>
           </div>
@@ -761,7 +761,7 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 sm:col-span-2">
               <Link href="/" className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
                   <FileText className="w-4 h-4 text-black" strokeWidth={2.5} />
                 </div>
                 <span className="text-base font-bold text-white">SmartInvoice</span>
@@ -804,7 +804,7 @@ export default function LandingPage() {
           <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-gray-600">© 2025 SmartInvoice. All rights reserved. Made by Harsh Bhardwaj.</p>
             <div className="flex items-center gap-1 text-xs text-gray-600">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               All systems operational
             </div>
           </div>
