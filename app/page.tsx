@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Logo, { LogoMarkOnly } from '@/components/Logo';
 import { FileText, ArrowRight, Sparkles, Zap, Shield, ChartBar as BarChart3, Star, TrendingUp, DollarSign, Users, Clock, Globe, ChevronDown, ChevronRight, Play, Check, X, Menu, Lock, Repeat, Send, Download, Activity, Building, Twitter, Linkedin, Github, Headphones } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -228,12 +229,7 @@ const DashboardMock = () => {
           style={{ background: spotify.nearBlack }}
         >
           <div className="flex items-center gap-3 mb-6 px-2">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: spotify.green }}
-            >
-              <FileText className="w-4 h-4" style={{ color: '#000' }} />
-            </div>
+            <LogoMarkOnly size={32} />
             <span className="hidden sm:block text-sm font-bold text-white">SmartInvoice</span>
           </div>
 
@@ -384,14 +380,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-105"
-                style={{ background: spotify.green, boxShadow: spotify.shadowMedium }}
-              >
-                <FileText className="w-4 h-4" style={{ color: '#000' }} />
-              </div>
-              <span className="text-sm font-bold text-white">SmartInvoice</span>
+            <Link href="/" className="group">
+              <Logo variant="full" size="sm" theme="dark" className="group-hover:opacity-90 transition-opacity" />
             </Link>
 
             {/* Desktop Nav */}
@@ -806,11 +796,8 @@ export default function LandingPage() {
       <section className="py-16 px-6" style={{ background: spotify.darkSurface }}>
         <div className="max-w-3xl mx-auto text-center">
           <Card className="p-10 sm:p-12">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ background: spotify.green }}
-            >
-              <Headphones className="w-7 h-7" style={{ color: '#000' }} />
+            <div className="flex justify-center mb-6">
+              <LogoMarkOnly size={64} />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
               Ready to transform your billing?
@@ -844,11 +831,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 sm:col-span-1">
-              <Link href="/" className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: spotify.green }}>
-                  <FileText className="w-4 h-4" style={{ color: '#000' }} />
-                </div>
-                <span className="text-sm font-bold text-white">SmartInvoice</span>
+              <Link href="/" className="mb-4 inline-block">
+                <Logo variant="full" size="sm" theme="dark" />
               </Link>
               <p className="text-xs" style={{ color: spotify.textMuted }}>
                 Premium invoicing for modern professionals.
