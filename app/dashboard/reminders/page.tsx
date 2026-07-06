@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlertTriangle, Clock, Send, Phone, Scale, Trash2, Mail, DollarSign, Calendar, TrendingUp, Users, Zap, CheckCircle, AlertCircle } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Clock, Send, Phone, Scale, Trash2, Mail, DollarSign, Calendar, TrendingUp, Users, Zap, CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,19 +69,20 @@ export default function RemindersPage() {
   const [loading, setLoading] = useState(true);
   const [sendingReminders, setSendingReminders] = useState(false);
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { session } = useAuth();
+  const accessToken = session?.access_token;
 
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       fetchOverdueData();
     }
-  }, [token]);
+  }, [accessToken]);
 
   const fetchOverdueData = async () => {
     try {
       const response = await fetch('/api/reminders/overdue', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -137,7 +138,7 @@ export default function RemindersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           invoiceIds: selectedInvoices,

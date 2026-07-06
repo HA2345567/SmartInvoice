@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Eye, Download, Send, Trash2, Search, Filter, Plus, CheckCircle, Clock, AlertTriangle, Edit, Calendar, DollarSign, CreditCard, FileDown, Sparkles, TrendingUp, Users, Zap, AlertCircle, BarChart3 } from 'lucide-react';
+import { FileText, Eye, Download, Send, Trash2, Search, Filter, Plus, CircleCheck as CheckCircle, Clock, TriangleAlert as AlertTriangle, CreditCard as Edit, Calendar, DollarSign, CreditCard, FileDown, Sparkles, TrendingUp, Users, Zap, CircleAlert as AlertCircle, ChartBar as BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -126,18 +126,19 @@ export default function InvoicesPage() {
     notes: ''
   });
   const { toast } = useToast();
-  const { token, loading: authLoading } = useAuth();
+  const { session, loading: authLoading } = useAuth();
+  const accessToken = session?.access_token;
 
   useEffect(() => {
     // Only fetch invoices if authentication is complete and we have a token.
-    if (!authLoading && token) {
+    if (!authLoading && accessToken) {
       fetchInvoices();
     }
     // If auth is not loading and there's no token, we can stop the page's loading state.
-    if (!authLoading && !token) {
+    if (!authLoading && !accessToken) {
       setLoading(false);
     }
-  }, [token, authLoading]);
+  }, [accessToken, authLoading]);
 
   useEffect(() => {
     filterInvoices();
@@ -147,7 +148,7 @@ export default function InvoicesPage() {
     try {
       const response = await fetch('/api/invoices', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
       if (response.ok) {
@@ -191,7 +192,7 @@ export default function InvoicesPage() {
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/pdf`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
       if (response.ok) {
@@ -226,7 +227,7 @@ export default function InvoicesPage() {
     try {
       const response = await fetch('/api/export/invoices', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -305,7 +306,7 @@ export default function InvoicesPage() {
       const response = await fetch(`/api/invoices/${invoiceId}/send`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -370,7 +371,7 @@ export default function InvoicesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           status: 'paid',
@@ -419,7 +420,7 @@ export default function InvoicesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(updateData),
       });
@@ -453,7 +454,7 @@ export default function InvoicesPage() {
       const response = await fetch(`/api/invoices/${invoiceId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 

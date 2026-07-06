@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, TrendingUp, DollarSign, FileText, Users, Calendar, AlertCircle } from 'lucide-react';
+import { ChartBar as BarChart3, TrendingUp, DollarSign, FileText, Users, Calendar, CircleAlert as AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -39,19 +39,20 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { session } = useAuth();
+  const accessToken = session?.access_token;
 
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       fetchAnalytics();
     }
-  }, [token]);
+  }, [accessToken]);
 
   const fetchAnalytics = async () => {
     try {
       const response = await fetch('/api/analytics', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 

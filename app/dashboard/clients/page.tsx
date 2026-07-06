@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, Search, Mail, MapPin, FileText, DollarSign, Plus, Edit, Trash2, Download, Building, CreditCard, Calendar, AlertCircle } from 'lucide-react';
+import { Users, Search, Mail, MapPin, FileText, DollarSign, Plus, CreditCard as Edit, Trash2, Download, Building, CreditCard, Calendar, CircleAlert as AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -34,7 +34,8 @@ export default function ClientsPage() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { session } = useAuth();
+  const accessToken = session?.access_token;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -46,10 +47,10 @@ export default function ClientsPage() {
   });
 
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       fetchClients();
     }
-  }, [token]);
+  }, [accessToken]);
 
   useEffect(() => {
     filterClients();
@@ -59,7 +60,7 @@ export default function ClientsPage() {
     try {
       const response = await fetch('/api/clients', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
       if (response.ok) {
@@ -175,7 +176,7 @@ export default function ClientsPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData),
       });
@@ -212,7 +213,7 @@ export default function ClientsPage() {
       const response = await fetch(`/api/clients/${client.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -240,7 +241,7 @@ export default function ClientsPage() {
     try {
       const response = await fetch('/api/export/clients', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 

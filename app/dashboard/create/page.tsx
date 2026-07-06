@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Trash2, Save, Eye, Send, AlertCircle, User, FileText, Download, Sparkles, Layout } from 'lucide-react';
+import { Plus, Trash2, Save, Eye, Send, CircleAlert as AlertCircle, User, FileText, Download, Sparkles, LayoutGrid as Layout } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,7 +38,8 @@ import { PreviewDialogs } from './components/PreviewDialogs';
 export default function CreateInvoice() {
   const { toast } = useToast();
   const router = useRouter();
-  const { token, user } = useAuth();
+  const { session, user } = useAuth();
+  const accessToken = session?.access_token;
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -178,10 +179,10 @@ export default function CreateInvoice() {
   }, [invoiceData.date]);
 
   const fetchClients = async () => {
-    if (!token) return;
+    if (!accessToken) return;
     try {
       const response = await fetch('/api/clients', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       if (response.ok) {
         const data = await response.json();
@@ -193,10 +194,10 @@ export default function CreateInvoice() {
   };
 
   const generateInvoiceNumber = async () => {
-    if (!token) return;
+    if (!accessToken) return;
     try {
       const response = await fetch('/api/invoices/generate-number', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       if (response.ok) {
         const { invoiceNumber } = await response.json();
@@ -214,7 +215,7 @@ export default function CreateInvoice() {
     }
     try {
       const response = await fetch(`/api/suggestions/items?q=${encodeURIComponent(query)}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       if (response.ok) {
         const data = await response.json();
@@ -324,7 +325,7 @@ export default function CreateInvoice() {
     try {
       const response = await fetch('/api/invoices', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
         body: JSON.stringify({
           ...invoiceData,
           subtotal: totals.subtotal,
@@ -369,7 +370,7 @@ export default function CreateInvoice() {
 
       const response = await fetch('/api/invoices/preview', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
         body: JSON.stringify(tempInvoiceData),
       });
 
