@@ -3,301 +3,298 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/database';
+import type { User, Session } from '@supabase/supabase-js';
 
-interface User {
+// Extended user type with profile data
+interface AppUser {
   id: string;
   email: string;
   name: string;
   company?: string;
   avatar?: string;
-  subscriptionTier?: 'free' | 'pro' | 'business';
 }
 
 interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; userNotFound?: boolean }>;
-  signup: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string; userExists?: boolean }>;
-  logout: () => void;
+  user: AppUser | null;
+  session: Session | null;
   loading: boolean;
+  signUp: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const verifyAndRefreshToken = useCallback(async () => {
-    const storedToken = localStorage.getItem('auth_token');
-    console.log('Verifying token from localStorage:', storedToken ? 'Token exists' : 'No token');
-
-    if (!storedToken) {
-      setLoading(false);
-      return;
-    }
-
+  // Fetch user profile from public.users table
+  const fetchUserProfile = useCallback(async (authUser: User): Promise<AppUser | null> => {
     try {
-      console.log('Making request to /api/auth/me with token');
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${storedToken}`,
-        },
-      });
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, name, company, avatar')
+        .eq('id', authUser.id)
+        .maybeSingle();
 
-      console.log('Auth check response status:', response.status);
-
-      if (response.ok) {
-        const { user: refreshedUser, token: refreshedToken } = await response.json();
-        console.log('Auth check successful, user:', refreshedUser.email);
-        setUser(refreshedUser);
-        setToken(refreshedToken);
-        localStorage.setItem('auth_token', refreshedToken);
-        localStorage.setItem('auth_user', JSON.stringify(refreshedUser));
-      } else if (response.status === 401) {
-        console.log('Token is invalid or expired, clearing storage');
-        // Token is invalid or expired, clear storage but don't redirect immediately
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
-        setUser(null);
-        setToken(null);
-        // Only redirect if we're on a protected route
-        if (window.location.pathname.startsWith('/dashboard')) {
-          router.push('/auth/login');
-        }
-      } else {
-        // Other errors - don't logout, just log the error
-        console.error('Session verification failed with status:', response.status);
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
       }
-    } catch (error) {
-      console.error("Session verification failed", error);
-      // Don't logout on network errors, just log the error
-      // This prevents redirects due to temporary network issues
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
 
-  useEffect(() => {
-    // 1. Initialize Authentication
-    const initializeAuth = async () => {
-      // First, check for an active Supabase session (for Google/OAuth users)
-      // This is crucial because Supabase tokens expire in 1h, but the client auto-refreshes them.
-      // We must prefer the fresh token from the client over any stale 'auth_token' in localStorage.
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        console.log('AuthContext: Recovered active Supabase session for', session.user.email);
-        const appUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
-          avatar: session.user.user_metadata.avatar_url,
+      if (data) {
+        return {
+          id: data.id,
+          email: data.email,
+          name: data.name || authUser.email?.split('@')[0] || 'User',
+          company: data.company,
+          avatar: data.avatar,
         };
+      }
 
-        setUser(appUser);
-        setToken(session.access_token);
-        localStorage.setItem('auth_token', session.access_token);
-        localStorage.setItem('auth_user', JSON.stringify(appUser));
-        setLoading(false);
-      } else {
-        // Fallback: Check for Local JWT (for Email/Password users who use our custom 7-day tokens)
-        const storedToken = localStorage.getItem('auth_token');
-        const storedUser = localStorage.getItem('auth_user');
+      // No profile exists - create one
+      const newProfile = {
+        id: authUser.id,
+        email: authUser.email!,
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+        company: authUser.user_metadata?.company || null,
+      };
 
-        if (storedToken && storedUser) {
-          // We have a stored token, but no Supabase session. 
-          // This is likely a Local JWT user. Verify it.
-          try {
-            // Optimistically set user to avoid flash (will be corrected by verify if invalid)
-            setUser(JSON.parse(storedUser));
-          } catch (e) { /* ignore parse error */ }
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([newProfile]);
 
-          verifyAndRefreshToken(); // This controls 'loading' state
-        } else {
+      if (insertError) {
+        console.error('Error creating user profile:', insertError);
+        // Still return a user object based on auth data
+        return {
+          id: authUser.id,
+          email: authUser.email!,
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+          company: authUser.user_metadata?.company,
+        };
+      }
+
+      // Fetch the newly created profile
+      const { data: newProfileData } = await supabase
+        .from('users')
+        .select('id, email, name, company, avatar')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      return newProfileData ? {
+        id: newProfileData.id,
+        email: newProfileData.email,
+        name: newProfileData.name,
+        company: newProfileData.company,
+        avatar: newProfileData.avatar,
+      } : null;
+    } catch (err) {
+      console.error('Exception fetching user profile:', err);
+      return null;
+    }
+  }, []);
+
+  // Initialize auth state
+  useEffect(() => {
+    let mounted = true;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+
+        if (!mounted) return;
+
+        if (initialSession?.user) {
+          setSession(initialSession);
+          const profile = await fetchUserProfile(initialSession.user);
+          if (mounted && profile) {
+            setUser(profile);
+          }
+        }
+      } catch (err) {
+        console.error('Init auth error:', err);
+      } finally {
+        if (mounted) {
           setLoading(false);
         }
       }
     };
 
-    initializeAuth();
+    initAuth();
 
-    // 2. Listen for Supabase Auth changes (handles OAuth redirects, Token Refreshes, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthContext: Supabase Auth State Change:', event);
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state change:', event);
 
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
-        const appUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
-          avatar: session.user.user_metadata.avatar_url,
-        };
-        setUser(appUser);
-        setToken(session.access_token);
-        localStorage.setItem('auth_token', session.access_token);
-        localStorage.setItem('auth_user', JSON.stringify(appUser));
-        setLoading(false);
+      if (!mounted) return;
 
-        // Redirect logic for SIGNED_IN only (avoid redirecting on just a refresh)
-        if (event === 'SIGNED_IN') {
-          const path = window.location.pathname;
-          if (path === '/auth/login' || path === '/auth/signup' || path === '/') {
-            router.push('/dashboard');
-          }
-        }
-      } else if (event === 'SIGNED_OUT') {
-        // Only clear if we actually received a definite sign out event
-        // (Sometimes 'initial' is null, don't wipe just yet)
-        console.log('AuthContext: Signed out event received.');
+      if (event === 'SIGNED_OUT') {
         setUser(null);
-        setToken(null);
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
-        router.push('/');
+        setSession(null);
         setLoading(false);
+
+        // Redirect to home if on a protected route
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')) {
+          router.push('/');
+        }
+        return;
       }
+
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && newSession) {
+        setSession(newSession);
+
+        // Fetch profile using async wrapper
+        (async () => {
+          const profile = await fetchUserProfile(newSession.user);
+          if (mounted && profile) {
+            setUser(profile);
+
+            // Redirect after successful sign in
+            if (event === 'SIGNED_IN') {
+              const path = window.location.pathname;
+              if (path === '/auth/login' || path === '/auth/signup' || path === '/') {
+                router.push('/dashboard');
+              }
+            }
+          }
+        })();
+      }
+
+      setLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [verifyAndRefreshToken, router]);
+  }, [fetchUserProfile, router]);
 
-  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string; userNotFound?: boolean }> => {
+  // Sign up with email/password
+  const signUp = useCallback(async (
+    email: string,
+    password: string,
+    name: string,
+    company?: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            company: company || null,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
-        body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Login response not ok:', response.status, errorText);
-
-        // Try to parse as JSON, fallback to text
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: `Server error: ${response.status}` };
-        }
-
-        return {
-          success: false,
-          error: errorData.error || `Server error: ${response.status}`,
-          userNotFound: errorData.userNotFound
-        };
+      if (error) {
+        setLoading(false);
+        return { success: false, error: error.message };
       }
 
-      const data = await response.json();
+      if (data.user) {
+        // Create profile in public.users
+        await supabase.from('users').insert([{
+          id: data.user.id,
+          email: email.toLowerCase(),
+          name,
+          company: company || null,
+        }]);
 
-      if (data.user && data.token) {
-        setUser(data.user);
-        setToken(data.token);
+        // If email confirmation is disabled, user is immediately signed in
+        if (data.session) {
+          setSession(data.session);
+          const profile: AppUser = {
+            id: data.user.id,
+            email: email.toLowerCase(),
+            name,
+            company,
+          };
+          setUser(profile);
+          router.push('/dashboard');
+        }
 
-        // Store in localStorage
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('auth_user', JSON.stringify(data.user));
-
+        setLoading(false);
         return { success: true };
       }
 
-      return {
-        success: false,
-        error: data.error || 'Login failed',
-        userNotFound: data.userNotFound
-      };
-    } catch (error) {
-      console.error('Login error:', error);
-      return {
-        success: false,
-        error: 'Network error. Please check your connection and try again.'
-      };
+      setLoading(false);
+      return { success: false, error: 'Failed to create account' };
+    } catch (err) {
+      setLoading(false);
+      console.error('SignUp error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
     }
-  }, []);
+  }, [router]);
 
-  const signup = useCallback(async (email: string, password: string, name: string, company?: string): Promise<{ success: boolean; error?: string; userExists?: boolean }> => {
+  // Sign in with email/password
+  const signIn = useCallback(async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name, company }),
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Signup response not ok:', response.status, errorText);
-
-        // Try to parse as JSON, fallback to text
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: `Server error: ${response.status}` };
+      if (error) {
+        setLoading(false);
+        // Handle specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          return { success: false, error: 'Invalid email or password. Please try again.' };
         }
-
-        return {
-          success: false,
-          error: errorData.error || `Server error: ${response.status}`,
-          userExists: errorData.userExists
-        };
+        return { success: false, error: error.message };
       }
 
-      const data = await response.json();
-
-      if (data.user && data.token) {
-        setUser(data.user);
-        setToken(data.token);
-
-        // Store in localStorage
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('auth_user', JSON.stringify(data.user));
-
-        return { success: true };
+      if (data.user && data.session) {
+        setSession(data.session);
+        const profile = await fetchUserProfile(data.user);
+        if (profile) {
+          setUser(profile);
+        }
+        router.push('/dashboard');
       }
 
-      return {
-        success: false,
-        error: data.error || 'Signup failed',
-        userExists: data.userExists
-      };
-    } catch (error) {
-      console.error('Signup error:', error);
-      return {
-        success: false,
-        error: 'Network error. Please check your connection and try again.'
-      };
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      setLoading(false);
+      console.error('SignIn error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
     }
-  }, []);
+  }, [fetchUserProfile, router]);
 
-  const logout = useCallback(() => {
-    console.log('Logout called - clearing authentication data');
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    setUser(null);
-    setToken(null);
-    // Only redirect if we're not already on the home page
-    if (window.location.pathname !== '/') {
+  // Sign out
+  const signOut = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
       router.push('/');
+    } catch (err) {
+      console.error('SignOut error:', err);
     }
   }, [router]);
 
   const contextValue = useMemo(() => ({
     user,
-    token,
-    login,
-    signup,
-    logout,
+    session,
     loading,
-  }), [user, token, login, signup, logout, loading]);
+    signUp,
+    signIn,
+    signOut,
+  }), [user, session, loading, signUp, signIn, signOut]);
 
   return (
     <AuthContext.Provider value={contextValue}>
