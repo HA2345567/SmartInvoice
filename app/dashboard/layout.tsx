@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { FileText, Chrome as Home, Plus, Users, Settings, LogOut, Menu, X, ChartBar as BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt } from 'lucide-react';
+import { FileText, Chrome as Home, Plus, Users, Settings, LogOut, Menu, X, ChartBar as BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt, Calculator } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +48,8 @@ export default function DashboardLayout({
     { name: 'Proposals', href: '/dashboard/proposals', icon: FileText, badge: 'AI' },
     { name: 'Clients', href: '/dashboard/clients', icon: Users },
     { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, badge: 'AI' },
+    { name: 'Tax Center', href: '/dashboard/tax', icon: Calculator },
+    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'AI Payment Agent', href: '/dashboard/agent', icon: Zap, badge: 'NEW' },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
