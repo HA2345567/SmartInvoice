@@ -14,6 +14,17 @@ import { StatsGrid } from './components/StatsGrid';
 import { IncomeTrend } from './components/IncomeTrend';
 import { RecentInvoices } from './components/RecentInvoices';
 import { PendingInvoices } from './components/PendingInvoices';
+import { BusinessHealth } from './components/BusinessHealth';
+import { CashRunway } from './components/CashRunway';
+import { AIRecommendations } from './components/AIRecommendations';
+import { ForecastWidget } from './components/ForecastWidget';
+
+interface Recommendation {
+  type: string;
+  message: string;
+  priority: 'high' | 'medium' | 'low';
+  action?: string;
+}
 
 interface Analytics {
   totalRevenue: number;
@@ -24,6 +35,11 @@ interface Analytics {
   monthlyData: Array<{ month: string; revenue: number; invoices: number }>;
   topClients: Array<{ name: string; company?: string; totalAmount: number; totalInvoices: number }>;
   invoiceStatusDistribution: { paid: number; pending: number; draft: number; overdue: number };
+  businessHealth: number;
+  cashRunway: number;
+  forecast: { nextMonth: number; nextQuarter: number; confidence: string };
+  recommendations: Recommendation[];
+  overdueAnalysis: { total: number; amount: number; byClient: Array<{ client: string; count: number; amount: number }>; avgDaysOverdue: number };
 }
 
 interface Invoice {
@@ -204,46 +220,62 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <StatsGrid stats={stats} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        {/* Income Trend */}
-        <IncomeTrend analytics={analytics} safeFormatCurrency={safeFormatCurrency} />
+      {/* AI Intelligence Row - Business Health, Cash Runway, Forecast */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <BusinessHealth score={analytics?.businessHealth || 0} loading={!analytics} />
+        <CashRunway months={analytics?.cashRunway || 0} loading={!analytics} />
+        <ForecastWidget
+          forecast={analytics?.forecast || { nextMonth: 0, nextQuarter: 0, confidence: 'low' }}
+          currentMonthRevenue={currentMonthRevenue}
+          loading={!analytics}
+        />
+      </div>
 
-        {/* Quick Actions */}
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}>
-          <CardHeader>
-            <CardTitle className="text-white flex items-center text-sm font-bold">
-              <Zap className="w-4 h-4 mr-2" style={{ color: '#1ed760' }} />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-3">
+      {/* AI Recommendations */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="lg:col-span-2">
+          <IncomeTrend analytics={analytics} safeFormatCurrency={safeFormatCurrency} />
+        </div>
+        <AIRecommendations recommendations={analytics?.recommendations || []} loading={!analytics} />
+      </div>
+
+      {/* Quick Actions */}
+      <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}>
+        <CardHeader>
+          <CardTitle className="text-white flex items-center text-sm font-bold">
+            <Zap className="w-4 h-4 mr-2" style={{ color: '#1ed760' }} />
+            Quick Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Link href="/dashboard/create/select-type">
-              <Button className="w-full justify-start text-sm font-bold" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
+              <Button className="w-full justify-center text-sm font-bold h-12" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Invoice
               </Button>
             </Link>
             <Link href="/dashboard/clients">
-              <Button className="w-full justify-start text-sm font-bold" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
+              <Button className="w-full justify-center text-sm font-bold h-12" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
                 <Users className="w-4 h-4 mr-2" />
-                Manage Clients
+                Clients
               </Button>
             </Link>
             <Link href="/dashboard/reminders">
-              <Button className="w-full justify-start text-sm font-bold" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
+              <Button className="w-full justify-center text-sm font-bold h-12" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
                 <Clock className="w-4 h-4 mr-2" />
                 Reminders
               </Button>
             </Link>
             <Link href="/dashboard/analytics">
-              <Button className="w-full justify-start text-sm font-bold" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
+              <Button className="w-full justify-center text-sm font-bold h-12" style={{ background: '#1f1f1f', color: '#b3b3b3', borderRadius: '8px' }}>
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Analytics
               </Button>
             </Link>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Recent Invoices */}

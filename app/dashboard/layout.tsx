@@ -45,9 +45,10 @@ export default function DashboardLayout({
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Create Invoice', href: '/dashboard/create', icon: Plus },
     { name: 'Invoices', href: '/dashboard/invoices', icon: FileText },
+    { name: 'Proposals', href: '/dashboard/proposals', icon: FileText, badge: 'AI' },
     { name: 'Clients', href: '/dashboard/clients', icon: Users },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, badge: 'AI' },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'AI Payment Agent', href: '/dashboard/agent', icon: Zap, badge: 'NEW' },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ], []);
