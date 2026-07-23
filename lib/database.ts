@@ -139,6 +139,9 @@ export class DatabaseService {
       taxRate: parseFloat(data.taxrate || data.tax_rate || 0),
       discountRate: parseFloat(data.discountrate || data.discount_rate || 0),
       paymentLink: data.paymentlink || data.payment_link,
+      theme: data.theme || 'ultra-luxury',
+      invoiceType: data.invoicetype || data.invoice_type || 'sales',
+      customColors: typeof data.customcolors === 'string' ? JSON.parse(data.customcolors) : data.customcolors || null,
       emailSent: data.emailsent ?? false,
       remindersSent: data.reminderssent ?? 0,
       lastReminderSent: data.lastremindersent,
@@ -230,7 +233,25 @@ export class DatabaseService {
     try {
       const sql = getSql();
       const clients = await sql`SELECT * FROM clients WHERE userid = ${userId} ORDER BY createdat DESC`;
-      return (clients || []).map(c => this.transformClientToCamelCase(c)!);
+      const invoices = await sql`SELECT clientid, amount FROM invoices WHERE userid = ${userId}`;
+      
+      const invoiceCounts: Record<string, number> = {};
+      const invoiceTotals: Record<string, number> = {};
+      (invoices || []).forEach(inv => {
+        if (inv.clientid) {
+          invoiceCounts[inv.clientid] = (invoiceCounts[inv.clientid] || 0) + 1;
+          invoiceTotals[inv.clientid] = (invoiceTotals[inv.clientid] || 0) + (parseFloat(inv.amount) || 0);
+        }
+      });
+
+      return (clients || []).map(c => {
+        const transformed = this.transformClientToCamelCase(c)!;
+        return {
+          ...transformed,
+          totalInvoices: invoiceCounts[c.id] || 0,
+          totalAmount: invoiceTotals[c.id] || 0,
+        };
+      });
     } catch (error) {
       console.error('Error getting clients:', error);
       return [];
@@ -320,13 +341,14 @@ export class DatabaseService {
       const result = await sql`
         INSERT INTO invoices (
           id, userid, invoicenumber, clientid, clientname, clientemail, clientcompany, clientaddress, clientgst, clientcurrency,
-          amount, subtotal, taxamount, discountamount, status, date, duedate, items, notes, terms, taxrate, discountrate, emailsent, reminderssent, createdat, updatedat
+          amount, subtotal, taxamount, discountamount, status, date, duedate, items, notes, terms, taxrate, discountrate, emailsent, reminderssent, theme, invoicetype, customcolors, createdat, updatedat
         ) VALUES (
           ${id}, ${userId}, ${invoiceData.invoiceNumber}, ${clientId}, ${invoiceData.clientName}, ${invoiceData.clientEmail.toLowerCase()},
           ${invoiceData.clientCompany || null}, ${invoiceData.clientAddress || ''}, ${invoiceData.clientGST || invoiceData.clientGst || null},
           ${invoiceData.clientCurrency || 'USD'}, ${invoiceData.amount || 0}, ${invoiceData.subtotal || 0}, ${invoiceData.taxAmount || 0},
           ${invoiceData.discountAmount || 0}, ${invoiceData.status || 'draft'}, ${invoiceData.date || now.split('T')[0]}, ${invoiceData.dueDate || now.split('T')[0]},
-          ${itemsJson}, ${invoiceData.notes || null}, ${invoiceData.terms || null}, ${invoiceData.taxRate || 0}, ${invoiceData.discountRate || 0}, false, 0, ${now}, ${now}
+          ${itemsJson}, ${invoiceData.notes || null}, ${invoiceData.terms || null}, ${invoiceData.taxRate || 0}, ${invoiceData.discountRate || 0}, false, 0,
+          ${invoiceData.theme || 'ultra-luxury'}, ${invoiceData.invoiceType || 'sales'}, ${invoiceData.customColors ? JSON.stringify(invoiceData.customColors) : null}, ${now}, ${now}
         )
         RETURNING *
       `;

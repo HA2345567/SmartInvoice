@@ -3,6 +3,8 @@ import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 import { getNeonSql } from '@/lib/database-config';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);

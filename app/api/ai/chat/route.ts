@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
     try {
         const apiKey = process.env.GOOGLE_API_KEY;

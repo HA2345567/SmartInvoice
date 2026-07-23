@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * SmartInvoice Luxury Logo Component
+ * SmartInvoice Logo Component - Geometric Slanting Wings + Spotify Green (#1ed760) Bold 'S' Ribbon
  */
 
 interface LogoProps {
@@ -11,10 +11,10 @@ interface LogoProps {
 }
 
 const sizeConfig = {
-  sm: { mark: 32, textSize: 'text-base', gap: 'gap-2' },
-  md: { mark: 42, textSize: 'text-xl', gap: 'gap-2.5' },
-  lg: { mark: 52, textSize: 'text-2xl', gap: 'gap-3' },
-  xl: { mark: 64, textSize: 'text-3xl', gap: 'gap-3.5' },
+  sm: { mark: 34, textSize: 'text-base', gap: 'gap-2.5' },
+  md: { mark: 44, textSize: 'text-xl', gap: 'gap-3' },
+  lg: { mark: 56, textSize: 'text-2xl', gap: 'gap-3.5' },
+  xl: { mark: 70, textSize: 'text-3xl', gap: 'gap-4' },
 };
 
 export default function Logo({
@@ -24,94 +24,52 @@ export default function Logo({
 }: LogoProps) {
   const s = sizeConfig[size] || sizeConfig.md;
 
-  // Logo Mark SVG - Ultra Luxury Emerald & Cyan AI Emblem
+  // Geometric Slanting Logo Mark (Clean 100x100 Vector Geometry)
   const LogoMark = () => (
     <svg
       width={s.mark}
       height={s.mark}
-      viewBox="0 0 64 64"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="flex-shrink-0 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-transform duration-300 hover:scale-105"
+      className="flex-shrink-0 drop-shadow-[0_0_12px_rgba(30,215,96,0.4)] transition-transform duration-300 hover:scale-105"
     >
       <defs>
-        <linearGradient id="smartLogoBg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#064e3b" />
-          <stop offset="50%" stopColor="#022c22" />
-          <stop offset="100%" stopColor="#0f172a" />
-        </linearGradient>
-
-        <linearGradient id="smartLogoPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="50%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#06b6d4" />
-        </linearGradient>
-
-        <linearGradient id="smartLogoAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#38bdf8" />
+        <linearGradient id="spotifyGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1ed760" />
           <stop offset="100%" stopColor="#10b981" />
         </linearGradient>
-
-        <filter id="smartGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
       </defs>
 
-      {/* Rounded Squircle Container */}
-      <rect
-        x="2"
-        y="2"
-        width="60"
-        height="60"
-        rx="16"
-        fill="url(#smartLogoBg)"
-        stroke="rgba(52, 211, 153, 0.25)"
-        strokeWidth="1.5"
-      />
+      {/* Top Slanting White Polygon Wing */}
+      <path d="M 28 10 L 88 10 L 64 42 L 18 42 Z" fill="#ffffff" />
 
-      {/* Outer Subtle Glow Ring */}
-      <rect
-        x="6"
-        y="6"
-        width="52"
-        height="52"
-        rx="12"
-        stroke="url(#smartLogoPrimary)"
-        strokeOpacity="0.15"
-        strokeWidth="1"
-      />
+      {/* Bottom Slanting White Polygon Wing */}
+      <path d="M 36 58 L 82 58 L 72 90 L 12 90 Z" fill="#ffffff" />
 
-      {/* Stylized 'S' + Invoice Ribbon Fold */}
+      {/* Bold 'S' Ribbon in Signature Spotify Green (#1ed760) */}
       <path
-        d="M20 22C20 18.6863 22.6863 16 26 16H38C41.3137 16 44 18.6863 44 22V26C44 28.2091 42.2091 30 40 30H24C21.7909 30 20 31.7909 20 34V42C20 45.3137 22.6863 48 26 48H38C41.3137 48 44 45.3137 44 42"
-        stroke="url(#smartLogoPrimary)"
-        strokeWidth="5"
+        d="M 60 20 C 78 20 86 30 86 40 C 86 54 44 48 44 64 C 44 74 54 80 72 80"
+        fill="none"
+        stroke="url(#spotifyGreenGrad)"
+        strokeWidth="14"
         strokeLinecap="round"
         strokeLinejoin="round"
-        filter="url(#smartGlow)"
-      />
-
-      {/* Document Lines within the mark */}
-      <line x1="28" y1="23" x2="36" y2="23" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="28" y1="41" x2="36" y2="41" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* AI Sparkle Star Badge */}
-      <path
-        d="M44 18L45.5 22L49.5 23.5L45.5 25L44 29L42.5 25L38.5 23.5L42.5 22L44 18Z"
-        fill="url(#smartLogoAccent)"
       />
     </svg>
   );
 
-  // Wordmark text
+  // Wordmark text with Premium Luxury Typography
   const Wordmark = () => (
-    <span className={`font-extrabold tracking-tight ${s.textSize} text-white flex items-center gap-1`}>
-      <span>Smart</span>
-      <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+    <span
+      className={`font-black ${s.textSize} text-white flex items-center gap-0.5 select-none`}
+      style={{ fontFamily: "'Outfit', 'Plus Jakarta Sans', 'Syne', sans-serif" }}
+    >
+      <span className="text-white font-extrabold tracking-[-0.04em]">Smart</span>
+      <span className="text-[#1ed760] font-black tracking-[-0.02em] drop-shadow-[0_0_15px_rgba(30,215,96,0.4)]">
         Invoice
       </span>
-      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+      <span className="h-2.5 w-2.5 rounded-full bg-[#1ed760] animate-pulse shadow-[0_0_10px_#1ed760] ml-1 flex-shrink-0" />
     </span>
   );
 

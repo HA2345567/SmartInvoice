@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseService } from '@/lib/database-enhanced';
 import { AuthService } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 import { ReminderService } from '@/lib/reminder-service';
 
 export async function GET(request: NextRequest) {

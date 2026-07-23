@@ -496,20 +496,22 @@ export class PremiumPDFGenerator {
       this.doc.setFillColor(...(this.colors.bg as [number, number, number]));
       this.doc.rect(0, 0, this.pageWidth, this.pageHeight, 'F');
 
-      if (invoiceData.theme === 'ultra-luxury') {
-        this.renderUltraLuxuryLayout(invoiceData); // Apple Minimal
-      } else if (invoiceData.theme === 'microsoft') {
+      const theme = (invoiceData.theme || 'ultra-luxury').toLowerCase();
+
+      if (theme === 'ultra-luxury' || theme === 'luxury' || theme === 'minimal' || theme === 'professional') {
+        this.renderUltraLuxuryLayout(invoiceData);
+      } else if (theme === 'microsoft') {
         this.renderMicrosoftLayout(invoiceData);
-      } else if (invoiceData.theme === 'amazon') {
+      } else if (theme === 'amazon') {
         this.renderAmazonLayout(invoiceData);
-      } else if (invoiceData.theme === 'financial') {
+      } else if (theme === 'financial' || theme === 'stripe' || theme === 'google' || theme === 'salesforce') {
         this.renderFinancialLayout(invoiceData);
-      } else if (invoiceData.theme === 'creative-agency') {
+      } else if (theme === 'creative-agency' || theme === 'shopify' || theme === 'slack') {
         this.renderCreativeAgencyLayout(invoiceData);
-      } else if (invoiceData.theme === 'professional-services') {
+      } else if (theme === 'professional-services' || theme === 'notion') {
         this.renderProfessionalServicesLayout(invoiceData);
       } else {
-        this.renderMicrosoftLayout(invoiceData);
+        this.renderUltraLuxuryLayout(invoiceData);
       }
 
       return this.doc.output('arraybuffer') as unknown as Uint8Array;

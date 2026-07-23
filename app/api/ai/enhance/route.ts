@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/lib/auth';
 import { enhanceText } from '@/lib/gemini';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
     try {
         const user = await AuthService.getUserFromRequest(request);

@@ -92,7 +92,54 @@ async function initDb() {
     `;
     console.log('✅ Invoices table ready');
 
-    // 4. Feedback table
+    // 4. Expenses table
+    await sql`
+      CREATE TABLE IF NOT EXISTS expenses (
+        id TEXT PRIMARY KEY,
+        userid TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        description TEXT NOT NULL,
+        amount NUMERIC NOT NULL DEFAULT 0,
+        date TEXT,
+        category TEXT,
+        subcategory TEXT,
+        vendor TEXT,
+        paymentmethod TEXT,
+        receipturl TEXT,
+        notes TEXT,
+        isrecurring BOOLEAN DEFAULT false,
+        createdat TEXT,
+        updatedat TEXT
+      );
+    `;
+    console.log('✅ Expenses table ready');
+
+    // 5. Proposals table
+    await sql`
+      CREATE TABLE IF NOT EXISTS proposals (
+        id TEXT PRIMARY KEY,
+        userid TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        proposalnumber TEXT NOT NULL,
+        title TEXT NOT NULL,
+        clientname TEXT NOT NULL,
+        clientemail TEXT NOT NULL,
+        clientcompany TEXT,
+        clientaddress TEXT,
+        amount NUMERIC DEFAULT 0,
+        status TEXT DEFAULT 'draft',
+        date TEXT,
+        validuntildays INTEGER DEFAULT 30,
+        items JSONB,
+        scope TEXT,
+        terms TEXT,
+        aisummary TEXT,
+        aisuggestions JSONB,
+        createdat TEXT,
+        updatedat TEXT
+      );
+    `;
+    console.log('✅ Proposals table ready');
+
+    // 6. Feedback table
     await sql`
       CREATE TABLE IF NOT EXISTS feedback (
         id TEXT PRIMARY KEY,

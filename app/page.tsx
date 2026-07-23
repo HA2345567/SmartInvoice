@@ -454,8 +454,10 @@ export default function LandingPage() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="relative pt-28 pb-16 px-6">
-        <div className="relative max-w-4xl mx-auto text-center">
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-500" style={{ backgroundImage: "url('/hero-bg.png')" }}>
+        {/* Ambient Gradient Overlay for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
+        <div className="relative max-w-4xl mx-auto text-center z-10">
           {/* Badge */}
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
@@ -514,11 +516,6 @@ export default function LandingPage() {
               <span className="text-xs ml-1">4.9/5</span>
             </div>
           </div>
-        </div>
-
-        {/* Dashboard Preview */}
-        <div className="relative max-w-4xl mx-auto">
-          <DashboardMock />
         </div>
       </section>
 

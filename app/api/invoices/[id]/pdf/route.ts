@@ -54,7 +54,9 @@ export async function GET(
           default: return 'PENDING' as const;
         }
       })(),
-      theme: 'professional' as const
+      theme: (invoice.theme || 'ultra-luxury') as any,
+      invoiceType: (invoice.invoiceType || 'sales') as any,
+      customColors: invoice.customColors || undefined,
     };
 
     // Generate PDF using PremiumPDFGenerator

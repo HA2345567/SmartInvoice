@@ -3,6 +3,8 @@ import { DatabaseService } from '@/lib/database-enhanced';
 import { AuthService } from '@/lib/auth';
 import { SmartSuggestionsService } from '@/lib/smart-suggestions';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await AuthService.getUserFromRequest(request);

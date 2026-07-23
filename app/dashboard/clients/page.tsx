@@ -302,8 +302,8 @@ export default function ClientsPage() {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => openDialog()} className="bg-white text-black hover:bg-zinc-200">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button onClick={() => openDialog()} className="bg-[#1ed760] text-black font-extrabold hover:bg-[#1fdf64] rounded-full px-5 py-2.5 shadow-lg shadow-[#1ed760]/20 uppercase tracking-wider text-xs border-none transition-all hover:scale-[1.02]">
+                <Plus className="w-4 h-4 mr-1.5 stroke-[3]" />
                 Add Client
               </Button>
             </DialogTrigger>
@@ -457,29 +457,30 @@ export default function ClientsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client) => (
-            <Card key={client.id} className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-colors group">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
-                      <span className="text-lg font-semibold text-white">
-                        {(client.name || 'C').charAt(0).toUpperCase()}
-                      </span>
+            <Card key={client.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all rounded-xl p-5 flex flex-col justify-between shadow-xl">
+              <div>
+                {/* Header & Actions */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-11 h-11 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-full flex items-center justify-center text-base flex-shrink-0">
+                      {(client.name || 'C').charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-white text-lg truncate">{client.name}</CardTitle>
-                      <CardDescription className="text-zinc-400 flex items-center truncate">
-                        <Mail className="w-3 h-3 mr-1 flex-shrink-0" />
-                        {client.email}
-                      </CardDescription>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-white font-bold text-base truncate">{client.name}</h3>
+                      <p className="text-xs text-zinc-400 truncate flex items-center gap-1.5 mt-0.5">
+                        <Mail className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                        <span className="truncate">{client.email}</span>
+                      </p>
                     </div>
                   </div>
-                  <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openDialog(client)}
-                      className="text-zinc-400 hover:text-white h-8 w-8 p-0"
+                      className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8 p-0 rounded-lg"
+                      title="Edit Client"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -487,66 +488,63 @@ export default function ClientsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(client)}
-                      className="text-zinc-400 hover:text-red-400 h-8 w-8 p-0"
+                      className="text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 h-8 w-8 p-0 rounded-lg"
+                      title="Delete Client"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {client.company && (
-                  <div className="flex items-center space-x-2">
-                    <Building className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                    <p className="text-sm text-zinc-300 truncate">{client.company}</p>
-                  </div>
-                )}
-                
-                {client.address && (
-                  <div className="flex items-start space-x-2">
-                    <MapPin className="w-4 h-4 text-zinc-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-zinc-300 line-clamp-2">{client.address}</p>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  {client.gstNumber && (
-                    <Badge variant="outline" className="border-zinc-700 text-zinc-300 text-xs">
-                      GST: {client.gstNumber}
-                    </Badge>
+
+                {/* Info List */}
+                <div className="space-y-2 mb-4">
+                  {client.company && (
+                    <div className="flex items-center gap-2 text-xs text-zinc-300">
+                      <Building className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                      <span className="truncate">{client.company}</span>
+                    </div>
                   )}
-                  <div className="flex items-center space-x-1">
-                    <CreditCard className="w-3 h-3 text-zinc-400" />
-                    <span className="text-xs text-zinc-400">{client.currency}</span>
+                  
+                  {client.address && (
+                    <div className="flex items-start gap-2 text-xs text-zinc-300">
+                      <MapPin className="w-3.5 h-3.5 text-zinc-500 mt-0.5 flex-shrink-0" />
+                      <span className="line-clamp-2">{client.address}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2 pt-1 flex-wrap">
+                    {client.gstNumber && (
+                      <Badge variant="outline" className="border-zinc-700 bg-zinc-800/50 text-zinc-300 text-[11px] px-2 py-0.5">
+                        GST: {client.gstNumber}
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="border-zinc-700 bg-zinc-800/50 text-zinc-400 text-[11px] px-2 py-0.5">
+                      Currency: {client.currency || 'USD'}
+                    </Badge>
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-1 mb-1">
-                      <FileText className="w-4 h-4 text-zinc-400" />
-                      <span className="text-sm text-zinc-400">Invoices</span>
-                    </div>
-                    <p className="text-lg font-semibold text-white">{client.totalInvoices}</p>
+              </div>
+
+              {/* Card Footer Metrics */}
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800/80 bg-zinc-950/50 -mx-5 -mb-5 px-5 py-3.5 rounded-b-xl mt-2">
+                <div className="text-center border-r border-zinc-800/80 pr-2">
+                  <div className="text-xs text-zinc-400 flex items-center justify-center gap-1 mb-0.5">
+                    <FileText className="w-3.5 h-3.5 text-zinc-500" />
+                    <span>Invoices</span>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-1 mb-1">
-                      <DollarSign className="w-4 h-4 text-zinc-400" />
-                      <span className="text-sm text-zinc-400">Total</span>
-                    </div>
-                    <p className="text-lg font-semibold text-white">{client.currency}{(client.totalAmount || 0).toFixed(0)}</p>
-                  </div>
+                  <p className="text-base font-bold text-white">{client.totalInvoices || 0}</p>
                 </div>
 
-                {client.lastInvoiceDate && (
-                  <div className="flex items-center space-x-2 pt-2 border-t border-zinc-800">
-                    <Calendar className="w-3 h-3 text-zinc-400" />
-                    <span className="text-xs text-zinc-400">
-                      Last invoice: {format(new Date(client.lastInvoiceDate), 'MMM dd, yyyy')}
-                    </span>
+                <div className="text-center pl-2">
+                  <div className="text-xs text-zinc-400 flex items-center justify-center gap-1 mb-0.5">
+                    <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Total Billed</span>
                   </div>
-                )}
-              </CardContent>
+                  <p className="text-base font-bold text-emerald-400">
+                    {client.currency || '$'}{(client.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                  </p>
+                </div>
+              </div>
             </Card>
           ))}
         </div>
