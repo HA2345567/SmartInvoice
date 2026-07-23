@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, FileCheck, TrendingUp, CheckCircle, RefreshCw, DollarSign, AlertTriangle, Globe, Receipt, Clock, Wallet, FileSpreadsheet } from 'lucide-react';
+import { FileText, FileCheck, TrendingUp, CheckCircle, RefreshCw, DollarSign, AlertTriangle, Globe, Receipt, Clock, Wallet, FileSpreadsheet, Sparkles, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -23,121 +23,121 @@ const invoiceTypes: InvoiceTypeOption[] = [
         type: 'sales',
         label: 'Sales Invoice',
         icon: FileText,
-        description: 'Standard invoice for completed sales and services',
+        description: 'Standard invoice for completed sales, products, and services',
         bestFor: ['Product sales', 'Service delivery', 'One-time transactions'],
-        color: 'text-blue-400',
-        bgColor: 'bg-blue-500/10',
-        borderColor: 'border-blue-500/30'
+        color: 'text-emerald-400',
+        bgColor: 'bg-emerald-500/10',
+        borderColor: 'border-emerald-500/40'
     },
     {
         type: 'proforma',
         label: 'Proforma Invoice',
         icon: FileCheck,
-        description: 'Preliminary quote or estimate - not a payment request',
+        description: 'Preliminary quote or estimate before final delivery',
         bestFor: ['Price estimates', 'International trade', 'Customs documentation'],
         color: 'text-purple-400',
         bgColor: 'bg-purple-500/10',
-        borderColor: 'border-purple-500/30'
+        borderColor: 'border-purple-500/40'
     },
     {
         type: 'interim',
         label: 'Interim Invoice',
         icon: TrendingUp,
-        description: 'Progress billing for ongoing projects at milestones',
+        description: 'Progress billing for ongoing projects at key milestones',
         bestFor: ['Construction', 'Long-term projects', 'Milestone payments'],
-        color: 'text-orange-400',
-        bgColor: 'bg-orange-500/10',
-        borderColor: 'border-orange-500/30'
+        color: 'text-amber-400',
+        bgColor: 'bg-amber-500/10',
+        borderColor: 'border-amber-500/40'
     },
     {
         type: 'final',
         label: 'Final Invoice',
         icon: CheckCircle,
-        description: 'Final payment request upon project completion',
+        description: 'Final payment request upon complete project delivery',
         bestFor: ['Project completion', 'Contract closeout', 'Final deliverables'],
-        color: 'text-green-400',
-        bgColor: 'bg-green-500/10',
-        borderColor: 'border-green-500/30'
+        color: 'text-teal-400',
+        bgColor: 'bg-teal-500/10',
+        borderColor: 'border-teal-500/40'
     },
     {
         type: 'recurring',
         label: 'Recurring Invoice',
         icon: RefreshCw,
-        description: 'Automatic billing for subscriptions and regular services',
+        description: 'Automated billing for subscriptions and retainer services',
         bestFor: ['SaaS subscriptions', 'Monthly retainers', 'Recurring services'],
         color: 'text-cyan-400',
         bgColor: 'bg-cyan-500/10',
-        borderColor: 'border-cyan-500/30'
+        borderColor: 'border-cyan-500/40'
     },
     {
         type: 'credit-note',
         label: 'Credit Note',
         icon: DollarSign,
-        description: 'Issue refunds or credits for returns and corrections',
+        description: 'Issue refunds, price adjustments, or account credits',
         bestFor: ['Product returns', 'Billing corrections', 'Discounts'],
-        color: 'text-red-400',
-        bgColor: 'bg-red-500/10',
-        borderColor: 'border-red-500/30'
+        color: 'text-rose-400',
+        bgColor: 'bg-rose-500/10',
+        borderColor: 'border-rose-500/40'
     },
     {
         type: 'past-due',
         label: 'Past Due Invoice',
         icon: AlertTriangle,
-        description: 'Payment reminder for overdue invoices',
+        description: 'Formatted payment demand notice for overdue balances',
         bestFor: ['Overdue payments', 'Late fee notices', 'Payment reminders'],
-        color: 'text-yellow-400',
-        bgColor: 'bg-yellow-500/10',
-        borderColor: 'border-yellow-500/30'
+        color: 'text-orange-400',
+        bgColor: 'bg-orange-500/10',
+        borderColor: 'border-orange-500/40'
     },
     {
         type: 'commercial',
         label: 'Commercial Invoice',
         icon: Globe,
-        description: 'International trade and customs clearance documentation',
-        bestFor: ['Import/export', 'Customs clearance', 'International shipping'],
+        description: 'Cross-border trade and international customs clearance',
+        bestFor: ['Import/export', 'Customs clearance', 'Global shipping'],
         color: 'text-blue-400',
         bgColor: 'bg-blue-500/10',
-        borderColor: 'border-blue-500/30'
+        borderColor: 'border-blue-500/40'
     },
     {
         type: 'tax',
         label: 'Tax Invoice',
         icon: Receipt,
-        description: 'VAT/GST compliant invoice with detailed tax breakdown',
-        bestFor: ['VAT-registered businesses', 'Tax compliance', 'Government reporting'],
-        color: 'text-emerald-400',
-        bgColor: 'bg-emerald-500/10',
-        borderColor: 'border-emerald-500/30'
+        description: 'GST / VAT compliant invoice with statutory breakdowns',
+        bestFor: ['VAT-registered businesses', 'Tax compliance', 'Audit reporting'],
+        color: 'text-green-400',
+        bgColor: 'bg-green-500/10',
+        borderColor: 'border-green-500/40'
     },
     {
         type: 'timesheet',
         label: 'Timesheet Invoice',
         icon: Clock,
-        description: 'Hourly billing with detailed time tracking',
-        bestFor: ['Consultants', 'Freelancers', 'Legal services'],
+        description: 'Detailed hourly billing with tracked time logs',
+        bestFor: ['Consultants', 'Freelancers', 'Agencies & Lawyers'],
         color: 'text-violet-400',
         bgColor: 'bg-violet-500/10',
-        borderColor: 'border-violet-500/30'
+        borderColor: 'border-violet-500/40'
     },
     {
         type: 'retainer',
         label: 'Retainer Invoice',
         icon: Wallet,
-        description: 'Advance payment for future services',
-        bestFor: ['Law firms', 'Monthly retainers', 'Prepaid services'],
+        description: 'Advance deposit billing for upcoming work hours',
+        bestFor: ['Law firms', 'Agencies', 'Prepaid service retainers'],
         color: 'text-sky-400',
         bgColor: 'bg-sky-500/10',
-        borderColor: 'border-sky-500/30'
+        borderColor: 'border-sky-500/40'
     },
     {
         type: 'expense',
         label: 'Expense Report',
         icon: FileSpreadsheet,
-        description: 'Business expense reimbursement documentation',
-        bestFor: ['Employee reimbursements', 'Travel expenses', 'Business costs'],
-        color: 'text-amber-400',
-        bgColor: 'bg-amber-500/10',
-        borderColor: 'border-amber-500/30'
+        description: 'Reimbursement invoice for out-of-pocket business costs',
+        bestFor: ['Employee claims', 'Travel expenses', 'Vendor costs'],
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-500/10',
+        borderColor: 'border-yellow-500/40'
     }
 ];
 
@@ -147,104 +147,111 @@ interface InvoiceTypeSelectorProps {
 }
 
 export function InvoiceTypeSelector({ selected, onChange }: InvoiceTypeSelectorProps) {
+    const selectedOption = invoiceTypes.find(t => t.type === selected) || invoiceTypes[0];
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
                 <div>
-                    <h3 className="text-lg font-semibold text-white">Invoice Type</h3>
-                    <p className="text-sm text-green-muted">Choose the type that matches your billing scenario</p>
+                    <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <span>Select Document Type</span>
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                    </h3>
+                    <p className="text-sm text-zinc-400 mt-0.5">
+                        Choose a tailored document schema designed for your specific workflow
+                    </p>
                 </div>
-                <Badge className="bg-green-500/20 text-green-primary border-green-500/30">
-                    {invoiceTypes.find(t => t.type === selected)?.label}
+                <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 text-sm font-semibold">
+                    {selectedOption.label} Selected
                 </Badge>
             </div>
 
+            {/* Grid of Invoice Types */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {invoiceTypes.map((invoiceType) => {
                     const Icon = invoiceType.icon;
                     const isSelected = selected === invoiceType.type;
 
                     return (
-                        <Card
+                        <div
                             key={invoiceType.type}
-                            className={`cursor-pointer transition-all duration-200 hover:scale-105 ${isSelected
-                                ? `${invoiceType.bgColor} border-2 ${invoiceType.borderColor} shadow-lg`
-                                : 'card-green-mist border-gray-700 hover:border-green-500/50'
-                                }`}
                             onClick={() => onChange(invoiceType.type)}
+                            className={`group relative cursor-pointer rounded-xl p-5 border transition-all duration-300 transform hover:-translate-y-1 ${
+                                isSelected
+                                    ? `bg-zinc-900/90 border-emerald-500 shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/50`
+                                    : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/80'
+                            }`}
                         >
-                            <CardContent className="p-4 space-y-3">
-                                {/* Icon & Title */}
-                                <div className="flex items-start justify-between">
-                                    <div className={`p-2 rounded-lg ${invoiceType.bgColor}`}>
-                                        <Icon className={`w-6 h-6 ${invoiceType.color}`} />
+                            <div className="flex items-start justify-between mb-3">
+                                <div className={`p-3 rounded-lg border border-zinc-800 ${invoiceType.bgColor} transition-transform group-hover:scale-110`}>
+                                    <Icon className={`w-6 h-6 ${invoiceType.color}`} />
+                                </div>
+                                {isSelected ? (
+                                    <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-black shadow-md shadow-emerald-500/50">
+                                        <Check className="w-3.5 h-3.5 stroke-[3]" />
                                     </div>
-                                    {isSelected && (
-                                        <div className="w-3 h-3 rounded-full bg-green-primary animate-pulse" />
-                                    )}
-                                </div>
+                                ) : (
+                                    <div className="w-5 h-5 rounded-full border border-zinc-700 group-hover:border-zinc-500 transition-colors" />
+                                )}
+                            </div>
 
-                                <div>
-                                    <h4 className="font-semibold text-white mb-1">
-                                        {invoiceType.label}
-                                    </h4>
-                                    <p className="text-xs text-green-muted leading-relaxed">
-                                        {invoiceType.description}
-                                    </p>
-                                </div>
+                            <h4 className="font-bold text-white text-base mb-1 group-hover:text-emerald-400 transition-colors">
+                                {invoiceType.label}
+                            </h4>
+                            <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed mb-3">
+                                {invoiceType.description}
+                            </p>
 
-                                {/* Best For Tags */}
-                                <div className="flex flex-wrap gap-1">
-                                    {invoiceType.bestFor.slice(0, 2).map((use, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="text-xs px-2 py-0.5 rounded-full bg-gray-800/50 text-gray-400"
-                                        >
-                                            {use}
-                                        </span>
-                                    ))}
-                                    {invoiceType.bestFor.length > 2 && (
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-800/50 text-gray-400">
-                                            +{invoiceType.bestFor.length - 2}
-                                        </span>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                {invoiceType.bestFor.slice(0, 2).map((use, idx) => (
+                                    <span
+                                        key={idx}
+                                        className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50"
+                                    >
+                                        {use}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     );
                 })}
             </div>
 
-            {/* Selected Type Info */}
-            {selected && (
-                <Card className="card-green-mist border-green-500/30">
-                    <CardContent className="p-4">
-                        <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${invoiceTypes.find(t => t.type === selected)?.bgColor}`}>
-                                {(() => {
-                                    const Icon = invoiceTypes.find(t => t.type === selected)?.icon;
-                                    return Icon ? <Icon className={`w-5 h-5 ${invoiceTypes.find(t => t.type === selected)?.color}`} /> : null;
-                                })()}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-white mb-1">
-                                    {invoiceTypes.find(t => t.type === selected)?.label}
+            {/* Detailed Info Card for Selected Document */}
+            {selectedOption && (
+                <div className="rounded-xl p-5 border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-zinc-900/60 to-zinc-900/60 backdrop-blur-xl">
+                    <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-xl border border-emerald-500/30 ${selectedOption.bgColor}`}>
+                            <selectedOption.icon className={`w-7 h-7 ${selectedOption.color}`} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <h4 className="text-base font-bold text-white">
+                                    {selectedOption.label} Setup
                                 </h4>
-                                <p className="text-xs text-green-muted mb-2">
-                                    {invoiceTypes.find(t => t.type === selected)?.description}
-                                </p>
-                                <div className="space-y-1">
-                                    <p className="text-xs font-medium text-green-primary">Best suited for:</p>
-                                    <ul className="text-xs text-green-muted space-y-0.5">
-                                        {invoiceTypes.find(t => t.type === selected)?.bestFor.map((use, idx) => (
-                                            <li key={idx}>• {use}</li>
-                                        ))}
-                                    </ul>
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">
+                                    Active Preset
+                                </Badge>
+                            </div>
+                            <p className="text-xs text-zinc-300 mb-3">
+                                {selectedOption.description}
+                            </p>
+                            <div>
+                                <span className="text-xs font-semibold text-emerald-400 block mb-1.5">
+                                    Included Features & Recommended Use Cases:
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedOption.bestFor.map((use, idx) => (
+                                        <span key={idx} className="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 flex items-center gap-1.5">
+                                            <Check className="w-3 h-3 text-emerald-400" />
+                                            {use}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             )}
         </div>
     );

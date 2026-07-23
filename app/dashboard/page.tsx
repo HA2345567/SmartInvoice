@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/database';
 import { StatsGrid } from './components/StatsGrid';
 import { IncomeTrend } from './components/IncomeTrend';
 import { RecentInvoices } from './components/RecentInvoices';

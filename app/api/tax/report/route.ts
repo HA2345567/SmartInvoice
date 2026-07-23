@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, getSupabaseClient } from '@/lib/auth-helpers';
+import { getAuthUser } from '@/lib/auth-helpers';
+import { DatabaseService } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,39 +9,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
-
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate') || new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
     const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
 
-    // Get all invoices for the period
-    const { data: invoices, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('userid', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate);
+    let allInvoices = await DatabaseService.getInvoices(user.id);
+    const invoices = allInvoices.filter((inv: any) => {
+      const invDate = inv.date || '';
+      return invDate >= startDate && invDate <= endDate;
+    });
 
-    if (error) {
-      console.error('Error fetching invoices for tax report:', error);
-      return NextResponse.json({ error: 'Failed to fetch tax data' }, { status: 500 });
-    }
-
-    // Calculate tax summary
     let totalRevenue = 0;
     let totalTaxCollected = 0;
     let taxableRevenue = 0;
     let exemptRevenue = 0;
     const taxBreakdown: { [rate: string]: { taxable: number; tax: number } } = {};
 
-    // Invoice-level breakdown
     const invoiceTaxDetails = (invoices || []).map((inv: any) => {
       const amount = Number(inv.amount) || 0;
-      const taxAmount = Number(inv.taxamount) || 0;
-      const taxRate = Number(inv.taxrate) || 0;
+      const taxAmount = Number(inv.taxAmount) || 0;
+      const taxRate = Number(inv.taxRate) || 0;
       const subtotal = Number(inv.subtotal) || 0;
 
       if (inv.status === 'paid') {
@@ -60,8 +48,8 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        invoiceNumber: inv.invoicenumber,
-        clientName: inv.clientname,
+        invoiceNumber: inv.invoiceNumber,
+        clientName: inv.clientName,
         date: inv.date,
         status: inv.status,
         subtotal: subtotal,
@@ -71,7 +59,6 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Calculate GST/VAT summary by HSN/SAC codes (mock for now)
     const gstSummary = Object.entries(taxBreakdown).map(([rate, data]) => ({
       rate,
       taxableAmount: data.taxable,
@@ -79,17 +66,16 @@ export async function GET(request: NextRequest) {
       taxType: rate.includes('18') ? 'IGST' : 'GST',
     }));
 
-    // Monthly tax breakdown
     const monthlyTax: { [month: string]: { revenue: number; tax: number } } = {};
     (invoices || [])
       .filter((i: any) => i.status === 'paid')
       .forEach((inv: any) => {
-        const month = new Date(inv.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+        const month = new Date(inv.date || Date.now()).toLocaleString('default', { month: 'short', year: 'numeric' });
         if (!monthlyTax[month]) {
           monthlyTax[month] = { revenue: 0, tax: 0 };
         }
         monthlyTax[month].revenue += Number(inv.amount) || 0;
-        monthlyTax[month].tax += Number(inv.taxamount) || 0;
+        monthlyTax[month].tax += Number(inv.taxAmount) || 0;
       });
 
     return NextResponse.json({

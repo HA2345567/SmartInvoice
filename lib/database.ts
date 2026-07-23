@@ -1,15 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-console.log('Initializing Supabase client with key type:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE' : 'ANON');
+// Singleton Neon SQL client to reuse HTTP connections across queries
+const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_jy7RdpHvbqZ5@ep-royal-butterfly-ay7k3tn8-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const sql = neon(connectionString);
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase environment variables');
+export const supabase: any = null;
+
+function getSql() {
+  return sql;
 }
-
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 export interface Invoice {
   id: string;
@@ -75,168 +74,163 @@ export class DatabaseService {
       email: data.email,
       name: data.name,
       company: data.company,
-      companyAddress: data.company_address,
-      companyGST: data.company_gst,
-      companyPhone: data.company_phone,
+      companyAddress: data.company_address || data.address,
+      companyGST: data.company_gst || data.gstnumber,
+      companyPhone: data.company_phone || data.phone,
       companyWebsite: data.company_website,
       avatar: data.avatar,
-      createdAt: data.createdat,
-      updatedAt: data.updatedat, // Ensure consistency with Auth interface
-      password: data.password // Include password for internal auth checks
+      createdAt: data.createdat || data.created_at,
+      updatedAt: data.updatedat || data.updated_at,
+      password: data.password
+    };
+  }
+
+  private static transformClientToCamelCase(data: any): Client | null {
+    if (!data) return null;
+    return {
+      id: data.id,
+      userId: data.userid || data.user_id,
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      address: data.address,
+      gstNumber: data.gstnumber || data.gst_number,
+      currency: data.currency || 'USD',
+      isActive: data.isactive ?? true,
+      createdAt: data.createdat || data.created_at,
+      updatedAt: data.updatedat || data.updated_at,
+    };
+  }
+
+  private static transformInvoiceToCamelCase(data: any): any {
+    if (!data) return null;
+    let items = data.items;
+    if (typeof items === 'string') {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        items = [];
+      }
+    }
+    return {
+      id: data.id,
+      userId: data.userid || data.user_id,
+      invoiceNumber: data.invoicenumber || data.invoice_number,
+      clientId: data.clientid || data.client_id,
+      clientName: data.clientname || data.client_name,
+      clientEmail: data.clientemail || data.client_email,
+      clientCompany: data.clientcompany || data.client_company,
+      clientAddress: data.clientaddress || data.client_address,
+      clientGST: data.clientgst || data.client_gst,
+      clientCurrency: data.clientcurrency || data.client_currency || 'USD',
+      amount: parseFloat(data.amount || 0),
+      subtotal: parseFloat(data.subtotal || 0),
+      taxAmount: parseFloat(data.taxamount || data.tax_amount || 0),
+      discountAmount: parseFloat(data.discountamount || data.discount_amount || 0),
+      status: data.status || 'draft',
+      date: data.date,
+      dueDate: data.duedate || data.due_date,
+      paidDate: data.paiddate || data.paid_date,
+      paymentMethod: data.paymentmethod || data.payment_method,
+      paymentNotes: data.paymentnotes || data.payment_notes,
+      items: Array.isArray(items) ? items : [],
+      notes: data.notes,
+      terms: data.terms,
+      taxRate: parseFloat(data.taxrate || data.tax_rate || 0),
+      discountRate: parseFloat(data.discountrate || data.discount_rate || 0),
+      paymentLink: data.paymentlink || data.payment_link,
+      emailSent: data.emailsent ?? false,
+      remindersSent: data.reminderssent ?? 0,
+      lastReminderSent: data.lastremindersent,
+      createdAt: data.createdat || data.created_at,
+      updatedAt: data.updatedat || data.updated_at,
     };
   }
 
   // User operations
   static async createUser(userData: {
     email: string;
-    password: string;
+    password?: string;
     name: string;
     company?: string;
   }): Promise<{ user: any; exists: boolean }> {
     try {
-      // Check if user exists
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', userData.email.toLowerCase())
-        .single();
-
-      if (existingUser) {
-        const transformed = this.transformUserToCamelCase(existingUser);
+      const sql = getSql();
+      const existing = await sql`SELECT * FROM users WHERE LOWER(email) = ${userData.email.toLowerCase()} LIMIT 1`;
+      
+      if (existing && existing.length > 0) {
+        const transformed = this.transformUserToCamelCase(existing[0]);
         const { password, ...userWithoutPassword } = transformed;
         return { user: userWithoutPassword, exists: true };
       }
 
-      const user = {
-        id: crypto.randomUUID(),
-        email: userData.email.toLowerCase(),
-        password: userData.password,
-        name: userData.name,
-        company: userData.company,
-        createdat: new Date().toISOString(),
-        updatedat: new Date().toISOString(),
-      };
+      const userId = crypto.randomUUID();
+      const now = new Date().toISOString();
 
-      const { data, error } = await supabase
-        .from('users')
-        .insert([user])
-        .select()
-        .single();
+      const result = await sql`
+        INSERT INTO users (id, email, password, name, company, createdat, updatedat)
+        VALUES (${userId}, ${userData.email.toLowerCase()}, ${userData.password || ''}, ${userData.name}, ${userData.company || null}, ${now}, ${now})
+        RETURNING *
+      `;
 
-      if (error) throw error;
-
-      const transformed = this.transformUserToCamelCase(data);
+      const transformed = this.transformUserToCamelCase(result[0]);
       const { password, ...userWithoutPassword } = transformed;
       return { user: userWithoutPassword, exists: false };
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('Error creating user in Neon DB:', error);
       throw error;
     }
   }
 
   static async getUserByEmail(email: string): Promise<any | null> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .single();
-
-    if (error) return null;
-    return this.transformUserToCamelCase(data);
+    try {
+      const sql = getSql();
+      const users = await sql`SELECT * FROM users WHERE LOWER(email) = ${email.toLowerCase()} LIMIT 1`;
+      if (!users || users.length === 0) return null;
+      return this.transformUserToCamelCase(users[0]);
+    } catch (error) {
+      console.error('Error getting user by email:', error);
+      return null;
+    }
   }
 
   static async getUserById(id: string): Promise<any | null> {
-    console.log('Looking for user with ID:', id);
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, email, name, company, avatar, createdat, updatedat, company_address, company_gst, company_phone, company_website')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error('Database error when getting user by ID:', error);
+    try {
+      const sql = getSql();
+      const users = await sql`SELECT * FROM users WHERE id = ${id} LIMIT 1`;
+      if (!users || users.length === 0) return null;
+      return this.transformUserToCamelCase(users[0]);
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
       return null;
     }
-
-    if (!data) {
-      console.log('No user found with ID:', id);
-      return null;
-    }
-
-    console.log('User found:', data.email);
-
-    return this.transformUserToCamelCase(data);
   }
 
+  // Client operations
   static async createClient(userId: string, clientData: Omit<Client, 'id' | 'userId' | 'isActive' | 'createdAt' | 'updatedAt'>): Promise<Client> {
     try {
-      const client = {
-        id: crypto.randomUUID(),
-        userid: userId,
-        name: clientData.name,
-        email: clientData.email.toLowerCase(),
-        company: clientData.company,
-        address: clientData.address,
-        gstnumber: clientData.gstNumber,
-        currency: clientData.currency || 'USD',
-        isactive: true,
-        createdat: new Date().toISOString(),
-        updatedat: new Date().toISOString(),
-      };
+      const sql = getSql();
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
 
-      const { data, error } = await supabase
-        .from('clients')
-        .insert([client])
-        .select()
-        .single();
+      const result = await sql`
+        INSERT INTO clients (id, userid, name, email, company, address, gstnumber, currency, isactive, createdat, updatedat)
+        VALUES (${id}, ${userId}, ${clientData.name}, ${clientData.email.toLowerCase()}, ${clientData.company || null}, ${clientData.address || ''}, ${clientData.gstNumber || null}, ${clientData.currency || 'USD'}, true, ${now}, ${now})
+        RETURNING *
+      `;
 
-      if (error) throw error;
-
-      // Transform back to camelCase for consistency
-      return {
-        id: data.id,
-        userId: data.userid,
-        name: data.name,
-        email: data.email,
-        company: data.company,
-        address: data.address,
-        gstNumber: data.gstnumber,
-        currency: data.currency,
-        isActive: data.isactive,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      return this.transformClientToCamelCase(result[0])!;
     } catch (error) {
       console.error('Error creating client:', error);
       throw error;
     }
   }
 
-  static async getClients(userId: string): Promise<any[]> {
+  static async getClients(userId: string): Promise<Client[]> {
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('userid', userId)
-        .order('createdat', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform to camelCase
-      return (data || []).map(client => ({
-        id: client.id,
-        userId: client.userid,
-        name: client.name,
-        email: client.email,
-        company: client.company,
-        address: client.address,
-        gstNumber: client.gstnumber,
-        currency: client.currency,
-        isActive: client.isactive,
-        createdAt: client.createdat,
-        updatedAt: client.updatedat,
-      }));
+      const sql = getSql();
+      const clients = await sql`SELECT * FROM clients WHERE userid = ${userId} ORDER BY createdat DESC`;
+      return (clients || []).map(c => this.transformClientToCamelCase(c)!);
     } catch (error) {
       console.error('Error getting clients:', error);
       return [];
@@ -245,29 +239,10 @@ export class DatabaseService {
 
   static async getClientById(userId: string, id: string): Promise<Client | null> {
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('userid', userId)
-        .eq('id', id)
-        .single();
-
-      if (error) return null;
-
-      // Transform to camelCase
-      return {
-        id: data.id,
-        userId: data.userid,
-        name: data.name,
-        email: data.email,
-        company: data.company,
-        address: data.address,
-        gstNumber: data.gstnumber,
-        currency: data.currency,
-        isActive: data.isactive,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      const sql = getSql();
+      const clients = await sql`SELECT * FROM clients WHERE userid = ${userId} AND id = ${id} LIMIT 1`;
+      if (!clients || clients.length === 0) return null;
+      return this.transformClientToCamelCase(clients[0]);
     } catch (error) {
       console.error('Error getting client by id:', error);
       return null;
@@ -276,41 +251,28 @@ export class DatabaseService {
 
   static async updateClient(userId: string, id: string, updates: any): Promise<Client | null> {
     try {
-      // Transform camelCase to database column names
-      const dbUpdates: any = {};
-      if (updates.name) dbUpdates.name = updates.name;
-      if (updates.email) dbUpdates.email = updates.email.toLowerCase();
-      if (updates.company) dbUpdates.company = updates.company;
-      if (updates.address) dbUpdates.address = updates.address;
-      if (updates.gstNumber) dbUpdates.gstnumber = updates.gstNumber;
-      if (updates.currency) dbUpdates.currency = updates.currency;
-      if (updates.isActive !== undefined) dbUpdates.isactive = updates.isActive;
-      dbUpdates.updatedat = new Date().toISOString();
+      const sql = getSql();
+      const existing = await this.getClientById(userId, id);
+      if (!existing) return null;
 
-      const { data, error } = await supabase
-        .from('clients')
-        .update(dbUpdates)
-        .eq('userid', userId)
-        .eq('id', id)
-        .select()
-        .single();
+      const name = updates.name ?? existing.name;
+      const email = updates.email ? updates.email.toLowerCase() : existing.email;
+      const company = updates.company ?? existing.company;
+      const address = updates.address ?? existing.address;
+      const gstNumber = updates.gstNumber ?? existing.gstNumber;
+      const currency = updates.currency ?? existing.currency;
+      const isActive = updates.isActive ?? existing.isActive;
+      const now = new Date().toISOString();
 
-      if (error) throw error;
+      const result = await sql`
+        UPDATE clients
+        SET name = ${name}, email = ${email}, company = ${company}, address = ${address},
+            gstnumber = ${gstNumber}, currency = ${currency}, isactive = ${isActive}, updatedat = ${now}
+        WHERE userid = ${userId} AND id = ${id}
+        RETURNING *
+      `;
 
-      // Transform back to camelCase
-      return {
-        id: data.id,
-        userId: data.userid,
-        name: data.name,
-        email: data.email,
-        company: data.company,
-        address: data.address,
-        gstNumber: data.gstnumber,
-        currency: data.currency,
-        isActive: data.isactive,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      return this.transformClientToCamelCase(result[0]);
     } catch (error) {
       console.error('Error updating client:', error);
       return null;
@@ -319,13 +281,9 @@ export class DatabaseService {
 
   static async deleteClient(userId: string, id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('userid', userId)
-        .eq('id', id);
-
-      return !error;
+      const sql = getSql();
+      await sql`DELETE FROM clients WHERE userid = ${userId} AND id = ${id}`;
+      return true;
     } catch (error) {
       console.error('Error deleting client:', error);
       return false;
@@ -334,87 +292,58 @@ export class DatabaseService {
 
   static async clientHasInvoices(userId: string, clientId: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('userid', userId)
-        .eq('clientid', clientId)
-        .limit(1);
-
-      if (error) throw error;
-      return data && data.length > 0;
+      const sql = getSql();
+      const invoices = await sql`SELECT id FROM invoices WHERE userid = ${userId} AND clientid = ${clientId} LIMIT 1`;
+      return invoices && invoices.length > 0;
     } catch (error) {
       console.error('Error checking client invoices:', error);
       return false;
     }
   }
 
+  // Invoice operations
   static async createInvoice(userId: string, invoiceData: any): Promise<any> {
     try {
+      const sql = getSql();
       const clientId = await this.getOrCreateClientId(userId, invoiceData.clientEmail, {
         name: invoiceData.clientName,
         address: invoiceData.clientAddress,
         company: invoiceData.clientCompany,
-        gstNumber: invoiceData.clientGST,
+        gstNumber: invoiceData.clientGST || invoiceData.clientGst,
         currency: invoiceData.clientCurrency
       });
 
-      const newInvoice = {
-        id: crypto.randomUUID(),
-        userid: userId,
-        invoicenumber: invoiceData.invoiceNumber,
-        clientid: clientId,
-        clientname: invoiceData.clientName,
-        clientemail: invoiceData.clientEmail.toLowerCase(),
-        clientcompany: invoiceData.clientCompany,
-        clientaddress: invoiceData.clientAddress,
-        clientgst: invoiceData.clientGST,
-        clientcurrency: invoiceData.clientCurrency,
-        amount: invoiceData.amount,
-        subtotal: invoiceData.subtotal,
-        taxamount: invoiceData.taxAmount,
-        discountamount: invoiceData.discountAmount,
-        status: 'draft',
-        date: invoiceData.date,
-        duedate: invoiceData.dueDate,
-        items: invoiceData.items,
-        notes: invoiceData.notes,
-        terms: invoiceData.terms,
-        taxrate: invoiceData.taxRate,
-        discountrate: invoiceData.discountRate,
-        emailsent: false,
-        reminderssent: 0,
-        createdat: new Date().toISOString(),
-        updatedat: new Date().toISOString(),
-      };
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
+      const itemsJson = JSON.stringify(invoiceData.items || []);
 
-      const { data, error } = await supabase
-        .from('invoices')
-        .insert([newInvoice])
-        .select()
-        .single();
+      const result = await sql`
+        INSERT INTO invoices (
+          id, userid, invoicenumber, clientid, clientname, clientemail, clientcompany, clientaddress, clientgst, clientcurrency,
+          amount, subtotal, taxamount, discountamount, status, date, duedate, items, notes, terms, taxrate, discountrate, emailsent, reminderssent, createdat, updatedat
+        ) VALUES (
+          ${id}, ${userId}, ${invoiceData.invoiceNumber}, ${clientId}, ${invoiceData.clientName}, ${invoiceData.clientEmail.toLowerCase()},
+          ${invoiceData.clientCompany || null}, ${invoiceData.clientAddress || ''}, ${invoiceData.clientGST || invoiceData.clientGst || null},
+          ${invoiceData.clientCurrency || 'USD'}, ${invoiceData.amount || 0}, ${invoiceData.subtotal || 0}, ${invoiceData.taxAmount || 0},
+          ${invoiceData.discountAmount || 0}, ${invoiceData.status || 'draft'}, ${invoiceData.date || now.split('T')[0]}, ${invoiceData.dueDate || now.split('T')[0]},
+          ${itemsJson}, ${invoiceData.notes || null}, ${invoiceData.terms || null}, ${invoiceData.taxRate || 0}, ${invoiceData.discountRate || 0}, false, 0, ${now}, ${now}
+        )
+        RETURNING *
+      `;
 
-      if (error) throw error;
-
-      // Transform back to camelCase
-      return this.transformInvoiceToCamelCase(data);
+      return this.transformInvoiceToCamelCase(result[0]);
     } catch (error) {
-      console.error('Error creating invoice:', error);
+      console.error('Error creating invoice in Neon DB:', error);
       throw error;
     }
   }
 
   private static async getOrCreateClientId(userId: string, email: string, clientData?: any): Promise<string> {
     try {
-      const { data: client } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('userid', userId)
-        .eq('email', email.toLowerCase())
-        .single();
-
-      if (client) {
-        return client.id;
+      const sql = getSql();
+      const existing = await sql`SELECT id FROM clients WHERE userid = ${userId} AND LOWER(email) = ${email.toLowerCase()} LIMIT 1`;
+      if (existing && existing.length > 0) {
+        return existing[0].id;
       }
 
       const newClient = await this.createClient(userId, {
@@ -432,55 +361,11 @@ export class DatabaseService {
     }
   }
 
-  private static transformInvoiceToCamelCase(data: any): any {
-    if (!data) return null;
-    return {
-      id: data.id,
-      userId: data.userid || data.user_id,
-      invoiceNumber: data.invoicenumber || data.invoice_number,
-      clientId: data.clientid || data.client_id,
-      clientName: data.clientname || data.client_name,
-      clientEmail: data.clientemail || data.client_email,
-      clientCompany: data.clientcompany || data.client_company,
-      clientAddress: data.clientaddress || data.client_address,
-      clientGST: data.clientgst || data.client_gst,
-      clientCurrency: data.clientcurrency || data.client_currency,
-      amount: data.amount,
-      subtotal: data.subtotal,
-      taxAmount: data.taxamount || data.tax_amount,
-      discountAmount: data.discountamount || data.discount_amount,
-      status: data.status,
-      date: data.date,
-      dueDate: data.duedate || data.due_date,
-      paidDate: data.paiddate || data.paid_date,
-      paymentMethod: data.paymentmethod || data.payment_method,
-      paymentNotes: data.paymentnotes || data.payment_notes,
-      items: data.items,
-      notes: data.notes,
-      terms: data.terms,
-      taxRate: data.taxrate || data.tax_rate,
-      discountRate: data.discountrate || data.discount_rate,
-      paymentLink: data.paymentlink || data.payment_link,
-      emailSent: data.emailsent || data.email_sent,
-      remindersSent: data.reminderssent || data.reminders_sent || 0,
-      lastReminderSent: data.lastremindersent || data.last_reminder_sent,
-      createdAt: data.createdat || data.created_at,
-      updatedAt: data.updatedat || data.updated_at,
-    };
-  }
-
   static async getInvoices(userId: string): Promise<any[]> {
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('userid', userId)
-        .order('createdat', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform to camelCase
-      return (data || []).map(invoice => this.transformInvoiceToCamelCase(invoice));
+      const sql = getSql();
+      const invoices = await sql`SELECT * FROM invoices WHERE userid = ${userId} ORDER BY createdat DESC`;
+      return (invoices || []).map(inv => this.transformInvoiceToCamelCase(inv));
     } catch (error) {
       console.error('Error getting invoices:', error);
       return [];
@@ -489,16 +374,10 @@ export class DatabaseService {
 
   static async getInvoiceById(userId: string, id: string): Promise<any | null> {
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('userid', userId)
-        .eq('id', id)
-        .single();
-
-      if (error) return null;
-
-      return this.transformInvoiceToCamelCase(data);
+      const sql = getSql();
+      const invoices = await sql`SELECT * FROM invoices WHERE userid = ${userId} AND id = ${id} LIMIT 1`;
+      if (!invoices || invoices.length === 0) return null;
+      return this.transformInvoiceToCamelCase(invoices[0]);
     } catch (error) {
       console.error('Error getting invoice by id:', error);
       return null;
@@ -507,15 +386,10 @@ export class DatabaseService {
 
   static async getPublicInvoiceById(id: string): Promise<any | null> {
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) return null;
-
-      return this.transformInvoiceToCamelCase(data);
+      const sql = getSql();
+      const invoices = await sql`SELECT * FROM invoices WHERE id = ${id} LIMIT 1`;
+      if (!invoices || invoices.length === 0) return null;
+      return this.transformInvoiceToCamelCase(invoices[0]);
     } catch (error) {
       console.error('Error getting public invoice by id:', error);
       return null;
@@ -524,47 +398,53 @@ export class DatabaseService {
 
   static async updateInvoice(userId: string, id: string, updates: any): Promise<any | null> {
     try {
-      // Transform camelCase to database column names
-      const dbUpdates: any = {};
-      if (updates.invoiceNumber) dbUpdates.invoicenumber = updates.invoiceNumber;
-      if (updates.clientName) dbUpdates.clientname = updates.clientName;
-      if (updates.clientEmail) dbUpdates.clientemail = updates.clientEmail.toLowerCase();
-      if (updates.clientCompany) dbUpdates.clientcompany = updates.clientCompany;
-      if (updates.clientAddress) dbUpdates.clientaddress = updates.clientAddress;
-      if (updates.clientGST) dbUpdates.clientgst = updates.clientGST;
-      if (updates.clientCurrency) dbUpdates.clientcurrency = updates.clientCurrency;
-      if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
-      if (updates.subtotal !== undefined) dbUpdates.subtotal = updates.subtotal;
-      if (updates.taxAmount !== undefined) dbUpdates.taxamount = updates.taxAmount;
-      if (updates.discountAmount !== undefined) dbUpdates.discountamount = updates.discountAmount;
-      if (updates.status) dbUpdates.status = updates.status;
-      if (updates.date) dbUpdates.date = updates.date;
-      if (updates.dueDate) dbUpdates.duedate = updates.dueDate;
-      if (updates.paidDate) dbUpdates.paiddate = updates.paidDate;
-      if (updates.paymentMethod) dbUpdates.paymentmethod = updates.paymentMethod;
-      if (updates.paymentNotes) dbUpdates.paymentnotes = updates.paymentNotes;
-      if (updates.items) dbUpdates.items = updates.items;
-      if (updates.notes) dbUpdates.notes = updates.notes;
-      if (updates.terms) dbUpdates.terms = updates.terms;
-      if (updates.taxRate !== undefined) dbUpdates.taxrate = updates.taxRate;
-      if (updates.discountRate !== undefined) dbUpdates.discountrate = updates.discountRate;
-      if (updates.paymentLink) dbUpdates.paymentlink = updates.paymentLink;
-      if (updates.emailSent !== undefined) dbUpdates.emailsent = updates.emailSent;
-      if (updates.remindersSent !== undefined) dbUpdates.reminders_sent = updates.remindersSent;
-      if (updates.lastReminderSent) dbUpdates.last_reminder_sent = updates.lastReminderSent;
-      dbUpdates.updatedat = new Date().toISOString();
+      const sql = getSql();
+      const existing = await this.getInvoiceById(userId, id);
+      if (!existing) return null;
 
-      const { data, error } = await supabase
-        .from('invoices')
-        .update(dbUpdates)
-        .eq('userid', userId)
-        .eq('id', id)
-        .select()
-        .single();
+      const invoiceNumber = updates.invoiceNumber ?? existing.invoiceNumber;
+      const clientName = updates.clientName ?? existing.clientName;
+      const clientEmail = updates.clientEmail ? updates.clientEmail.toLowerCase() : existing.clientEmail;
+      const clientCompany = updates.clientCompany ?? existing.clientCompany;
+      const clientAddress = updates.clientAddress ?? existing.clientAddress;
+      const clientGst = updates.clientGST || updates.clientGst || existing.clientGST;
+      const clientCurrency = updates.clientCurrency ?? existing.clientCurrency;
+      const amount = updates.amount ?? existing.amount;
+      const subtotal = updates.subtotal ?? existing.subtotal;
+      const taxAmount = updates.taxAmount ?? existing.taxAmount;
+      const discountAmount = updates.discountAmount ?? existing.discountAmount;
+      const status = updates.status ?? existing.status;
+      const date = updates.date ?? existing.date;
+      const dueDate = updates.dueDate ?? existing.dueDate;
+      const paidDate = updates.paidDate ?? existing.paidDate;
+      const paymentMethod = updates.paymentMethod ?? existing.paymentMethod;
+      const paymentNotes = updates.paymentNotes ?? existing.paymentNotes;
+      const itemsJson = updates.items ? JSON.stringify(updates.items) : JSON.stringify(existing.items);
+      const notes = updates.notes ?? existing.notes;
+      const terms = updates.terms ?? existing.terms;
+      const taxRate = updates.taxRate ?? existing.taxRate;
+      const discountRate = updates.discountRate ?? existing.discountRate;
+      const paymentLink = updates.paymentLink ?? existing.paymentLink;
+      const emailSent = updates.emailSent ?? existing.emailSent;
+      const remindersSent = updates.remindersSent ?? existing.remindersSent;
+      const lastReminderSent = updates.lastReminderSent ?? existing.lastReminderSent;
+      const now = new Date().toISOString();
 
-      if (error) throw error;
+      const result = await sql`
+        UPDATE invoices
+        SET invoicenumber = ${invoiceNumber}, clientname = ${clientName}, clientemail = ${clientEmail},
+            clientcompany = ${clientCompany}, clientaddress = ${clientAddress}, clientgst = ${clientGst},
+            clientcurrency = ${clientCurrency}, amount = ${amount}, subtotal = ${subtotal}, taxamount = ${taxAmount},
+            discountamount = ${discountAmount}, status = ${status}, date = ${date}, duedate = ${dueDate},
+            paiddate = ${paidDate}, paymentmethod = ${paymentMethod}, paymentnotes = ${paymentNotes},
+            items = ${itemsJson}, notes = ${notes}, terms = ${terms}, taxrate = ${taxRate}, discountrate = ${discountRate},
+            paymentlink = ${paymentLink}, emailsent = ${emailSent}, reminderssent = ${remindersSent},
+            lastremindersent = ${lastReminderSent}, updatedat = ${now}
+        WHERE userid = ${userId} AND id = ${id}
+        RETURNING *
+      `;
 
-      return this.transformInvoiceToCamelCase(data);
+      return this.transformInvoiceToCamelCase(result[0]);
     } catch (error) {
       console.error('Error updating invoice:', error);
       return null;
@@ -573,13 +453,9 @@ export class DatabaseService {
 
   static async deleteInvoice(userId: string, id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('invoices')
-        .delete()
-        .eq('userid', userId)
-        .eq('id', id);
-
-      return !error;
+      const sql = getSql();
+      await sql`DELETE FROM invoices WHERE userid = ${userId} AND id = ${id}`;
+      return true;
     } catch (error) {
       console.error('Error deleting invoice:', error);
       return false;
@@ -595,14 +471,7 @@ export class DatabaseService {
 
   static async getAnalytics(userId: string): Promise<any> {
     try {
-      const { data: allInvoices, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('userid', userId);
-
-      if (error) throw error;
-
-      const invoices = (allInvoices || []).map(invoice => this.transformInvoiceToCamelCase(invoice));
+      const invoices = await this.getInvoices(userId);
       const totalRevenue = invoices
         .filter((inv: any) => inv.status === 'paid')
         .reduce((sum: number, inv: any) => sum + inv.amount, 0);
@@ -660,7 +529,7 @@ export class DatabaseService {
   }
 
   static calculateTopClients(invoices: any[]): Array<{ id: string; name: string; company?: string; totalAmount: number; totalInvoices: number }> {
-    const clientMap: { [key: string]: { id: string, name: string; company?: string; totalAmount: number; totalInvoices: number } } = {};
+    const clientMap: { [key: string]: { id: string; name: string; company?: string; totalAmount: number; totalInvoices: number } } = {};
     invoices.filter((i: any) => i.status === 'paid').forEach((invoice: any) => {
       if (!clientMap[invoice.clientId]) {
         clientMap[invoice.clientId] = {
@@ -680,108 +549,15 @@ export class DatabaseService {
       .slice(0, 5);
   }
 
-  static async exportInvoicesCSV(userId: string): Promise<string> {
-    try {
-      const { data: invoices, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('userid', userId)
-        .order('createdat', { ascending: false });
-
-      if (error) throw error;
-
-      if (!invoices || invoices.length === 0) {
-        return '';
-      }
-
-      // Transform to camelCase for CSV export
-      const transformedInvoices = invoices.map(invoice => this.transformInvoiceToCamelCase(invoice));
-      const headers = Object.keys(transformedInvoices[0]).join(',');
-      const rows = transformedInvoices.map((invoice: any) =>
-        Object.values(invoice).map(value => {
-          const strValue = String(value);
-          if (strValue.includes(',')) {
-            return `"${strValue}"`;
-          }
-          return strValue;
-        }).join(',')
-      ).join('\n');
-
-      return `${headers}\n${rows}`;
-    } catch (error) {
-      console.error('Error exporting invoices CSV:', error);
-      return '';
-    }
-  }
-
-  static async exportClientsCSV(userId: string): Promise<string> {
-    try {
-      const { data: clients, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('userid', userId)
-        .order('createdat', { ascending: false });
-
-      if (error) throw error;
-
-      if (!clients || clients.length === 0) {
-        return '';
-      }
-
-      // Transform to camelCase for CSV export
-      const transformedClients = clients.map(client => ({
-        id: client.id,
-        userId: client.userid,
-        name: client.name,
-        email: client.email,
-        company: client.company,
-        address: client.address,
-        gstNumber: client.gstnumber,
-        currency: client.currency,
-        isActive: client.isactive,
-        createdAt: client.createdat,
-        updatedAt: client.updatedat,
-      }));
-
-      const headers = Object.keys(transformedClients[0]).join(',');
-      const rows = transformedClients.map((client: any) =>
-        Object.values(client).map(value => {
-          const strValue = String(value);
-          if (strValue.includes(',')) {
-            return `"${strValue}"`;
-          }
-          return strValue;
-        }).join(',')
-      ).join('\n');
-
-      return `${headers}\n${rows}`;
-    } catch (error) {
-      console.error('Error exporting clients CSV:', error);
-      return '';
-    }
-  }
-
   static async addFeedback(feedback: any) {
-    // Using Supabase for feedback
     try {
-      const payload: any = {
-        type: feedback.type,
-        rating: feedback.rating,
-        title: feedback.title,
-        description: feedback.description,
-        email: feedback.email,
-        category: feedback.category,
-      };
-
-      if (feedback.createdAt) {
-        payload.created_at = feedback.createdAt;
-      }
-
-      const { error } = await supabase
-        .from('feedback')
-        .insert([payload]);
-
-      if (error) throw error;
+      const sql = getSql();
+      const id = crypto.randomUUID();
+      const now = feedback.createdAt || new Date().toISOString();
+      await sql`
+        INSERT INTO feedback (id, type, rating, title, description, email, category, created_at)
+        VALUES (${id}, ${feedback.type}, ${feedback.rating}, ${feedback.title}, ${feedback.description}, ${feedback.email}, ${feedback.category}, ${now})
+      `;
     } catch (error) {
       console.error('Error adding feedback:', error);
       throw error;
@@ -790,16 +566,12 @@ export class DatabaseService {
 
   static async getAllFeedback() {
     try {
-      const { data, error } = await supabase
-        .from('feedback')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
+      const sql = getSql();
+      const feedback = await sql`SELECT * FROM feedback ORDER BY created_at DESC`;
+      return feedback || [];
     } catch (error) {
       console.error('Error getting feedback:', error);
       return [];
     }
   }
-} 
+}

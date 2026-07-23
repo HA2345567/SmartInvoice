@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, getSupabaseClient } from '@/lib/auth-helpers';
+import { getAuthUser } from '@/lib/auth-helpers';
+import { DatabaseService } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,37 +9,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
-
     const { searchParams } = new URL(request.url);
     const reportType = searchParams.get('type') || 'profit-loss';
     const startDate = searchParams.get('startDate') || new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
     const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
 
-    // Get invoices for revenue
-    const { data: invoices } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('userid', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate);
+    const allInvoices = await DatabaseService.getInvoices(user.id);
+    const invoices = allInvoices.filter((inv: any) => {
+      const invDate = inv.date || '';
+      return invDate >= startDate && invDate <= endDate;
+    });
 
-    // Get expenses
-    const { data: expenses } = await supabase
-      .from('expenses')
-      .select('*')
-      .eq('userid', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate);
+    const expenses: any[] = []; // Expenses table placeholder
 
     // Calculate Revenue
     const paidInvoices = (invoices || []).filter((i: any) => i.status === 'paid');
     const totalRevenue = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.amount) || 0, 0);
     const grossRevenue = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.subtotal) || 0, 0);
-    const totalTaxCollected = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.taxamount) || 0, 0);
-    const totalDiscounts = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.discountamount) || 0, 0);
+    const totalTaxCollected = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.taxAmount) || 0, 0);
+    const totalDiscounts = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.discountAmount) || 0, 0);
 
     // Calculate Expenses by Category
     const expensesByCategory: { [category: string]: number } = {};
@@ -56,13 +45,13 @@ export async function GET(request: NextRequest) {
     const monthlyData: { [month: string]: { revenue: number; expenses: number; profit: number } } = {};
 
     paidInvoices.forEach((i: any) => {
-      const month = new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+      const month = new Date(i.date || Date.now()).toLocaleString('default', { month: 'short', year: 'numeric' });
       if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0, profit: 0 };
       monthlyData[month].revenue += Number(i.amount) || 0;
     });
 
     (expenses || []).forEach((e: any) => {
-      const month = new Date(e.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+      const month = new Date(e.date || Date.now()).toLocaleString('default', { month: 'short', year: 'numeric' });
       if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0, profit: 0 };
       monthlyData[month].expenses += Number(e.amount) || 0;
     });
@@ -74,7 +63,7 @@ export async function GET(request: NextRequest) {
     // Client revenue breakdown
     const clientRevenue: { [client: string]: number } = {};
     paidInvoices.forEach((i: any) => {
-      const client = i.clientname || 'Unknown';
+      const client = i.clientName || 'Unknown';
       clientRevenue[client] = (clientRevenue[client] || 0) + Number(i.amount) || 0;
     });
 
@@ -85,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     // Balance Sheet (simplified)
     const assets = {
-      cash: totalRevenue, // Simplified: assumes collected revenue is cash
+      cash: totalRevenue,
       receivables: (invoices || [])
         .filter((i: any) => ['sent', 'overdue'].includes(i.status))
         .reduce((sum: number, i: any) => sum + Number(i.amount) || 0, 0),

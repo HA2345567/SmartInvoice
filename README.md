@@ -40,7 +40,7 @@ A comprehensive, production-ready invoice management system built with Next.js, 
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn
+- bun
 
 ### Quick Start
 
@@ -48,7 +48,7 @@ A comprehensive, production-ready invoice management system built with Next.js, 
    ```bash
    git clone <repository-url>
    cd smartinvoice
-   npm install
+   bun install
    ```
 
 2. **Environment Configuration**
@@ -65,7 +65,7 @@ A comprehensive, production-ready invoice management system built with Next.js, 
 
 3. **Start Development Server**
    ```bash
-   npm run dev
+   bun dev
    ```
 
 4. **Access Application**

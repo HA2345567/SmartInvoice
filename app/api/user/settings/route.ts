@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, getSupabaseClient } from '@/lib/auth-helpers';
+import { getAuthUser } from '@/lib/auth-helpers';
+import { DatabaseService } from '@/lib/database';
+import { getNeonSql } from '@/lib/database-config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,44 +10,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
+    const profile = await DatabaseService.getUserById(user.id);
 
-    // Get user profile
-    const { data: profile, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user settings:', error);
+    if (!profile) {
       return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
     }
 
-    // Transform to camelCase
     const settings = {
       id: profile.id,
       email: profile.email,
       name: profile.name,
       company: profile.company,
       avatar: profile.avatar,
-      phone: profile.phone,
-      address: profile.address,
-      gstNumber: profile.gstnumber,
+      phone: profile.phone || profile.companyPhone,
+      address: profile.address || profile.companyAddress,
+      gstNumber: profile.gstNumber || profile.companyGST,
       currency: profile.currency || 'USD',
-      invoicePrefix: profile.invoiceprefix || 'INV',
-      defaultTerms: profile.defaultterms || 'Payment due within 30 days',
-      defaultNotes: profile.defaultnotes || 'Thank you for your business!',
-      defaultGstRate: profile.defaultgstrate || 18,
-      defaultTaxRate: profile.defaulttaxrate || 0,
-      emailNotifications: profile.emailnotifications ?? true,
-      reminderEmails: profile.reminderemails ?? true,
-      reminderDays: profile.reminderdays || 7,
-      autoGenerateNumbers: profile.autogeneratenumbers ?? true,
-      createdAt: profile.createdat,
-      updatedAt: profile.updatedat,
+      invoicePrefix: profile.invoicePrefix || 'INV',
+      defaultTerms: profile.defaultTerms || 'Payment due within 30 days',
+      defaultNotes: profile.defaultNotes || 'Thank you for your business!',
+      defaultGstRate: profile.defaultGstRate || 18,
+      defaultTaxRate: profile.defaultTaxRate || 0,
+      emailNotifications: profile.emailNotifications ?? true,
+      reminderEmails: profile.reminderEmails ?? true,
+      reminderDays: profile.reminderDays || 7,
+      autoGenerateNumbers: profile.autoGenerateNumbers ?? true,
+      createdAt: profile.createdAt,
+      updatedAt: profile.updatedAt,
     };
 
     return NextResponse.json(settings);
@@ -62,42 +53,41 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
-
     const data = await request.json();
+    const sql = getNeonSql();
+    const now = new Date().toISOString();
 
-    // Prepare update object with snake_case column names
-    const updateData: Record<string, any> = {
-      updatedat: new Date().toISOString(),
-    };
-
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.company !== undefined) updateData.company = data.company;
-    if (data.phone !== undefined) updateData.phone = data.phone;
-    if (data.address !== undefined) updateData.address = data.address;
-    if (data.gstNumber !== undefined) updateData.gstnumber = data.gstNumber;
-    if (data.currency !== undefined) updateData.currency = data.currency;
-    if (data.invoicePrefix !== undefined) updateData.invoiceprefix = data.invoicePrefix;
-    if (data.defaultTerms !== undefined) updateData.defaultterms = data.defaultTerms;
-    if (data.defaultNotes !== undefined) updateData.defaultnotes = data.defaultNotes;
-    if (data.defaultGstRate !== undefined) updateData.defaultgstrate = data.defaultGstRate;
-    if (data.defaultTaxRate !== undefined) updateData.defaulttaxrate = data.defaultTaxRate;
-    if (data.emailNotifications !== undefined) updateData.emailnotifications = data.emailNotifications;
-    if (data.reminderEmails !== undefined) updateData.reminderemails = data.reminderEmails;
-    if (data.reminderDays !== undefined) updateData.reminderdays = data.reminderDays;
-    if (data.autoGenerateNumbers !== undefined) updateData.autogeneratenumbers = data.autoGenerateNumbers;
-
-    const { error } = await supabase
-      .from('users')
-      .update(updateData)
-      .eq('id', user.id);
-
-    if (error) {
-      console.error('Error updating settings:', error);
-      return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
+    const current = await DatabaseService.getUserById(user.id);
+    if (!current) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
+
+    const name = data.name ?? current.name;
+    const company = data.company ?? current.company;
+    const phone = data.phone ?? current.phone;
+    const address = data.address ?? current.address;
+    const gstNumber = data.gstNumber ?? current.gstNumber;
+    const currency = data.currency ?? current.currency;
+    const invoicePrefix = data.invoicePrefix ?? current.invoicePrefix;
+    const defaultTerms = data.defaultTerms ?? current.defaultTerms;
+    const defaultNotes = data.defaultNotes ?? current.defaultNotes;
+    const defaultGstRate = data.defaultGstRate ?? current.defaultGstRate;
+    const defaultTaxRate = data.defaultTaxRate ?? current.defaultTaxRate;
+    const emailNotifications = data.emailNotifications ?? current.emailNotifications;
+    const reminderEmails = data.reminderEmails ?? current.reminderEmails;
+    const reminderDays = data.reminderDays ?? current.reminderDays;
+    const autoGenerateNumbers = data.autoGenerateNumbers ?? current.autoGenerateNumbers;
+
+    await sql`
+      UPDATE users
+      SET name = ${name}, company = ${company}, phone = ${phone}, address = ${address},
+          gstnumber = ${gstNumber}, currency = ${currency}, invoiceprefix = ${invoicePrefix},
+          defaultterms = ${defaultTerms}, defaultnotes = ${defaultNotes}, defaultgstrate = ${defaultGstRate},
+          defaulttaxrate = ${defaultTaxRate}, emailnotifications = ${emailNotifications},
+          reminderemails = ${reminderEmails}, reminderdays = ${reminderDays},
+          autogeneratenumbers = ${autoGenerateNumbers}, updatedat = ${now}
+      WHERE id = ${user.id}
+    `;
 
     return NextResponse.json({ success: true, message: 'Settings updated successfully' });
   } catch (error) {

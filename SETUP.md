@@ -13,7 +13,7 @@
 ```bash
 git clone <repository-url>
 cd SmartInvoice-main-1
-npm install
+bun install
 ```
 
 ### 2. Environment Configuration
@@ -56,11 +56,11 @@ EMAIL_FROM=noreply@yourdomain.com
 
 ```bash
 # Development
-npm run dev
+bun dev
 
 # Production build
-npm run build
-npm start
+bun run build
+bun start
 ```
 
 ## Security Checklist

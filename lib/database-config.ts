@@ -1,57 +1,16 @@
-import { Client } from 'pg';
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 
-// Database configuration for production deployment
+// Database configuration for Neon DB (PostgreSQL)
 export const getDatabaseConfig = () => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
-  if (isDevelopment) {
-    // Use SQLite for development
-    return {
-      type: 'sqlite',
-      database: './data/smartinvoice.db'
-    };
-  } else {
-    // Use PostgreSQL for production
-    return {
-      type: 'postgresql',
-      url: process.env.DATABASE_URL
-    };
-  }
+  return {
+    type: 'neon',
+    url: process.env.DATABASE_URL
+  };
 };
 
-// Migration helper for production deployment
-export const runMigrations = async () => {
-  const config = getDatabaseConfig();
-  
-  if (config.type === 'postgresql') {
-    // PostgreSQL migrations would go here
-    // console.log('Running PostgreSQL migrations...');
-    await applyMigrations();
-  }
+export const getNeonSql = () => {
+  const connectionString = process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@ep-placeholder.neon.tech/neondb';
+  return neon(connectionString);
 };
 
-async function applyMigrations() {
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL is required for migrations');
-  }
-  
-  const client = new Client({ connectionString: process.env.DATABASE_URL });
-  try {
-    await client.connect();
-    // console.log('Running PostgreSQL migrations...');
-    // await migrate(client, './migrations');
-    // console.log('Migrations applied successfully.');
-  } catch (err) {
-    console.error('Migration error:', err);
-  } finally {
-    await client.end();
-  }
-}
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-export default supabase;
+export default getNeonSql;

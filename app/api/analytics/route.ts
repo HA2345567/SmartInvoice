@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, getSupabaseClient } from '@/lib/auth-helpers';
+import { getAuthUser } from '@/lib/auth-helpers';
+import { DatabaseService } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,20 +9,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
-
-    // Get all invoices for analytics
-    const { data: invoices, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('userid', user.id);
-
-    if (error) {
-      console.error('Error fetching invoices:', error);
-      return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
-    }
+    // Get all invoices for analytics from Neon DB
+    const invoices = await DatabaseService.getInvoices(user.id);
 
     // Calculate core analytics
     const totalRevenue = invoices
@@ -87,9 +76,10 @@ function calculateMonthlyData(invoices: any[]): Array<{ month: string; revenue: 
   const monthly: { [key: string]: { revenue: number; invoices: number } } = {};
 
   invoices
-    .filter((i: any) => i.status === 'paid' && i.paiddate)
+    .filter((i: any) => i.status === 'paid' && (i.paidDate || i.date))
     .forEach((invoice: any) => {
-      const date = new Date(invoice.paiddate);
+      const dateStr = invoice.paidDate || invoice.date;
+      const date = new Date(dateStr);
       const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
       if (!monthly[month]) {
         monthly[month] = { revenue: 0, invoices: 0 };
@@ -109,11 +99,11 @@ function calculateTopClients(invoices: any[]): Array<{ name: string; company?: s
   invoices
     .filter((i: any) => i.status === 'paid')
     .forEach((invoice: any) => {
-      const clientName = invoice.clientname || 'Unknown';
+      const clientName = invoice.clientName || 'Unknown';
       if (!clientMap[clientName]) {
         clientMap[clientName] = {
           name: clientName,
-          company: invoice.clientcompany,
+          company: invoice.clientCompany,
           totalAmount: 0,
           totalInvoices: 0,
         };
@@ -128,15 +118,13 @@ function calculateTopClients(invoices: any[]): Array<{ name: string; company?: s
 }
 
 function calculateBusinessHealth(invoices: any[], monthlyData: any[]): number {
-  let score = 50; // Base score
+  let score = 50;
 
-  // Payment rate bonus (up to +20)
   const paidRate = invoices.length > 0
     ? invoices.filter((i: any) => i.status === 'paid').length / invoices.length
     : 0;
   score += paidRate * 20;
 
-  // Revenue consistency bonus (up to +15)
   if (monthlyData.length >= 2) {
     const revenues = monthlyData.slice(-3).map((m: any) => m.revenue);
     const avgRevenue = revenues.reduce((a: number, b: number) => a + b, 0) / revenues.length;
@@ -145,7 +133,6 @@ function calculateBusinessHealth(invoices: any[], monthlyData: any[]): number {
     score += Math.max(0, 15 - cv * 15);
   }
 
-  // Growth trend bonus (up to +15)
   if (monthlyData.length >= 2) {
     const recentRevenue = monthlyData[monthlyData.length - 1]?.revenue || 0;
     const prevRevenue = monthlyData[monthlyData.length - 2]?.revenue || 0;
@@ -155,7 +142,6 @@ function calculateBusinessHealth(invoices: any[], monthlyData: any[]): number {
     }
   }
 
-  // Overdue penalty (up to -20)
   const overdueRate = invoices.length > 0
     ? invoices.filter((i: any) => i.status === 'overdue').length / invoices.length
     : 0;
@@ -171,13 +157,10 @@ function calculateCashRunway(monthlyData: any[]): number {
     .slice(-3)
     .reduce((sum: number, m: any) => sum + m.revenue, 0) / Math.min(3, monthlyData.length);
 
-  // Assume 20% average monthly expenses
   const monthlyBurn = avgMonthlyRevenue * 0.2;
 
-  if (monthlyBurn <= 0) return 999; // Infinite runway if no burn
+  if (monthlyBurn <= 0) return 999;
 
-  // Simple runway calculation: cash on hand / monthly burn
-  // Using last month's revenue as proxy for cash
   const lastMonthRevenue = monthlyData[monthlyData.length - 1]?.revenue || 0;
   return Math.round((lastMonthRevenue / monthlyBurn) * 10) / 10;
 }
@@ -190,7 +173,6 @@ function calculateForecast(monthlyData: any[]): { nextMonth: number; nextQuarter
   const revenues = monthlyData.slice(-6).map((m: any) => m.revenue);
   const avgRevenue = revenues.reduce((a: number, b: number) => a + b, 0) / revenues.length;
 
-  // Simple linear extrapolation
   let trend = 0;
   if (revenues.length >= 2) {
     const recent = revenues.slice(-3);
@@ -215,7 +197,6 @@ function calculateForecast(monthlyData: any[]): { nextMonth: number; nextQuarter
 function generateRecommendations(invoices: any[], monthlyData: any[], healthScore: number): Array<{ type: string; message: string; priority: 'high' | 'medium' | 'low'; action?: string }> {
   const recommendations: Array<{ type: string; message: string; priority: 'high' | 'medium' | 'low'; action?: string }> = [];
 
-  // Overdue invoices
   const overdue = invoices.filter((i: any) => i.status === 'overdue');
   if (overdue.length > 0) {
     const totalOverdue = overdue.reduce((sum: number, i: any) => sum + (i.amount || 0), 0);
@@ -227,10 +208,9 @@ function generateRecommendations(invoices: any[], monthlyData: any[], healthScor
     });
   }
 
-  // Stale drafts
   const staleDrafts = invoices.filter((i: any) => {
     if (i.status !== 'draft') return false;
-    const created = new Date(i.createdat);
+    const created = new Date(i.createdAt || Date.now());
     const daysOld = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
     return daysOld > 7;
   });
@@ -243,11 +223,10 @@ function generateRecommendations(invoices: any[], monthlyData: any[], healthScor
     });
   }
 
-  // Payment prediction
   const sent = invoices.filter((i: any) => i.status === 'sent');
   if (sent.length > 0) {
     const likelyToPay = sent.filter((i: any) => {
-      const dueDate = new Date(i.duedate);
+      const dueDate = new Date(i.dueDate || Date.now());
       const daysUntilDue = (dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
       return daysUntilDue > 0 && daysUntilDue < 7;
     });
@@ -260,7 +239,6 @@ function generateRecommendations(invoices: any[], monthlyData: any[], healthScor
     }
   }
 
-  // Health score warning
   if (healthScore < 60) {
     recommendations.push({
       type: 'health',
@@ -285,7 +263,7 @@ function analyzeOverdue(invoices: any[]): {
 
   const clientMap: { [key: string]: { count: number; amount: number } } = {};
   overdue.forEach((i: any) => {
-    const client = i.clientname || 'Unknown';
+    const client = i.clientName || 'Unknown';
     if (!clientMap[client]) {
       clientMap[client] = { count: 0, amount: 0 };
     }
@@ -298,11 +276,10 @@ function analyzeOverdue(invoices: any[]): {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5);
 
-  // Calculate average days overdue
   let totalDays = 0;
   overdue.forEach((i: any) => {
-    if (i.duedate) {
-      const due = new Date(i.duedate);
+    if (i.dueDate) {
+      const due = new Date(i.dueDate);
       const days = Math.ceil((Date.now() - due.getTime()) / (1000 * 60 * 60 * 24));
       totalDays += Math.max(0, days);
     }

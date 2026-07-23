@@ -1,81 +1,58 @@
 /**
  * Server-side authentication helpers for API routes
- * Works with Supabase Auth to get the current user from cookies/headers
+ * Uses JWT tokens and Neon DB for authentication
  */
 
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
+import { AuthService } from './auth';
+import { DatabaseService } from './database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Helper to extract JWT token from request header or cookies
+export function getAuthToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
 
-// Create a Supabase client for server-side use
-export function getSupabaseClient(authToken?: string) {
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-    },
-  });
-  return client;
+  const cookieStore = request.cookies;
+  const token = cookieStore.get('auth-token')?.value ||
+                cookieStore.get('token')?.value ||
+                cookieStore.get('sb-access-token')?.value;
+
+  return token || null;
 }
 
 // Get user from request - either from Authorization header or cookies
-export async function getAuthUser(request: NextRequest): Promise<{ id: string; email: string } | null> {
+export async function getAuthUser(request: NextRequest): Promise<{ id: string; email: string; name?: string } | null> {
   try {
-    // Try Authorization header first (for API calls from client)
-    const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
+    const token = getAuthToken(request);
+    if (!token) return null;
 
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const supabase = getSupabaseClient(token);
-
-      const { data: { user }, error } = await supabase.auth.getUser(token);
-
-      if (error || !user) {
-        return null;
-      }
-
-      return {
-        id: user.id,
-        email: user.email || '',
-      };
+    const payload = AuthService.verifyToken(token);
+    if (!payload || !payload.userId) {
+      return null;
     }
 
-    // Try cookie-based auth (for SSR)
-    const cookieStore = request.cookies;
-    const accessToken = cookieStore.get('sb-access-token')?.value ||
-                        cookieStore.get('supabase-auth-token')?.value;
+    const user = await DatabaseService.getUserById(payload.userId);
+    if (!user) return null;
 
-    if (accessToken) {
-      const supabase = getSupabaseClient(accessToken);
-      const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
-      if (error || !user) {
-        return null;
-      }
-
-      return {
-        id: user.id,
-        email: user.email || '',
-      };
-    }
-
-    return null;
+    return {
+      id: user.id,
+      email: user.email || '',
+      name: user.name,
+    };
   } catch (error) {
     console.error('Auth error:', error);
     return null;
   }
 }
 
-// Create a user-scoped Supabase client for database operations
+// Legacy compatibility helper for user database client
 export async function getUserClient(request: NextRequest) {
   const user = await getAuthUser(request);
-  if (!user) return { user: null, supabase: null };
+  return { user, supabase: null };
+}
 
-  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-
-  const supabase = getSupabaseClient(token);
-
-  return { user, supabase };
+export function getSupabaseClient(authToken?: string) {
+  return null;
 }

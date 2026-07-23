@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       companyName: user.company || 'SmartInvoice',
       companyAddress: user.companyAddress || 'Your Company Address\nCity, State - PIN',
       companyGST: user.companyGST || 'Your GST Number',
-      companyEmail: user.email,
+      companyEmail: '',
       companyPhone: user.companyPhone || '',
       companyWebsite: user.companyWebsite || '',
       invoiceStatus: 'PENDING',

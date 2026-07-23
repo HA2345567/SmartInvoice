@@ -33,7 +33,7 @@ const INVOICE_TYPES: Record<InvoiceType, any> = {
     'recurring': RecurringInvoice,
     'credit-note': CreditNote,
     'past-due': PastDueInvoice,
-    'commercial': SalesInvoice, // Fallbacks
+    'commercial': SalesInvoice,
     'tax': SalesInvoice,
     'timesheet': SalesInvoice,
     'retainer': SalesInvoice,
@@ -62,28 +62,59 @@ interface InvoiceRendererProps {
 }
 
 const InvoiceRenderer: React.FC<InvoiceRendererProps> = ({ type, style, data }) => {
-    const InvoiceComponent = INVOICE_TYPES[type];
-    const styleClass = STYLE_CLASSES[style];
+    const InvoiceComponent = INVOICE_TYPES[type] || SalesInvoice;
+    const styleClass = STYLE_CLASSES[style] || ultraLuxury;
 
-    if (!InvoiceComponent) {
-        console.error(`Invalid invoice type: ${type}`);
-        return (
-            <div className="flex items-center justify-center h-full p-4 border border-dashed border-red-300 bg-red-50 text-red-500 rounded">
-                Error: Invalid invoice type "{type}"
-            </div>
-        );
-    }
+    const safeFrom = data?.from ? {
+        name: data.from.name || 'Your Company Name',
+        email: data.from.email || '',
+        address: data.from.address || '',
+        city: data.from.city || '',
+        phone: data.from.phone || '',
+        gst: data.from.gst || '',
+        logoUrl: data.from.logoUrl || '',
+    } : {
+        name: 'Your Company Name',
+        email: '',
+        address: '',
+        city: '',
+        phone: '',
+        gst: '',
+        logoUrl: '',
+    };
 
-    if (!styleClass) {
-        console.error(`Invalid invoice style: ${style}`);
-        return (
-            <div className="flex items-center justify-center h-full p-4 border border-dashed border-red-300 bg-red-50 text-red-500 rounded">
-                Error: Invalid invoice style "{style}"
-            </div>
-        );
-    }
+    const safeTo = data?.to ? {
+        name: data.to.name || 'Client Name',
+        email: data.to.email || '',
+        address: data.to.address || '',
+        city: data.to.city || '',
+        company: data.to.company || '',
+        gst: data.to.gst || '',
+    } : {
+        name: 'Client Name',
+        email: '',
+        address: '',
+        city: '',
+        company: '',
+        gst: '',
+    };
 
-    return <InvoiceComponent data={data} styleClass={styleClass} />;
+    const normalizedData: InvoiceData = {
+        ...data,
+        from: safeFrom,
+        to: safeTo,
+        invoiceNumber: data?.invoiceNumber || 'INV-0001',
+        issuedDate: data?.issuedDate || new Date().toISOString().split('T')[0],
+        dueDate: data?.dueDate || '',
+        currencySymbol: data?.currencySymbol || '$',
+        items: data?.items || [],
+        subtotal: data?.subtotal || 0,
+        tax: data?.tax || 0,
+        discount: data?.discount || 0,
+        total: data?.total || 0,
+    };
+
+    return <InvoiceComponent data={normalizedData} styleClass={styleClass} />;
 };
 
 export default InvoiceRenderer;

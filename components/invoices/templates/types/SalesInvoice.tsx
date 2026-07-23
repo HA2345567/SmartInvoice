@@ -81,10 +81,10 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
             </div>
             <div className={getClasses('addressBlock', 'addressCol')}>
               <h3>From</h3>
-              <div className={styleClass.name}>{data.from.name}</div>
-              <div>{data.from.address}</div>
-              <div>{data.from.city}</div>
-              {data.from.email && <div>{data.from.email}</div>}
+              <div className={styleClass.name}>{data?.from?.name}</div>
+              <div>{data?.from?.address}</div>
+              <div>{data?.from?.city}</div>
+              {data?.from?.email && <div>{data.from.email}</div>}
             </div>
           </div>
 
@@ -300,7 +300,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
             <div className={getClasses('brandHeader', 'sfdcHeader', 'shopifyBrand', 'slackLogo')}>
               <div className={styleClass.logoArea}>
                 <div className={getClasses('logoPlaceholder', 'shopifyLogo', 'sfdcLogo')}></div>
-                <span className={getClasses('title', 'slackText', 'shopifyText')}>{data.from.name}</span>
+                <span className={getClasses('title', 'slackText', 'shopifyText')}>{data?.from?.name}</span>
               </div>
               {(styleClass.invoiceBadge || styleClass.invoiceLabel) && (
                 <div className={getClasses('invoiceBadge', 'invoiceLabel')}>INVOICE</div>
@@ -323,7 +323,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
             </div>
             <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
               <label>Amount</label>
-              <span style={{ fontWeight: '700' }}>${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <span style={{ fontWeight: '700' }}>${(data.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
             <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
               <label>Status</label>
@@ -335,18 +335,18 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
             <div className={getClasses('addressSection', 'addressGrid', 'addresses', 'customerSection')}>
               <div className={getClasses('addressBlock', 'addressBox', 'addressCol', 'customerBlock')}>
                 <h3>Bill To</h3>
-                <div className={getClasses('company', 'name')}>{data.to.name}</div>
-                <div>{data.to.company}</div>
-                <div>{data.to.address}</div>
-                <div>{data.to.city}</div>
-                {data.to.email && <div>{data.to.email}</div>}
+                <div className={getClasses('company', 'name')}>{data?.to?.name}</div>
+                <div>{data?.to?.company}</div>
+                <div>{data?.to?.address}</div>
+                <div>{data?.to?.city}</div>
+                {data?.to?.email && <div>{data.to.email}</div>}
               </div>
               <div className={getClasses('addressBlock', 'addressBox', 'addressCol', 'customerBlock')}>
                 <h3>From</h3>
-                <div className={getClasses('company', 'name')}>{data.from.name}</div>
-                <div>{data.from.address}</div>
-                <div>{data.from.city}</div>
-                {data.from.email && <div>{data.from.email}</div>}
+                <div className={getClasses('company', 'name')}>{data?.from?.name}</div>
+                <div>{data?.from?.address}</div>
+                <div>{data?.from?.city}</div>
+                {data?.from?.email && <div>{data.from.email}</div>}
               </div>
             </div>
 
@@ -439,45 +439,45 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
   return (
     <div className={styleClass.container}>
       <header className={styleClass.header}>
-        <div className={styleClass.title}>{data.from.name}</div>
+        <div className={styleClass.title}>{data?.from?.name || 'Company Name'}</div>
         <div className={getClasses('subtitle', 'subHeader', 'subHeader')}>INVOICE</div>
       </header>
 
       <div className={getClasses('metaGrid', 'metaSection', 'detailsGrid', 'meta')}>
         <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
           <label className={getClasses('metaLabel')}>Invoice No</label>
-          <span className={getClasses('metaValue')}>{data.invoiceNumber}</span>
+          <span className={getClasses('metaValue')}>{data?.invoiceNumber}</span>
         </div>
         <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
           <label className={getClasses('metaLabel')}>Date</label>
-          <span className={getClasses('metaValue')}>{data.issuedDate}</span>
+          <span className={getClasses('metaValue')}>{data?.issuedDate}</span>
         </div>
         <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
           <label className={getClasses('metaLabel')}>Due Date</label>
-          <span className={getClasses('metaValue')}>{data.dueDate}</span>
+          <span className={getClasses('metaValue')}>{data?.dueDate}</span>
         </div>
         <div className={getClasses('metaItem', 'metaGroup', 'detailsCol')}>
           <label className={getClasses('metaLabel')}>Total Due</label>
-          <span className={getClasses('metaValue')}>${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className={getClasses('metaValue')}>${(data?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
         </div>
       </div>
 
       <div className={getClasses('addressSection', 'addressGrid', 'addresses')}>
         <div className={getClasses('addressBlock', 'addressBox', 'addressCol')}>
           <h3>Bill To</h3>
-          <div>{data.to.name}</div>
-          <div>{data.to.company}</div>
-          <div>{data.to.address}</div>
-          <div>{data.to.city}</div>
-          <div>{data.to.email}</div>
+          <div>{data?.to?.name}</div>
+          <div>{data?.to?.company}</div>
+          <div>{data?.to?.address}</div>
+          <div>{data?.to?.city}</div>
+          <div>{data?.to?.email}</div>
         </div>
 
         <div className={getClasses('addressBlock', 'addressBox', 'addressCol')}>
           <h3>From</h3>
-          <div>{data.from.name}</div>
-          <div>{data.from.address}</div>
-          <div>{data.from.city}</div>
-          <div>{data.from.email}</div>
+          <div>{data?.from?.name}</div>
+          <div>{data?.from?.address}</div>
+          <div>{data?.from?.city}</div>
+          <div>{data?.from?.email}</div>
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, getSupabaseClient } from '@/lib/auth-helpers';
+import { getAuthUser } from '@/lib/auth-helpers';
+import { DatabaseService } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,22 +9,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
-
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('userid', user.id)
-      .order('createdat', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching clients:', error);
-      return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 });
-    }
-
-    return NextResponse.json((data || []).map(transformClient));
+    const clients = await DatabaseService.getClients(user.id);
+    return NextResponse.json(clients);
   } catch (error) {
     console.error('Get clients error:', error);
     return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 });
@@ -36,10 +23,6 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
-    const supabase = getSupabaseClient(token);
 
     const data = await request.json();
 
@@ -59,44 +42,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if client with this email already exists
-    const { data: existingClient } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('userid', user.id)
-      .eq('email', data.email.toLowerCase())
-      .maybeSingle();
+    const existingClients = await DatabaseService.getClients(user.id);
+    const existing = existingClients.find(c => c.email.toLowerCase() === data.email.toLowerCase().trim());
 
-    if (existingClient) {
+    if (existing) {
       return NextResponse.json({
         error: 'A client with this email already exists'
       }, { status: 409 });
     }
 
-    const newClient = {
-      userid: user.id,
+    const client = await DatabaseService.createClient(user.id, {
       name: data.name.trim(),
       email: data.email.toLowerCase().trim(),
-      company: data.company?.trim() || null,
+      company: data.company?.trim(),
       address: data.address?.trim() || '',
-      gstnumber: data.gstNumber?.trim() || null,
+      gstNumber: data.gstNumber?.trim(),
       currency: data.currency || 'USD',
-      isactive: true,
-    };
-
-    const { data: client, error } = await supabase
-      .from('clients')
-      .insert([newClient])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating client:', error);
-      return NextResponse.json({ error: 'Failed to create client' }, { status: 500 });
-    }
+    });
 
     return NextResponse.json({
       success: true,
-      client: transformClient(client),
+      client,
       message: 'Client created successfully'
     });
   } catch (error) {
@@ -106,20 +72,4 @@ export async function POST(request: NextRequest) {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
-}
-
-function transformClient(data: any): any {
-  return {
-    id: data.id,
-    userId: data.userid,
-    name: data.name,
-    email: data.email,
-    company: data.company,
-    address: data.address,
-    gstNumber: data.gstnumber,
-    currency: data.currency,
-    isActive: data.isactive,
-    createdAt: data.createdat,
-    updatedAt: data.updatedat,
-  };
 }

@@ -156,16 +156,14 @@ export default function CreateInvoice() {
   }, [invoiceData.items, invoiceData.discountRate, invoiceData.taxRate]);
 
   useEffect(() => {
-    if (token) {
-      fetchClients();
-      generateInvoiceNumber();
-    }
+    fetchClients();
+    generateInvoiceNumber();
 
     const savedType = sessionStorage.getItem('invoiceType');
     if (savedType) {
       setInvoiceData(prev => ({ ...prev, invoiceType: savedType as any }));
     }
-  }, [token]);
+  }, [accessToken]);
 
   useEffect(() => {
     if (invoiceData.date && !invoiceData.dueDate) {
@@ -209,7 +207,7 @@ export default function CreateInvoice() {
   };
 
   const fetchItemSuggestions = async (query: string) => {
-    if (query.length < 2 || !token) {
+    if (query.length < 2 || !accessToken) {
       setItemSuggestions([]);
       return;
     }
@@ -507,7 +505,7 @@ export default function CreateInvoice() {
 
           <ProfessionalFeatures
             user={user}
-            token={token || ''}
+            token={accessToken || ''}
             invoiceData={invoiceData}
             setInvoiceData={setInvoiceData}
             loading={loading}

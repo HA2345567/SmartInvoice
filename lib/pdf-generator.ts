@@ -536,8 +536,7 @@ export class PremiumPDFGenerator {
     this.doc.setFontSize(10); // Standard Body 10-11pt
     this.doc.setFont('helvetica', 'normal');
     const companyInfo = [
-      data.companyAddress,
-      data.companyEmail
+      data.companyAddress
     ].filter(Boolean).join('\n');
     this.doc.text(companyInfo, leftMargin, startY + 15);
 
@@ -735,7 +734,7 @@ export class PremiumPDFGenerator {
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(134, 134, 139);
-    this.doc.text(data.companyEmail || '', leftMargin, footerY + 10);
+    this.doc.text('', leftMargin, footerY + 10);
 
     // White-label mode: Don't show "Powered by" if Pro/Business tier
     if (!data.whiteLabelMode) {
@@ -990,7 +989,7 @@ export class PremiumPDFGenerator {
 
     // Company Address
     this.doc.setFontSize(9);
-    const companyInfo = [data.companyAddress, data.companyEmail].filter(Boolean).join(', ');
+    const companyInfo = [data.companyAddress].filter(Boolean).join(', ');
     this.doc.text(companyInfo, this.margin, startY + 16);
 
     // Boxed Sections
@@ -1088,7 +1087,7 @@ export class PremiumPDFGenerator {
     this.doc.setFontSize(9);
     this.doc.setFont('helvetica', 'normal');
     this.doc.text('Payment Instructions: Net 30 days', this.margin, this.pageHeight - 20);
-    this.doc.text(data.companyEmail ? `Questions: ${data.companyEmail}` : '', this.margin, this.pageHeight - 15);
+    this.doc.text('', this.margin, this.pageHeight - 15);
 
     if (!data.whiteLabelMode) {
       this.doc.setFontSize(8);
@@ -1118,7 +1117,7 @@ export class PremiumPDFGenerator {
 
     this.doc.setFontSize(10);
     this.doc.setFont('times', 'normal');
-    const address = [data.companyAddress, data.companyEmail].filter(Boolean).join(' • ');
+    const address = [data.companyAddress].filter(Boolean).join(' • ');
     const addrWidth = this.doc.getTextWidth(address);
     this.doc.text(address, (this.pageWidth - addrWidth) / 2, startY + 8);
 
@@ -1312,7 +1311,7 @@ export class PremiumPDFGenerator {
     this.doc.setFontSize(8);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(110, 110, 110);
-    const companyMeta = [data.companyAddress, data.companyEmail, data.companyWebsite].filter(Boolean).join('  |  ');
+    const companyMeta = [data.companyAddress, data.companyWebsite].filter(Boolean).join('  |  ');
     this.doc.text(companyMeta.toUpperCase(), margin, currentY);
 
     // INVOICE Label (Top Right, overlapping the color)
