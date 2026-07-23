@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 
 // Singleton Neon SQL client to reuse HTTP connections across queries
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_jy7RdpHvbqZ5@ep-royal-butterfly-ay7k3tn8-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const connectionString = process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@ep-placeholder.neon.tech/neondb';
 const sql = neon(connectionString);
 
 export const supabase: any = null;
