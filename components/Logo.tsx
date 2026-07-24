@@ -24,7 +24,7 @@ export default function Logo({
 }: LogoProps) {
   const s = sizeConfig[size] || sizeConfig.md;
 
-  // Geometric Slanting Logo Mark (Clean 100x100 Vector Geometry)
+  // Geometric Slanting Logo Mark (New Custom Yin-Yang Wave Vector Design)
   const LogoMark = () => (
     <svg
       width={s.mark}
@@ -32,29 +32,33 @@ export default function Logo({
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="flex-shrink-0 drop-shadow-[0_0_12px_rgba(30,215,96,0.4)] transition-transform duration-300 hover:scale-105"
+      className="flex-shrink-0 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] transition-transform duration-300 hover:scale-105"
     >
-      <defs>
-        <linearGradient id="spotifyGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1ed760" />
-          <stop offset="100%" stopColor="#10b981" />
-        </linearGradient>
-      </defs>
-
-      {/* Top Slanting White Polygon Wing */}
-      <path d="M 28 10 L 88 10 L 64 42 L 18 42 Z" fill="#ffffff" />
-
-      {/* Bottom Slanting White Polygon Wing */}
-      <path d="M 36 58 L 82 58 L 72 90 L 12 90 Z" fill="#ffffff" />
-
-      {/* Bold 'S' Ribbon in Signature Spotify Green (#1ed760) */}
+      {/* Top Wing (solid filled white) */}
       <path
-        d="M 60 20 C 78 20 86 30 86 40 C 86 54 44 48 44 64 C 44 74 54 80 72 80"
-        fill="none"
-        stroke="url(#spotifyGreenGrad)"
-        strokeWidth="14"
+        d="M 10 48.5 L 48 48.5 C 35 48.5, 35 26, 50 26 C 30 26, 20 48.5, 10 48.5 Z"
+        fill="#ffffff"
+      />
+      {/* Bottom Wing (solid filled white) */}
+      <path
+        d="M 90 51.5 L 52 51.5 C 65 51.5, 65 74, 50 74 C 70 74, 80 51.5, 90 51.5 Z"
+        fill="#ffffff"
+      />
+      {/* Top-Right thin arc */}
+      <path
+        d="M 50 26 A 24 24 0 0 1 74 50"
+        stroke="#ffffff"
+        strokeWidth="2.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="none"
+      />
+      {/* Bottom-Left thin arc */}
+      <path
+        d="M 50 74 A 24 24 0 0 1 26 50"
+        stroke="#ffffff"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
       />
     </svg>
   );
@@ -69,7 +73,6 @@ export default function Logo({
       <span className="text-[#1ed760] font-black tracking-[-0.02em] drop-shadow-[0_0_15px_rgba(30,215,96,0.4)]">
         Invoice
       </span>
-      <span className="h-2.5 w-2.5 rounded-full bg-[#1ed760] animate-pulse shadow-[0_0_10px_#1ed760] ml-1 flex-shrink-0" />
     </span>
   );
 

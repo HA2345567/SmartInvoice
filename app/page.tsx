@@ -71,7 +71,10 @@ const PillButton = ({
     lg: 'py-4 px-10 text-sm',
   };
 
-  const variants = {
+  const variants: Record<
+    'dark' | 'green' | 'light' | 'outlined',
+    { bg: string; text: string; hover?: string; border?: string }
+  > = {
     dark: { bg: spotify.midDark, text: spotify.textBase, hover: spotify.darkSurface },
     green: { bg: spotify.green, text: '#000000', hover: spotify.greenHover },
     light: { bg: spotify.lightSurface, text: spotify.darkSurface, hover: '#ffffff' },
@@ -87,7 +90,7 @@ const PillButton = ({
       style={{
         background: v.bg,
         color: v.text,
-        border: variant === 'outlined' ? v.border : 'none',
+        border: v.border || 'none',
         borderRadius: '9999px',
         textTransform: 'uppercase',
         letterSpacing: '1.4px',
@@ -139,12 +142,14 @@ const Card = ({
   children,
   className = '',
   hover = true,
-  elevated = false
+  elevated = false,
+  style = {}
 }: {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   elevated?: boolean;
+  style?: React.CSSProperties;
 }) => (
   <div
     className={`transition-transform duration-200 ${hover ? 'hover:scale-[1.02]' : ''} ${className}`}
@@ -152,6 +157,7 @@ const Card = ({
       background: spotify.darkSurface,
       borderRadius: '8px',
       boxShadow: elevated ? spotify.shadowMedium : 'none',
+      ...style,
     }}
   >
     {children}
@@ -371,27 +377,41 @@ export default function LandingPage() {
 
       {/* ═══ HEADER ═══ */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className={`fixed left-1/2 z-50 rounded-full transition-all duration-500 ease-out border backdrop-blur-lg ${
+          scrollY > 20
+            ? 'top-3 bg-black/80 border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)] w-[calc(100%-4rem)] max-w-4xl py-1.5'
+            : 'top-6 bg-[#121212]/30 border-white/5 w-[calc(100%-2rem)] max-w-5xl py-3'
+        }`}
         style={{
-          background: scrollY > 50 ? 'rgba(18,18,18,0.95)' : 'transparent',
-          backdropFilter: scrollY > 50 ? 'blur(20px)' : 'none',
+          transform: scrollY > 20 ? 'translateX(-50%) scale(0.95)' : 'translateX(-50%) scale(1)',
         }}
       >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
+        <div className={`w-full transition-all duration-500 ${scrollY > 20 ? 'px-4 md:px-6' : 'px-6 md:px-8'}`}>
+          <div className="flex items-center justify-between h-11">
             {/* Logo */}
-            <Link href="/" className="group">
-              <Logo variant="full" size="sm" theme="dark" className="group-hover:opacity-90 transition-opacity" />
+            <Link
+              href="/"
+              className={`group flex items-center transition-all duration-500 origin-left ${
+                scrollY > 20 ? 'scale-90' : 'scale-100'
+              }`}
+            >
+              <Logo variant="full" size="sm" className="transition-opacity" />
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5 group/nav">
               {['Features', 'Pricing', 'FAQ'].map(item => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="px-4 py-2 text-sm font-bold rounded-full transition-colors hover:text-white"
-                  style={{ color: spotify.textMuted }}
+                  className={`relative font-bold rounded-full transition-all duration-300 hover:bg-white/10 hover:text-white group-hover/nav:opacity-60 hover:!opacity-100 ${
+                    scrollY > 20 ? 'px-3 py-1 text-[10px]' : 'px-4 py-2 text-xs'
+                  }`}
+                  style={{
+                    color: spotify.textMuted,
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase'
+                  }}
                 >
                   {item}
                 </a>
@@ -399,27 +419,44 @@ export default function LandingPage() {
             </nav>
 
             {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className={`hidden md:flex items-center transition-all duration-500 ${scrollY > 20 ? 'gap-3' : 'gap-4'}`}>
               <Link
                 href="/auth/login"
-                className="text-xs font-bold px-4 py-2 transition-colors hover:text-white"
+                className={`font-extrabold transition-all duration-300 hover:text-white hover:scale-[1.05] ${
+                  scrollY > 20 ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
+                }`}
                 style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.4px' }}
               >
                 Sign in
               </Link>
-              <PillButton href="/auth/signup" variant="green" size="sm">
-                Get Started
-                <ArrowRight className="w-4 h-4" />
-              </PillButton>
+              <Link
+                href="/auth/signup"
+                className={`relative inline-flex items-center justify-center font-bold transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] text-black shadow-[0_4px_12px_rgba(30,215,96,0.3)] hover:shadow-[0_4px_20px_rgba(30,215,96,0.5)] ${
+                  scrollY > 20 ? 'px-4 py-2 text-[10px] gap-1' : 'px-5 py-2.5 text-xs gap-1.5'
+                }`}
+                style={{
+                  background: `linear-gradient(135deg, ${spotify.green} 0%, #1db954 100%)`,
+                  borderRadius: '9999px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.4px',
+                }}
+              >
+                <span>Get Started</span>
+                <ArrowRight className={`transition-all duration-500 ${scrollY > 20 ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
+              </Link>
             </div>
 
             {/* Mobile Menu */}
             <button
-              className="md:hidden p-2 rounded-full"
+              className="md:hidden p-2 rounded-full transition-colors hover:bg-white/10"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              style={{ background: spotify.midDark }}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              <Menu className="w-5 h-5" style={{ color: spotify.textBase }} />
+              {mobileMenuOpen ? (
+                <X className="w-4 h-4 text-white" />
+              ) : (
+                <Menu className="w-4 h-4" style={{ color: spotify.textBase }} />
+              )}
             </button>
           </div>
         </div>
@@ -427,26 +464,50 @@ export default function LandingPage() {
         {/* Mobile Menu Panel */}
         {mobileMenuOpen && (
           <div
-            className="md:hidden px-4 py-4 space-y-2"
-            style={{ background: spotify.darkSurface }}
+            className="md:hidden absolute top-[calc(100%+0.5rem)] left-0 right-0 p-4 rounded-3xl border border-white/10 space-y-2 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300"
+            style={{
+              background: 'rgba(18,18,18,0.95)',
+              backdropFilter: 'blur(20px)'
+            }}
           >
             {['Features', 'Pricing', 'FAQ'].map(item => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 text-sm font-bold rounded-lg"
-                style={{ color: spotify.textMuted, background: spotify.midDark }}
+                className="block px-5 py-3 text-xs font-extrabold rounded-full transition-colors hover:bg-white/10"
+                style={{
+                  color: spotify.textMuted,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase'
+                }}
               >
                 {item}
               </a>
             ))}
-            <div className="pt-3 space-y-2">
-              <Link href="/auth/login" className="block text-center py-3 text-sm font-bold rounded-full" style={{ color: spotify.textMuted }}>
+            <div className="pt-2 grid grid-cols-2 gap-2">
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center py-3 text-xs font-bold rounded-full transition-colors hover:bg-white/10 border border-white/10"
+                style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.2px' }}
+              >
                 Sign in
               </Link>
-              <Link href="/auth/signup" className="block text-center py-3 text-sm font-bold rounded-full" style={{ background: spotify.green, color: '#000' }}>
-                Get Started Free
+              <Link
+                href="/auth/signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center py-3 text-xs font-bold rounded-full transition-transform hover:scale-[1.02]"
+                style={{
+                  background: spotify.green,
+                  color: '#000',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.2px'
+                }}
+              >
+                Get Started
               </Link>
             </div>
           </div>
@@ -454,7 +515,15 @@ export default function LandingPage() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-500" style={{ backgroundImage: "url('/hero-bg.png')" }}>
+      <section 
+        className="relative pt-32 pb-24 px-6 overflow-hidden transition-all duration-500" 
+        style={{ 
+          backgroundImage: "url('/hero-bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat"
+        }}
+      >
         {/* Ambient Gradient Overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
         <div className="relative max-w-4xl mx-auto text-center z-10">
@@ -488,7 +557,7 @@ export default function LandingPage() {
               Start Free
               <ArrowRight className="w-4 h-4" />
             </PillButton>
-            <PillButton href="/auth/login" variant="outlined" size="lg" icon={<Play className="w-4 h-4" style={{ color: spotify.green }} />}>
+            <PillButton href="#demo" variant="outlined" size="lg" icon={<Play className="w-4 h-4" style={{ color: spotify.green }} />}>
               Watch Demo
             </PillButton>
           </div>
@@ -531,6 +600,81 @@ export default function LandingPage() {
                 {name}
               </span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ VIDEO DEMO ═══ */}
+      <section id="demo" className="py-16 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="mb-10">
+            <SectionLabel>Video Walkthrough</SectionLabel>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+              See SmartInvoice in action
+            </h2>
+            <p className="text-sm max-w-md mx-auto" style={{ color: spotify.textMuted }}>
+              Take a 2-minute tour to see how quickly you can generate invoices and receive payments.
+            </p>
+          </div>
+
+          <div 
+            className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer border transition-all duration-300"
+            style={{ 
+              background: spotify.midDark, 
+              borderColor: spotify.borderGray,
+              boxShadow: spotify.shadowHeavy
+            }}
+          >
+            {/* Ambient Background Gradient Glow */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-black via-transparent to-white/5 opacity-80" />
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500" 
+              style={{
+                background: `radial-gradient(circle at center, ${spotify.green} 0%, transparent 70%)`
+              }}
+            />
+
+            {/* Video Placeholder Content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {/* Play Button */}
+              <div 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl relative"
+                style={{ background: spotify.green }}
+              >
+                {/* Glowing rings */}
+                <div className="absolute inset-0 rounded-full animate-ping opacity-30" style={{ background: spotify.green }} />
+                <Play className="w-6 h-6 sm:w-8 sm:h-8 text-black fill-black ml-1" />
+              </div>
+              <span className="mt-4 text-xs font-bold uppercase tracking-widest text-white opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                Click to play demo
+              </span>
+            </div>
+
+            {/* Mock Player Control Bar */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 p-4 flex items-center gap-4 transition-all duration-300 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
+              style={{
+                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
+                borderTop: '1px solid rgba(255,255,255,0.05)'
+              }}
+            >
+              <Play className="w-4 h-4 text-white fill-white cursor-pointer" />
+              
+              {/* Progress bar */}
+              <div className="flex-1 h-1 rounded-full bg-white/30 relative cursor-pointer group/progress">
+                <div className="absolute left-0 top-0 bottom-0 rounded-full" style={{ width: '35%', background: spotify.green }} />
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-white -translate-y-1/3 -translate-x-1/2 left-[35%] opacity-0 group-hover/progress:opacity-100 transition-opacity" />
+              </div>
+              
+              {/* Time & Volume */}
+              <div className="text-[10px] font-bold text-white/80 select-none">
+                01:24 / 03:45
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                <div className="w-1.5 h-2.5 rounded-sm bg-white" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -706,16 +850,10 @@ export default function LandingPage() {
 
             {/* Pro - Featured */}
             <Card
-              className="p-6 relative"
+              className="p-6"
               elevated
               style={{ border: `1px solid ${spotify.green}`, boxShadow: spotify.shadowHeavy }}
             >
-              <div
-                className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold"
-                style={{ background: spotify.green, color: '#000', textTransform: 'uppercase' }}
-              >
-                Most Popular
-              </div>
               <div className="mb-5">
                 <div className="text-xs font-bold" style={{ color: spotify.green }}>Pro</div>
                 <div className="flex items-baseline gap-1">
@@ -829,7 +967,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 sm:col-span-1">
               <Link href="/" className="mb-4 inline-block">
-                <Logo variant="full" size="sm" theme="dark" />
+                <Logo variant="full" size="sm" />
               </Link>
               <p className="text-xs" style={{ color: spotify.textMuted }}>
                 Premium invoicing for modern professionals.
