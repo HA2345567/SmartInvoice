@@ -517,12 +517,6 @@ export default function LandingPage() {
       {/* ═══ HERO ═══ */}
       <section 
         className="relative pt-32 pb-24 px-6 overflow-hidden transition-all duration-500" 
-        style={{ 
-          backgroundImage: "url('/hero-bg.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
-        }}
       >
         {/* Ambient Gradient Overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
@@ -557,8 +551,8 @@ export default function LandingPage() {
               Start Free
               <ArrowRight className="w-4 h-4" />
             </PillButton>
-            <PillButton href="#demo" variant="outlined" size="lg" icon={<Play className="w-4 h-4" style={{ color: spotify.green }} />}>
-              Watch Demo
+            <PillButton href="#demo" variant="outlined" size="lg" icon={<ArrowRight className="w-4 h-4" style={{ color: spotify.green }} />}>
+              Explore App
             </PillButton>
           </div>
 
@@ -604,77 +598,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ VIDEO DEMO ═══ */}
+      {/* ═══ DASHBOARD PREVIEW ═══ */}
       <section id="demo" className="py-16 px-6">
-        <div className="max-w-5xl mx-auto text-center">
+        <div className="max-w-6xl mx-auto text-center">
           <div className="mb-10">
-            <SectionLabel>Video Walkthrough</SectionLabel>
+            <SectionLabel>Dashboard Preview</SectionLabel>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              See SmartInvoice in action
+              A powerful, intuitive workspace
             </h2>
             <p className="text-sm max-w-md mx-auto" style={{ color: spotify.textMuted }}>
-              Take a 2-minute tour to see how quickly you can generate invoices and receive payments.
+              Take a look at the comprehensive business overview and real-time tracking designed to get you paid faster.
             </p>
           </div>
 
           <div 
-            className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer border transition-all duration-300"
+            className="relative rounded-xl overflow-hidden border transition-all duration-300 hover:scale-[1.01]"
             style={{ 
-              background: spotify.midDark, 
               borderColor: spotify.borderGray,
               boxShadow: spotify.shadowHeavy
             }}
           >
-            {/* Ambient Background Gradient Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-black via-transparent to-white/5 opacity-80" />
-            <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500" 
-              style={{
-                background: `radial-gradient(circle at center, ${spotify.green} 0%, transparent 70%)`
-              }}
+            <img 
+              src="/dashboard-screenshot.png" 
+              alt="SmartInvoice Dashboard Preview" 
+              className="w-full h-auto block" 
             />
-
-            {/* Video Placeholder Content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              {/* Play Button */}
-              <div 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl relative"
-                style={{ background: spotify.green }}
-              >
-                {/* Glowing rings */}
-                <div className="absolute inset-0 rounded-full animate-ping opacity-30" style={{ background: spotify.green }} />
-                <Play className="w-6 h-6 sm:w-8 sm:h-8 text-black fill-black ml-1" />
-              </div>
-              <span className="mt-4 text-xs font-bold uppercase tracking-widest text-white opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                Click to play demo
-              </span>
-            </div>
-
-            {/* Mock Player Control Bar */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 p-4 flex items-center gap-4 transition-all duration-300 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
-              style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
-                borderTop: '1px solid rgba(255,255,255,0.05)'
-              }}
-            >
-              <Play className="w-4 h-4 text-white fill-white cursor-pointer" />
-              
-              {/* Progress bar */}
-              <div className="flex-1 h-1 rounded-full bg-white/30 relative cursor-pointer group/progress">
-                <div className="absolute left-0 top-0 bottom-0 rounded-full" style={{ width: '35%', background: spotify.green }} />
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-white -translate-y-1/3 -translate-x-1/2 left-[35%] opacity-0 group-hover/progress:opacity-100 transition-opacity" />
-              </div>
-              
-              {/* Time & Volume */}
-              <div className="text-[10px] font-bold text-white/80 select-none">
-                01:24 / 03:45
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                <div className="w-1.5 h-2.5 rounded-sm bg-white" />
-              </div>
-            </div>
           </div>
         </div>
       </section>
