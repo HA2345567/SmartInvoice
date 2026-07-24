@@ -12,6 +12,9 @@ export interface Address {
     address: string;
     city: string;
     logo?: string;
+    phone?: string;
+    gst?: string;
+    logoUrl?: string;
 }
 
 export interface InvoiceData {
@@ -25,6 +28,8 @@ export interface InvoiceData {
     tax?: number;
     total: number;
     notes?: string;
+    currencySymbol?: string;
+    discount?: number;
 
     // Specific fields
     proforma?: {

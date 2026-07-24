@@ -596,4 +596,83 @@ export class DatabaseService {
       return [];
     }
   }
+
+  static async exportClientsCSV(userId: string): Promise<string> {
+    try {
+      const clients = await this.getClients(userId);
+      const headers = ['ID', 'Name', 'Email', 'Company', 'Address', 'GST Number', 'Currency', 'Active', 'Created At'];
+      
+      const escape = (val: any) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const rows = clients.map(c => [
+        c.id,
+        c.name,
+        c.email,
+        c.company || '',
+        c.address || '',
+        c.gstNumber || '',
+        c.currency || 'USD',
+        c.isActive ? 'Yes' : 'No',
+        c.createdAt
+      ]);
+
+      return [headers.join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+    } catch (error) {
+      console.error('Error exporting clients to CSV:', error);
+      throw error;
+    }
+  }
+
+  static async exportInvoicesCSV(userId: string): Promise<string> {
+    try {
+      const invoices = await this.getInvoices(userId);
+      const headers = [
+        'Invoice ID', 'Invoice Number', 'Client Name', 'Client Email', 'Client Company', 
+        'Client Address', 'Client GST', 'Amount', 'Subtotal', 'Tax Amount', 
+        'Discount Amount', 'Status', 'Date', 'Due Date', 'Paid Date', 
+        'Payment Method', 'Created At'
+      ];
+      
+      const escape = (val: any) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const rows = invoices.map(inv => [
+        inv.id,
+        inv.invoiceNumber,
+        inv.clientName,
+        inv.clientEmail,
+        inv.clientCompany || '',
+        inv.clientAddress || '',
+        inv.clientGST || '',
+        inv.amount,
+        inv.subtotal,
+        inv.taxAmount,
+        inv.discountAmount,
+        inv.status,
+        inv.date,
+        inv.dueDate,
+        inv.paidDate || '',
+        inv.paymentMethod || '',
+        inv.createdAt
+      ]);
+
+      return [headers.join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+    } catch (error) {
+      console.error('Error exporting invoices to CSV:', error);
+      throw error;
+    }
+  }
 }
