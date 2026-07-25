@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       const taxRate = Number(inv.taxRate) || 0;
       const subtotal = Number(inv.subtotal) || 0;
 
-      if (inv.status === 'paid') {
+      if (inv.status !== 'draft') {
         totalRevenue += amount;
         totalTaxCollected += taxAmount;
         if (taxRate > 0) {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     const monthlyTax: { [month: string]: { revenue: number; tax: number } } = {};
     (invoices || [])
-      .filter((i: any) => i.status === 'paid')
+      .filter((i: any) => i.status !== 'draft')
       .forEach((inv: any) => {
         const month = new Date(inv.date || Date.now()).toLocaleString('default', { month: 'short', year: 'numeric' });
         if (!monthlyTax[month]) {

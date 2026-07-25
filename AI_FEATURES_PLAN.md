@@ -14,9 +14,9 @@ Based on the Product Requirements Document (Version 1.0), here is the roadmap fo
 **Goal:** A simplified, floating natural language interface for mobile & desktop.
 **Why First?** It provides a persistent "AI" presence across the entire app immediately.
 
-- [ ] **UI Component:** `AiChatbot` floating action button (FAB) that expands into a glassmorphic panel.
-- [ ] **Animations:** "Breathing" glow effect when idle. Typing indicators.
-- [ ] **Tech:**
+- [x] **UI Component:** `AiChatbot` floating action button (FAB) that expands into a glassmorphic panel.
+- [x] **Animations:** "Breathing" glow effect when idle. Typing indicators.
+- [x] **Tech:**
   - Floating panel with `AnimatePresence`.
   - Integration with `AIAgentService` (mocked initially, then connected to API).
   - Quick actions (Create Invoice, Check Status).
@@ -24,21 +24,21 @@ Based on the Product Requirements Document (Version 1.0), here is the roadmap fo
 ## ⚡ Phase 2: AI Invoice Assistant (Auto-Complete)
 **Goal:** Reduce invoice creation time by 80%.
 
-- [ ] **Smart Client Input:** Enhanced `Combobox` with fuzzy search and "confidence" badges.
-- [ ] **Line Item Suggestions:** "Magic" button next to line items that auto-fills based on selected client.
-- [ ] **Description Enhancer:** A "Sparkle" button in text areas to rewrite text (Formal/Friendly tones).
+- [x] **Smart Client Input:** Enhanced `Combobox` with fuzzy search and "confidence" badges.
+- [x] **Line Item Suggestions:** "Magic" button next to line items that auto-fills based on selected client.
+- [x] **Description Enhancer:** A "Sparkle" button in text areas to rewrite text (Formal/Friendly tones).
 
 ## 🔮 Phase 3: Smart Payment Predictor
 **Goal:** Cash flow visibility.
 
-- [ ] **Dashboard Widget:** "Cash Flow Forecast" graph using `recharts` with a confidence interval area.
-- [ ] **Invoice List Columns:** Add "Predicted Payment Date" column with color-coded risk indicators (Green/Yellow/Red dots).
+- [x] **Dashboard Widget:** "Cash Flow Forecast" graph using `recharts` with a confidence interval area.
+- [x] **Invoice List Columns:** Add "Predicted Payment Date" column with color-coded risk indicators (Green/Yellow/Red dots).
 
 ## 🧾 Phase 4: AI Expense Categorization
 **Goal:** Automated bookkeeping.
 
-- [ ] **Dropzone UI:** "Luxury" file upload area with scanning animations.
-- [ ] **Review Interface:** Card-based review flow where users confirm AI suggestions with a single swipe/click.
+- [x] **Dropzone UI:** "Luxury" file upload area with scanning animations.
+- [x] **Review Interface:** Card-based review flow where users confirm AI suggestions with a single swipe/click.
 
 ---
 

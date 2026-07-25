@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
+import { getNeonSql } from '@/lib/database-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,14 +23,21 @@ export async function GET(request: NextRequest) {
       return invDate >= startDate && invDate <= endDate;
     });
 
-    const expenses: any[] = []; // Expenses table placeholder
+    const sql = getNeonSql();
+    const dbExpenses = await sql`SELECT * FROM expenses WHERE userid = ${user.id} AND date >= ${startDate} AND date <= ${endDate}`;
+    const expenses = (dbExpenses || []).map(e => ({
+      id: e.id,
+      amount: parseFloat(e.amount || 0),
+      category: e.category || 'Other',
+      date: e.date
+    }));
 
-    // Calculate Revenue
-    const paidInvoices = (invoices || []).filter((i: any) => i.status === 'paid');
-    const totalRevenue = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.amount) || 0, 0);
-    const grossRevenue = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.subtotal) || 0, 0);
-    const totalTaxCollected = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.taxAmount) || 0, 0);
-    const totalDiscounts = paidInvoices.reduce((sum: number, i: any) => sum + Number(i.discountAmount) || 0, 0);
+    // Calculate Revenue (Accrual Basis: all non-draft invoices)
+    const activeInvoices = (invoices || []).filter((i: any) => i.status !== 'draft');
+    const totalRevenue = activeInvoices.reduce((sum: number, i: any) => sum + Number(i.amount) || 0, 0);
+    const grossRevenue = activeInvoices.reduce((sum: number, i: any) => sum + Number(i.subtotal) || 0, 0);
+    const totalTaxCollected = activeInvoices.reduce((sum: number, i: any) => sum + Number(i.taxAmount) || 0, 0);
+    const totalDiscounts = activeInvoices.reduce((sum: number, i: any) => sum + Number(i.discountAmount) || 0, 0);
 
     // Calculate Expenses by Category
     const expensesByCategory: { [category: string]: number } = {};
@@ -46,7 +54,7 @@ export async function GET(request: NextRequest) {
     // Monthly breakdown
     const monthlyData: { [month: string]: { revenue: number; expenses: number; profit: number } } = {};
 
-    paidInvoices.forEach((i: any) => {
+    activeInvoices.forEach((i: any) => {
       const month = new Date(i.date || Date.now()).toLocaleString('default', { month: 'short', year: 'numeric' });
       if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0, profit: 0 };
       monthlyData[month].revenue += Number(i.amount) || 0;
@@ -64,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     // Client revenue breakdown
     const clientRevenue: { [client: string]: number } = {};
-    paidInvoices.forEach((i: any) => {
+    activeInvoices.forEach((i: any) => {
       const client = i.clientName || 'Unknown';
       clientRevenue[client] = (clientRevenue[client] || 0) + Number(i.amount) || 0;
     });

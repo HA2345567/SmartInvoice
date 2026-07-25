@@ -57,16 +57,39 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
 
     let expenses: any[];
-    if (category) {
+    if (category && category !== 'all') {
       expenses = await sql`SELECT * FROM expenses WHERE userid = ${user.id} AND category = ${category} ORDER BY date DESC`;
     } else {
       expenses = await sql`SELECT * FROM expenses WHERE userid = ${user.id} ORDER BY date DESC`;
     }
 
-    return NextResponse.json((expenses || []).map(transformExpense));
+    const transformed = (expenses || []).map(transformExpense);
+    const count = transformed.length;
+    const total = transformed.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0);
+    const categoryBreakdown = transformed.reduce((acc: any, exp: any) => {
+      const cat = exp.category || 'Other';
+      acc[cat] = (acc[cat] || 0) + (exp.amount || 0);
+      return acc;
+    }, {});
+
+    return NextResponse.json({
+      expenses: transformed,
+      summary: {
+        total,
+        count,
+        categoryBreakdown
+      }
+    });
   } catch (error) {
     console.error('Get expenses error:', error);
-    return NextResponse.json(([]).map(transformExpense));
+    return NextResponse.json({
+      expenses: [],
+      summary: {
+        total: 0,
+        count: 0,
+        categoryBreakdown: {}
+      }
+    });
   }
 }
 
@@ -101,9 +124,9 @@ export async function POST(request: NextRequest) {
 
     const result = await sql`
       INSERT INTO expenses (
-        id, userid, description, amount, date, category, subcategory, vendor, paymentmethod, receipturl, notes, isrecurring, createdat, updatedat
+        id, userid, description, amount, date, category, subcategory, vendor, paymentmethod, receipturl, notes, isrecurring, recurringfrequency, aicategorized, currency, createdat, updatedat
       ) VALUES (
-        ${id}, ${user.id}, ${data.description.trim()}, ${amount}, ${data.date || now.split('T')[0]}, ${category}, ${subcategory || null}, ${data.vendor?.trim() || null}, ${data.paymentMethod || null}, ${data.receiptUrl || null}, ${data.notes?.trim() || null}, ${data.isRecurring ?? false}, ${now}, ${now}
+        ${id}, ${user.id}, ${data.description.trim()}, ${amount}, ${data.date || now.split('T')[0]}, ${category}, ${subcategory || null}, ${data.vendor?.trim() || null}, ${data.paymentMethod || null}, ${data.receiptUrl || null}, ${data.notes?.trim() || null}, ${data.isRecurring ?? false}, ${data.recurringFrequency || null}, ${data.aiCategorized ?? false}, ${data.currency || 'USD'}, ${now}, ${now}
       )
       RETURNING *
     `;
@@ -117,6 +140,104 @@ export async function POST(request: NextRequest) {
     console.error('Create expense error:', error);
     return NextResponse.json({
       error: 'Failed to create expense',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const user = await getAuthUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const sql = getNeonSql();
+    const data = await request.json();
+
+    if (!data.id) {
+      return NextResponse.json({ error: 'Expense ID is required' }, { status: 400 });
+    }
+
+    const amount = parseFloat(data.amount);
+    if (isNaN(amount) || amount <= 0) {
+      return NextResponse.json({
+        error: 'Please enter a valid amount greater than 0'
+      }, { status: 400 });
+    }
+
+    const category = data.category;
+    const now = new Date().toISOString();
+
+    const result = await sql`
+      UPDATE expenses SET
+        description = ${data.description.trim()},
+        amount = ${amount},
+        currency = ${data.currency || 'USD'},
+        category = ${category},
+        subcategory = ${data.subcategory || null},
+        date = ${data.date},
+        vendor = ${data.vendor?.trim() || null},
+        notes = ${data.notes?.trim() || null},
+        isrecurring = ${data.isRecurring ?? false},
+        recurringfrequency = ${data.recurringFrequency || null},
+        aicategorized = ${data.aiCategorized ?? false},
+        updatedat = ${now}
+      WHERE id = ${data.id} AND userid = ${user.id}
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Expense not found or unauthorized' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      expense: transformExpense(result[0]),
+      message: 'Expense updated successfully'
+    });
+  } catch (error) {
+    console.error('Update expense error:', error);
+    return NextResponse.json({
+      error: 'Failed to update expense',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getAuthUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const sql = getNeonSql();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Expense ID is required' }, { status: 400 });
+    }
+
+    const result = await sql`
+      DELETE FROM expenses
+      WHERE id = ${id} AND userid = ${user.id}
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Expense not found or unauthorized' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Expense deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete expense error:', error);
+    return NextResponse.json({
+      error: 'Failed to delete expense',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
@@ -137,6 +258,9 @@ function transformExpense(data: any): any {
     receiptUrl: data.receipturl,
     notes: data.notes,
     isRecurring: data.isrecurring,
+    recurringFrequency: data.recurringfrequency,
+    aiCategorized: data.aicategorized,
+    currency: data.currency || 'USD',
     createdAt: data.createdat,
     updatedAt: data.updatedat,
   };

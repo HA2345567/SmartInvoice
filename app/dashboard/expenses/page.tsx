@@ -20,6 +20,8 @@ import { Receipt, Plus, Sparkles, Search, Filter, Calendar, DollarSign, Tag, Tre
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { AiExpenseDropzone } from '@/components/ai/expenses/AiExpenseDropzone';
+import { AiExpenseReview, ExpenseItem } from '@/components/ai/expenses/AiExpenseReview';
 
 interface Expense {
   id: string;
@@ -74,6 +76,110 @@ export default function ExpensesPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedExpenses, setScannedExpenses] = useState<ExpenseItem[]>([]);
+
+  const handleFilesSelected = async (files: File[]) => {
+    if (!session?.access_token) return;
+    setIsScanning(true);
+    
+    const newScanned: ExpenseItem[] = [];
+    
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/expenses/scan', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          newScanned.push(data);
+        } else {
+          throw new Error('Failed to scan file');
+        }
+      } catch (error) {
+        console.error('File scan error:', error);
+        toast({
+          title: 'Scanning Error',
+          description: `Could not parse receipt ${file.name}`,
+          variant: 'destructive',
+        });
+      }
+    }
+    
+    if (newScanned.length > 0) {
+      setScannedExpenses(prev => [...prev, ...newScanned]);
+      toast({
+        title: 'Receipts Scanned',
+        description: `Successfully parsed ${newScanned.length} receipt(s)`,
+      });
+    }
+    
+    setIsScanning(false);
+  };
+
+  const handleApproveScanned = async (id: string, correctedData?: Partial<ExpenseItem>) => {
+    const expense = scannedExpenses.find(e => e.id === id);
+    if (!expense) return;
+
+    const dataToSave = {
+      ...expense,
+      ...correctedData
+    };
+
+    try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          description: dataToSave.merchant,
+          amount: dataToSave.amount.toString(),
+          currency: 'USD',
+          category: dataToSave.category,
+          date: dataToSave.date,
+          vendor: dataToSave.merchant,
+          notes: `Receipt uploaded: ${dataToSave.fileName}`,
+          aiCategorized: true
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: 'Expense approved and saved',
+        });
+        setScannedExpenses(prev => prev.filter(e => e.id !== id));
+        fetchExpenses();
+      } else {
+        throw new Error('Failed to save approved expense');
+      }
+    } catch (error) {
+      console.error('Approve scan error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save expense',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectScanned = (id: string) => {
+    setScannedExpenses(prev => prev.filter(e => e.id !== id));
+    toast({
+      title: 'Discarded',
+      description: 'Receipt suggestion discarded',
+    });
+  };
 
   const [formData, setFormData] = useState({
     description: '',
@@ -450,6 +556,31 @@ export default function ExpensesPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* AI Receipt Scanning Area */}
+      <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }} className="p-6">
+        <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <Sparkles className="w-5 h-5" style={{ color: '#1ed760' }} />
+          AI Receipt Scanner
+        </h2>
+        <p className="text-sm mb-4" style={{ color: '#b3b3b3' }}>
+          Upload PDF or images of receipts, and Gemini will automatically extract description, amount, date, and category.
+        </p>
+        <AiExpenseDropzone onFilesSelected={handleFilesSelected} isScanning={isScanning} />
+        
+        {scannedExpenses.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-[#4d4d4d] space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Scanned Receipts (Pending Approval)
+            </h3>
+            <AiExpenseReview
+              expenses={scannedExpenses}
+              onApprove={handleApproveScanned}
+              onReject={handleRejectScanned}
+            />
+          </div>
+        )}
+      </Card>
 
       {/* Summary Cards */}
       {summary && (

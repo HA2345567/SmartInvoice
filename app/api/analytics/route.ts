@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
     const paidInvoices = invoices.filter((inv: any) => inv.status === 'paid').length;
     const pendingInvoices = invoices.filter((inv: any) => inv.status === 'sent' || inv.status === 'overdue').length;
 
-    const averageInvoiceValue = paidInvoices > 0 ? totalRevenue / paidInvoices : 0;
+    const activeInvoices = invoices.filter((inv: any) => inv.status !== 'draft');
+    const averageInvoiceValue = activeInvoices.length > 0
+      ? activeInvoices.reduce((sum: number, inv: any) => sum + (inv.amount || 0), 0) / activeInvoices.length
+      : 0;
 
     // Monthly data calculation
     const monthlyData = calculateMonthlyData(invoices);

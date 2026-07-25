@@ -511,6 +511,53 @@ export default function InvoicesPage() {
     }
   };
 
+  const getPaymentRiskIndicator = (dueDateStr: string, status: string) => {
+    if (status === 'draft') return null;
+    const days = getDaysOverdue(dueDateStr);
+    
+    if (days < 0) {
+      const remainingDays = Math.abs(days);
+      if (remainingDays > 5) {
+        return (
+          <span className="flex items-center text-xs text-green-400 font-medium">
+            <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
+            Low Risk
+          </span>
+        );
+      } else {
+        return (
+          <span className="flex items-center text-xs text-yellow-400 font-medium">
+            <span className="w-2 h-2 rounded-full bg-yellow-500 mr-1.5 shadow-[0_0_8px_rgba(234,179,8,0.6)] animate-pulse" />
+            Medium Risk
+          </span>
+        );
+      }
+    } else {
+      return (
+        <span className="flex items-center text-xs text-red-400 font-medium">
+          <span className="w-2 h-2 rounded-full bg-red-500 mr-1.5 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" />
+          High Risk
+        </span>
+      );
+    }
+  };
+
+  const calculatePredictedPaymentDate = (createdAtStr: string, status: string) => {
+    if (!createdAtStr) return 'N/A';
+    try {
+      const baseDate = new Date(createdAtStr);
+      if (isNaN(baseDate.getTime())) return 'N/A';
+      
+      const daysToAdd = status === 'overdue' ? 35 : 14;
+      const predictedDate = new Date(baseDate);
+      predictedDate.setDate(baseDate.getDate() + daysToAdd);
+      
+      return formatDate(predictedDate.toISOString());
+    } catch {
+      return 'N/A';
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -731,6 +778,16 @@ export default function InvoicesPage() {
                           )}
                         </span>
                       </div>
+                      {invoice.status !== 'paid' && invoice.status !== 'draft' && (
+                        <div className="flex items-center space-x-3 text-xs mt-2 bg-purple-950/25 border border-purple-500/10 px-2.5 py-1 rounded-md w-fit backdrop-blur-sm">
+                          <span className="flex items-center text-purple-300">
+                            <Sparkles className="w-3 h-3 mr-1.5 text-purple-400 animate-pulse" />
+                            AI Forecast: Pay by {calculatePredictedPaymentDate(invoice.createdAt || invoice.date, invoice.status)}
+                          </span>
+                          <span className="text-gray-600">|</span>
+                          {getPaymentRiskIndicator(invoice.dueDate, invoice.status)}
+                        </div>
+                      )}
                       {invoice.paidDate && (
                         <div className="flex items-center space-x-2 text-sm text-green-400 mt-1">
                           <CheckCircle className="w-3 h-3" />
