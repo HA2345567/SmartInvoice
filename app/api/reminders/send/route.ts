@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
         // Calculate days overdue
         const dueDate = new Date(invoice.dueDate);
         const todayDate = new Date();
-        const daysOverdue = Math.ceil((todayDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysOverdueRaw = Math.ceil((todayDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysOverdue = daysOverdueRaw > 0 ? daysOverdueRaw : (invoice.status === 'overdue' ? 1 : 0);
 
         // Generate reminder message
         const reminderInfo = ReminderService.generateReminderMessage({

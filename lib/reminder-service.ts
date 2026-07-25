@@ -38,11 +38,13 @@ export class ReminderService {
         const diffTime = today.getTime() - dueDate.getTime();
         const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (daysOverdue > 0) {
+        if (daysOverdue > 0 || invoice.status === 'overdue') {
           // Update status to overdue if not already
           if (invoice.status === 'sent') {
             invoice.status = 'overdue';
           }
+
+          const effectiveDaysOverdue = daysOverdue > 0 ? daysOverdue : 1;
 
           overdueInvoices.push({
             id: invoice.id,
@@ -51,7 +53,7 @@ export class ReminderService {
             clientEmail: invoice.clientEmail,
             amount: invoice.amount,
             dueDate: invoice.dueDate,
-            daysOverdue,
+            daysOverdue: effectiveDaysOverdue,
             remindersSent: invoice.remindersSent || 0,
             lastReminderSent: invoice.lastReminderSent
           });

@@ -630,6 +630,17 @@ export class DatabaseService {
     }
   }
 
+  static async getExpenses(userId: string): Promise<any[]> {
+    try {
+      const sql = getSql();
+      const expenses = await sql`SELECT * FROM expenses WHERE userid = ${userId} ORDER BY date DESC`;
+      return expenses || [];
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      throw error;
+    }
+  }
+
   static async exportInvoicesCSV(userId: string): Promise<string> {
     try {
       const invoices = await this.getInvoices(userId);

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
-import { getNeonSql } from '@/lib/database-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,14 +22,18 @@ export async function GET(request: NextRequest) {
       return invDate >= startDate && invDate <= endDate;
     });
 
-    const sql = getNeonSql();
-    const dbExpenses = await sql`SELECT * FROM expenses WHERE userid = ${user.id} AND date >= ${startDate} AND date <= ${endDate}`;
-    const expenses = (dbExpenses || []).map(e => ({
-      id: e.id,
-      amount: parseFloat(e.amount || 0),
-      category: e.category || 'Other',
-      date: e.date
-    }));
+    const dbExpenses = await DatabaseService.getExpenses(user.id);
+    const expenses = (dbExpenses || [])
+      .filter((e: any) => {
+        const eDate = e.date || '';
+        return eDate >= startDate && eDate <= endDate;
+      })
+      .map((e: any) => ({
+        id: e.id,
+        amount: parseFloat(e.amount || 0),
+        category: e.category || 'Other',
+        date: e.date
+      }));
 
     // Calculate Revenue (Accrual Basis: all non-draft invoices)
     const activeInvoices = (invoices || []).filter((i: any) => i.status !== 'draft');
