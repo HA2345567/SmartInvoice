@@ -1,33 +1,113 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from 'axios';
 
-function getGenAI() {
-    const apiKey = process.env.GOOGLE_API_KEY;
+export interface AIConfig {
+    provider: string; // 'gemini' | 'openai' | 'custom'
+    apiKey: string;
+    model: string;
+    baseUrl?: string;
+}
+
+async function callAI(config: AIConfig, prompt: string, systemInstruction?: string, base64Image?: string, mimeType?: string): Promise<string> {
+    const provider = config.provider || 'gemini';
+    const apiKey = config.apiKey;
+    const model = config.model;
+    const baseUrl = config.baseUrl;
+
     if (!apiKey) {
-        throw new Error("GOOGLE_API_KEY is not configured");
+        throw new Error('AI API key is missing. Please configure it in Settings.');
     }
-    return new GoogleGenerativeAI(apiKey);
+
+    if (provider === 'gemini') {
+        const defaultBaseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+        const activeBaseUrl = baseUrl || defaultBaseUrl;
+        const activeModel = model || 'gemini-2.0-flash';
+        const url = `${activeBaseUrl}/${activeModel}:generateContent?key=${apiKey}`;
+
+        const parts: any[] = [];
+        if (base64Image && mimeType) {
+            parts.push({
+                inlineData: {
+                    mimeType: mimeType,
+                    data: base64Image
+                }
+            });
+        }
+        parts.push({ text: prompt });
+
+        const body: any = {
+            contents: [{ parts }]
+        };
+
+        if (systemInstruction) {
+            body.systemInstruction = {
+                parts: [{ text: systemInstruction }]
+            };
+        }
+
+        const response = await axios.post(url, body);
+        const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) {
+            console.error('Gemini API Error Response:', response.data);
+            throw new Error('Invalid response received from Gemini API');
+        }
+        return text;
+    } else {
+        // OpenAI or OpenAI-Compatible Custom Provider
+        const defaultBaseUrl = 'https://api.openai.com/v1';
+        const activeBaseUrl = baseUrl || defaultBaseUrl;
+        const activeModel = model || 'gpt-4o-mini';
+        const url = `${activeBaseUrl}/chat/completions`;
+
+        const messages: any[] = [];
+        if (systemInstruction) {
+            messages.push({ role: 'system', content: systemInstruction });
+        }
+
+        if (base64Image && mimeType) {
+            messages.push({
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: `data:${mimeType};base64,${base64Image}`
+                        }
+                    }
+                ]
+            });
+        } else {
+            messages.push({ role: 'user', content: prompt });
+        }
+
+        const response = await axios.post(url, {
+            model: activeModel,
+            messages
+        }, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const text = response.data?.choices?.[0]?.message?.content;
+        if (!text) {
+            console.error('OpenAI-Compatible API Error Response:', response.data);
+            throw new Error('Invalid response received from OpenAI-compatible API');
+        }
+        return text;
+    }
 }
 
-function getModel(modelName = "gemini-2.0-flash") {
-    return getGenAI().getGenerativeModel({ model: modelName });
-}
-
-export const geminiModel = { generateContent: (...args: Parameters<ReturnType<typeof getModel>['generateContent']>) => getModel().generateContent(...args) };
-export const geminiModelVision = { generateContent: (...args: Parameters<ReturnType<typeof getModel>['generateContent']>) => getModel().generateContent(...args) };
-
-export async function enhanceText(text: string, mode: 'formal' | 'friendly' | 'detailed'): Promise<string> {
+export async function enhanceText(config: AIConfig, text: string, mode: 'formal' | 'friendly' | 'detailed'): Promise<string> {
     const prompt = `Enhance the following text to be more ${mode} for an invoice description or notes. 
   Original text: "${text}"
   Return only the enhanced text, nothing else.`;
 
-    const result = await geminiModel.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    return callAI(config, prompt);
 }
 
-export async function scanReceipt(base64Image: string, mimeType: string) {
-    // If it's a PDF, we might need different handling depending on the library, 
-    // but Gemini 1.5 handles PDF bytes directly in the same way as images.
+export async function scanReceipt(config: AIConfig, base64Image: string, mimeType: string) {
     const prompt = `Extract information from this receipt/document. 
   Focus on: merchant/vendor name, total amount, date, and category (e.g., Office, Travel, Software, Food, etc.).
   Return the data in EXACTLY this JSON format:
@@ -39,18 +119,7 @@ export async function scanReceipt(base64Image: string, mimeType: string) {
     "confidence": 95
   }`;
 
-    const result = await geminiModelVision.generateContent([
-        {
-            inlineData: {
-                data: base64Image,
-                mimeType: mimeType
-            }
-        },
-        { text: prompt }
-    ]);
-
-    const response = await result.response;
-    const text = response.text();
+    const text = await callAI(config, prompt, undefined, base64Image, mimeType);
     console.log("RAW AI RESPONSE:", text);
 
     // Clean potential markdown code blocks

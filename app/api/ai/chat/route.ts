@@ -2,24 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
+import axios from 'axios';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
-        const apiKey = process.env.GOOGLE_API_KEY;
-
-        if (!apiKey) {
-            return NextResponse.json(
-                { error: 'Google API key is not configured' },
-                { status: 500 }
-            );
-        }
-
         // Authenticate user
         const user = await getAuthUser(request);
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Fetch user data via Neon DB DatabaseService
+        const userProfile = await DatabaseService.getUserById(user.id);
+        const apiKey = userProfile?.googleApiKey;
+
+        if (!apiKey) {
+            return NextResponse.json(
+                { error: 'AI features are disabled. Please configure your Google Gemini API Key in Settings.' },
+                { status: 400 }
+            );
         }
 
         const { messages } = await request.json();
@@ -31,8 +34,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Fetch user data via Neon DB DatabaseService
-        const userProfile = await DatabaseService.getUserById(user.id);
         const clientsData = await DatabaseService.getClients(user.id);
         const invoicesData = await DatabaseService.getInvoices(user.id);
 
@@ -117,30 +118,64 @@ Schema of "invoiceDraft" when generating/drafting an invoice:
 If no invoice draft is being generated, set "invoiceDraft" to null.
 `;
 
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash',
-            systemInstruction: systemInstruction,
-        });
+        let text = '';
+        const provider = userProfile?.aiProvider || 'gemini';
 
-        // Convert chat history to Gemini format
-        const history = messages.slice(0, -1).map((msg: any) => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
-        }));
+        if (provider === 'gemini') {
+            const model = genAI.getGenerativeModel({
+                model: userProfile?.aiModel || 'gemini-2.0-flash',
+                systemInstruction: systemInstruction,
+            });
 
-        const lastMessage = messages[messages.length - 1].content;
+            // Convert chat history to Gemini format
+            const history = messages.slice(0, -1).map((msg: any) => ({
+                role: msg.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
+            }));
 
-        const chat = model.startChat({
-            history: history,
-            generationConfig: {
-                maxOutputTokens: 1200,
-                responseMimeType: 'application/json',
-            },
-        });
+            const lastMessage = messages[messages.length - 1].content;
 
-        const result = await chat.sendMessage(lastMessage);
-        const response = await result.response;
-        const text = response.text();
+            const chat = model.startChat({
+                history: history,
+                generationConfig: {
+                    maxOutputTokens: 1200,
+                    responseMimeType: 'application/json',
+                },
+            });
+
+            const result = await chat.sendMessage(lastMessage);
+            const response = await result.response;
+            text = response.text();
+        } else {
+            const messagesToSend: any[] = [
+                { role: 'system', content: systemInstruction }
+            ];
+
+            messages.forEach((msg: any) => {
+                messagesToSend.push({
+                    role: msg.role === 'assistant' ? 'assistant' : 'user',
+                    content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                });
+            });
+
+            const defaultBaseUrl = 'https://api.openai.com/v1';
+            const activeBaseUrl = userProfile?.aiBaseUrl || defaultBaseUrl;
+            const activeModel = userProfile?.aiModel || 'gpt-4o-mini';
+            const url = `${activeBaseUrl}/chat/completions`;
+
+            const response = await axios.post(url, {
+                model: activeModel,
+                messages: messagesToSend,
+                response_format: { type: "json_object" }
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            text = response.data?.choices?.[0]?.message?.content || '';
+        }
 
         try {
             const parsed = JSON.parse(text);
@@ -149,14 +184,14 @@ If no invoice draft is being generated, set "invoiceDraft" to null.
                 invoiceDraft: parsed.invoiceDraft || null,
             });
         } catch (e) {
-            console.error('Failed to parse Gemini JSON output:', text);
+            console.error('Failed to parse AI JSON output:', text);
             return NextResponse.json({
                 content: text,
                 invoiceDraft: null,
             });
         }
     } catch (error: any) {
-        console.error('Gemini API Error:', error);
+        console.error('AI API Error:', error);
         return NextResponse.json(
             { error: error.message || 'Failed to process AI request' },
             { status: 500 }

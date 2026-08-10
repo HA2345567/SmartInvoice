@@ -29,6 +29,10 @@ async function initDb() {
         reminderemails BOOLEAN DEFAULT true,
         reminderdays INTEGER DEFAULT 7,
         autogeneratenumbers BOOLEAN DEFAULT true,
+        aiprovider TEXT DEFAULT 'gemini',
+        aiapikey TEXT,
+        aimodel TEXT DEFAULT 'gemini-2.0-flash',
+        aibaseurl TEXT,
         avatar TEXT,
         createdat TEXT,
         updatedat TEXT
@@ -86,6 +90,9 @@ async function initDb() {
         emailsent BOOLEAN DEFAULT false,
         reminderssent INTEGER DEFAULT 0,
         lastremindersent TEXT,
+        theme TEXT DEFAULT 'ultra-luxury',
+        invoicetype TEXT DEFAULT 'sales',
+        customcolors TEXT,
         createdat TEXT,
         updatedat TEXT
       );
@@ -107,6 +114,9 @@ async function initDb() {
         receipturl TEXT,
         notes TEXT,
         isrecurring BOOLEAN DEFAULT false,
+        recurringfrequency TEXT,
+        aicategorized BOOLEAN DEFAULT false,
+        currency TEXT DEFAULT 'USD',
         createdat TEXT,
         updatedat TEXT
       );

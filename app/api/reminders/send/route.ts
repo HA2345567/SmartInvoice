@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
         // Send email if configured and requested
         if (sendEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
           try {
-            console.log('EMAIL_USER:', process.env.EMAIL_USER, 'EMAIL_PASS:', process.env.EMAIL_PASS);
             const emailService = new EmailService();
             emailSent = await emailService.sendEmail({
               to: invoice.clientEmail,

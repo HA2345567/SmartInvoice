@@ -1,4 +1,9 @@
 import { neon } from '@neondatabase/serverless';
+import dns from 'dns';
+
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 // Singleton Neon SQL client to reuse HTTP connections across queries
 const connectionString = process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@ep-placeholder.neon.tech/neondb';
@@ -81,7 +86,24 @@ export class DatabaseService {
       avatar: data.avatar,
       createdAt: data.createdat || data.created_at,
       updatedAt: data.updatedat || data.updated_at,
-      password: data.password
+      password: data.password,
+      phone: data.phone,
+      address: data.address,
+      gstNumber: data.gstnumber,
+      currency: data.currency || 'USD',
+      invoicePrefix: data.invoiceprefix || 'INV',
+      defaultTerms: data.defaultterms || 'Payment due within 30 days',
+      defaultNotes: data.defaultnotes || 'Thank you for your business!',
+      defaultGstRate: parseFloat(data.defaultgstrate ?? 18),
+      defaultTaxRate: parseFloat(data.defaulttaxrate ?? 0),
+      emailNotifications: data.emailnotifications ?? true,
+      reminderEmails: data.reminderemails ?? true,
+      reminderDays: parseInt(data.reminderdays ?? 7),
+      autoGenerateNumbers: data.autogeneratenumbers ?? true,
+      aiProvider: data.aiprovider || 'gemini',
+      aiApiKey: data.aiapikey,
+      aiModel: data.aimodel || 'gemini-2.0-flash',
+      aiBaseUrl: data.aibaseurl
     };
   }
 

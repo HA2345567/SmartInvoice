@@ -37,6 +37,10 @@ export async function GET(request: NextRequest) {
       reminderEmails: profile.reminderEmails ?? true,
       reminderDays: profile.reminderDays || 7,
       autoGenerateNumbers: profile.autoGenerateNumbers ?? true,
+      aiProvider: profile.aiProvider || 'gemini',
+      aiApiKey: profile.aiApiKey || '',
+      aiModel: profile.aiModel || 'gemini-2.0-flash',
+      aiBaseUrl: profile.aiBaseUrl || '',
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
     };
@@ -79,7 +83,11 @@ export async function PUT(request: NextRequest) {
     const reminderEmails = data.reminderEmails ?? current.reminderEmails;
     const reminderDays = data.reminderDays ?? current.reminderDays;
     const autoGenerateNumbers = data.autoGenerateNumbers ?? current.autoGenerateNumbers;
-
+    const aiProvider = data.aiProvider ?? current.aiProvider ?? 'gemini';
+    const aiApiKey = data.aiApiKey ?? current.aiApiKey;
+    const aiModel = data.aiModel ?? current.aiModel ?? 'gemini-2.0-flash';
+    const aiBaseUrl = data.aiBaseUrl ?? current.aiBaseUrl;
+ 
     await sql`
       UPDATE users
       SET name = ${name}, company = ${company}, phone = ${phone}, address = ${address},
@@ -87,7 +95,8 @@ export async function PUT(request: NextRequest) {
           defaultterms = ${defaultTerms}, defaultnotes = ${defaultNotes}, defaultgstrate = ${defaultGstRate},
           defaulttaxrate = ${defaultTaxRate}, emailnotifications = ${emailNotifications},
           reminderemails = ${reminderEmails}, reminderdays = ${reminderDays},
-          autogeneratenumbers = ${autoGenerateNumbers}, updatedat = ${now}
+          autogeneratenumbers = ${autoGenerateNumbers}, aiprovider = ${aiProvider}, 
+          aiapikey = ${aiApiKey}, aimodel = ${aiModel}, aibaseurl = ${aiBaseUrl}, updatedat = ${now}
       WHERE id = ${user.id}
     `;
 

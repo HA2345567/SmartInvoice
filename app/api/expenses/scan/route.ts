@@ -21,8 +21,21 @@ export async function POST(request: NextRequest) {
         const base64 = Buffer.from(buffer).toString('base64');
         const mimeType = file.type;
 
-        // Scan with Gemini
-        const result = await scanReceipt(base64, mimeType);
+        const aiConfig = {
+            provider: (user as any).aiProvider || 'gemini',
+            apiKey: (user as any).aiApiKey,
+            model: (user as any).aiModel || 'gemini-2.0-flash',
+            baseUrl: (user as any).aiBaseUrl
+        };
+
+        if (!aiConfig.apiKey) {
+            return NextResponse.json({
+                error: 'AI feature is disabled. Please configure your AI API Key in Settings.'
+            }, { status: 400 });
+        }
+
+        // Scan with AI
+        const result = await scanReceipt(aiConfig, base64, mimeType);
 
         return NextResponse.json({
             ...result,

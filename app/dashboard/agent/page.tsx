@@ -6,13 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bot, Mail, CheckCircle, AlertCircle, RefreshCw, Send, Sparkles, Zap, Shield, ChevronRight } from 'lucide-react';
-import { AIAgentService, FollowUpAction } from '@/lib/ai-agent';
+import type { FollowUpAction } from '@/lib/ai-agent';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function AgentPage() {
-    const { user } = useAuth();
+    const { session, user } = useAuth();
+    const accessToken = session?.access_token;
     const { toast } = useToast();
     const [actions, setActions] = useState<FollowUpAction[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,17 +21,25 @@ export default function AgentPage() {
     const [executedCount, setExecutedCount] = useState(0);
 
     useEffect(() => {
-        if (user) {
+        if (accessToken) {
             loadActions();
         }
-    }, [user]);
+    }, [accessToken]);
 
     const loadActions = async () => {
+        if (!accessToken) return;
         setLoading(true);
         try {
-            if (user) {
-                const foundActions = await AIAgentService.scanForFollowUps(user.id);
+            const response = await fetch('/api/agent/scan', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            if (response.ok) {
+                const foundActions = await response.json();
                 setActions(foundActions);
+            } else {
+                throw new Error('Failed to retrieve follow-up actions');
             }
         } catch (error: any) {
             console.error("Failed to scan for follow-ups", error);
@@ -45,12 +54,22 @@ export default function AgentPage() {
     };
 
     const executeAll = async () => {
-        if (!user) return;
+        if (!accessToken) return;
         setProcessing(true);
         let count = 0;
         try {
             for (const action of actions) {
-                await AIAgentService.executeFollowUp(user.id, action);
+                const response = await fetch('/api/agent/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(action)
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to execute follow-up');
+                }
                 count++;
             }
             setExecutedCount(prev => prev + count);

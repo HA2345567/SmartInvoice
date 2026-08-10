@@ -30,6 +30,10 @@ interface Settings {
   reminderEmails: boolean;
   reminderDays: number;
   autoGenerateNumbers: boolean;
+  aiProvider: string;
+  aiApiKey: string;
+  aiModel: string;
+  aiBaseUrl: string;
 }
 
 const defaultSettings: Settings = {
@@ -48,6 +52,10 @@ const defaultSettings: Settings = {
   reminderEmails: true,
   reminderDays: 7,
   autoGenerateNumbers: true,
+  aiProvider: 'gemini',
+  aiApiKey: '',
+  aiModel: 'gemini-2.0-flash',
+  aiBaseUrl: '',
 };
 
 export default function SettingsPage() {
@@ -90,6 +98,10 @@ export default function SettingsPage() {
           reminderEmails: data.reminderEmails ?? true,
           reminderDays: data.reminderDays || 7,
           autoGenerateNumbers: data.autoGenerateNumbers ?? true,
+          aiProvider: data.aiProvider || 'gemini',
+          aiApiKey: data.aiApiKey || '',
+          aiModel: data.aiModel || 'gemini-2.0-flash',
+          aiBaseUrl: data.aiBaseUrl || '',
         });
       }
     } catch (error) {
@@ -182,7 +194,7 @@ export default function SettingsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto" style={{ background: '#181818', borderRadius: '8px' }}>
+        <TabsList className="grid w-full grid-cols-5 h-auto" style={{ background: '#181818', borderRadius: '8px' }}>
           <TabsTrigger value="profile" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white text-xs sm:text-sm">
             <User className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Profile</span>
@@ -198,6 +210,10 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white text-xs sm:text-sm">
             <Bell className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white text-xs sm:text-sm">
+            <Sparkles className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">AI Settings</span>
           </TabsTrigger>
         </TabsList>
 
@@ -568,6 +584,89 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-sm" style={{ color: '#b3b3b3' }}>
                   Predict payment likelihood and optimize collections
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* AI Settings Tab */}
+        <TabsContent value="ai" className="space-y-6">
+          <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'rgba(30,215,96,0.1)' }}>
+                  <Sparkles className="w-5 h-5" style={{ color: '#1ed760' }} />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Bring Your Own Key (BYOK)</CardTitle>
+                  <CardDescription style={{ color: '#b3b3b3' }}>
+                    Configure your own AI API Key to enable AI-powered assistant features.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="aiProvider" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>AI Provider</Label>
+                <select
+                  id="aiProvider"
+                  value={settings.aiProvider}
+                  onChange={(e) => handleInputChange('aiProvider', e.target.value)}
+                  className="w-full h-12 px-3 text-white"
+                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                >
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="custom">Custom / OpenAI-Compatible (e.g. DeepSeek, OpenRouter)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aiApiKey" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>API Key</Label>
+                <Input
+                  id="aiApiKey"
+                  type="password"
+                  value={settings.aiApiKey}
+                  onChange={(e) => handleInputChange('aiApiKey', e.target.value)}
+                  className="h-12 text-white font-mono"
+                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                  placeholder="sk-... or AIzaSy..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aiModel" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Model Name</Label>
+                <Input
+                  id="aiModel"
+                  value={settings.aiModel}
+                  onChange={(e) => handleInputChange('aiModel', e.target.value)}
+                  className="h-12 text-white"
+                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                  placeholder={settings.aiProvider === 'gemini' ? 'gemini-2.0-flash' : 'gpt-4o-mini'}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aiBaseUrl" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
+                  Custom Base URL <span className="text-xs font-normal" style={{ color: '#666' }}>(Optional)</span>
+                </Label>
+                <Input
+                  id="aiBaseUrl"
+                  value={settings.aiBaseUrl}
+                  onChange={(e) => handleInputChange('aiBaseUrl', e.target.value)}
+                  className="h-12 text-white"
+                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                  placeholder={
+                    settings.aiProvider === 'gemini' 
+                      ? 'https://generativelanguage.googleapis.com/v1beta/models' 
+                      : settings.aiProvider === 'openai' 
+                        ? 'https://api.openai.com/v1' 
+                        : 'https://openrouter.ai/api/v1'
+                  }
+                />
+                <p className="text-xs" style={{ color: '#b3b3b3' }}>
+                  Leave empty to use the default URL for the selected provider.
                 </p>
               </div>
             </CardContent>

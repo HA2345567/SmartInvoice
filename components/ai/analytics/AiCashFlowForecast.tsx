@@ -134,7 +134,7 @@ export function AiCashFlowForecast({ monthlyData = [] }: AiCashFlowForecastProps
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="month" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                            <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value: any) => `$${value}`} />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }}
                                 itemStyle={{ color: '#fff' }}

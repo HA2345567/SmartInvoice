@@ -52,7 +52,6 @@ export async function POST(
     });
 
     // Send email using Nodemailer
-    console.log('EMAIL_USER:', process.env.EMAIL_USER, 'EMAIL_PASS:', process.env.EMAIL_PASS);
     const emailService = new EmailService(); // Uses Gmail env vars by default
     const emailSent = await emailService.sendEmail({
       to: invoice.clientEmail,
