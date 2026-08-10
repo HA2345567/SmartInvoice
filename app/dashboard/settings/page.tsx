@@ -244,13 +244,6 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-lg font-bold text-white">{settings.name || 'Your Name'}</p>
                   <p className="text-sm" style={{ color: '#b3b3b3' }}>{user?.email}</p>
-                  <Badge
-                    className="mt-2"
-                    style={{ background: 'rgba(30,215,96,0.15)', color: '#1ed760', border: '1px solid rgba(30,215,96,0.3)' }}
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Free Plan
-                  </Badge>
                 </div>
               </div>
 
@@ -292,27 +285,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Upgrade prompt */}
-              <div
-                className="p-4 rounded-lg"
-                style={{ background: 'rgba(30,215,96,0.1)', border: '1px solid rgba(30,215,96,0.2)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Zap className="w-5 h-5" style={{ color: '#1ed760' }} />
-                    <div>
-                      <p className="text-sm font-bold text-white">Upgrade to Pro</p>
-                      <p className="text-xs" style={{ color: '#b3b3b3' }}>Unlock logo upload, custom themes, and more</p>
-                    </div>
-                  </div>
-                  <Button
-                    className="font-bold text-xs"
-                    style={{ background: '#1ed760', color: '#000', borderRadius: '9999px' }}
-                  >
-                    Upgrade
-                  </Button>
-                </div>
-              </div>
+
             </CardContent>
           </Card>
         </TabsContent>

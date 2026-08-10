@@ -27,7 +27,7 @@ export const ProfessionalFeatures = React.memo(({
     setLoading,
     toast
 }: ProfessionalFeaturesProps) => {
-    const isFree = user?.subscriptionTier === 'free';
+    const isFree = false;
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

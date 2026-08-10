@@ -400,7 +400,7 @@ export default function LandingPage() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-0.5 group/nav">
-              {['Features', 'Pricing', 'FAQ'].map(item => (
+              {['Features', 'FAQ'].map(item => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -470,7 +470,7 @@ export default function LandingPage() {
               backdropFilter: 'blur(20px)'
             }}
           >
-            {['Features', 'Pricing', 'FAQ'].map(item => (
+            {['Features', 'FAQ'].map(item => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
@@ -640,63 +640,95 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Feature highlights - Large cards */}
-          <div className="grid lg:grid-cols-2 gap-4 mb-4">
-            <Card className="p-6" elevated>
-              <div
-                className="w-11 h-11 rounded-full flex items-center justify-center mb-4"
-                style={{ background: 'rgba(30,215,96,0.1)' }}
-              >
-                <Sparkles className="w-5 h-5" style={{ color: spotify.green }} />
+          {/* Feature highlights - Alternating Grid with Screenshots */}
+          <div className="space-y-20 mb-8">
+            {/* Section 1: Create Invoice */}
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Image Box */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
+                <img 
+                  src="/features/create-invoice.png" 
+                  alt="Create New Invoice Dashboard" 
+                  className="w-full h-auto block rounded-2xl"
+                />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">AI Invoice Generation</h3>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: spotify.textMuted }}>
-                Describe your work in natural language. Our AI creates professional invoices with perfect line items and pricing in seconds.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['Natural Language', 'Smart Pricing', 'Instant Draft'].map(tag => (
-                  <Badge key={tag}>{tag}</Badge>
-                ))}
+              
+              {/* Text */}
+              <div className="space-y-4">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  Create Professional Invoices
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: spotify.textMuted }}>
+                  An intuitive invoice builder that lets you customize templates, choose modern themes, and customize visual appearance. Easily configure tax and discount rates with real-time dynamic total calculations.
+                </p>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-6" elevated>
-              <div
-                className="w-11 h-11 rounded-full flex items-center justify-center mb-4"
-                style={{ background: 'rgba(255,164,43,0.1)' }}
-              >
-                <Zap className="w-5 h-5" style={{ color: spotify.warning }} />
+            {/* Section 2: Smart Reminders */}
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Text */}
+              <div className="space-y-4 order-2 lg:order-1">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  Smart Reminders & Overdue Tracking
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: spotify.textMuted }}>
+                  Keep client relations professional while collecting payments faster. Our smart timing adjustments analyze invoice sizes and payment histories, scheduling automated escalation updates to recover unpaid balances.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-white mb-2">Instant Payments</h3>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: spotify.textMuted }}>
-                Embedded payment links let clients pay instantly. Stripe, Razorpay, UPI, and bank transfers supported.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['Stripe', 'UPI', 'Bank Transfer'].map(tag => (
-                  <Badge key={tag}>{tag}</Badge>
-                ))}
-              </div>
-            </Card>
-          </div>
 
-          {/* Feature grid - Small cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { icon: BarChart3, title: 'Analytics', desc: 'Revenue trends and cash flow forecasts.' },
-              { icon: Clock, title: 'Auto Reminders', desc: 'Scheduled payment reminders.' },
-              { icon: Globe, title: 'Multi-currency', desc: 'Bill in 50+ currencies.' },
-              { icon: Shield, title: 'Bank Security', desc: 'SOC 2 compliant, encrypted.' },
-              { icon: Users, title: 'Client Portal', desc: 'White-label client portal.' },
-              { icon: Repeat, title: 'Recurring', desc: 'Set-and-forget billing.' },
-              { icon: Download, title: 'PDF Export', desc: 'Pixel-perfect PDFs.' },
-              { icon: Activity, title: 'Tracking', desc: 'Real-time payment tracking.' },
-            ].map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="p-4">
-                <Icon className="w-5 h-5 mb-3" style={{ color: spotify.green }} />
-                <h4 className="text-sm font-bold text-white mb-1">{title}</h4>
-                <p className="text-xs" style={{ color: spotify.textMuted }}>{desc}</p>
-              </Card>
-            ))}
+              {/* Image Box */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] order-1 lg:order-2">
+                <img 
+                  src="/features/smart-reminders.png" 
+                  alt="Smart Reminders Dashboard" 
+                  className="w-full h-auto block rounded-2xl"
+                />
+              </div>
+            </div>
+
+            {/* Section 3: Tax Center */}
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Image Box */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
+                <img 
+                  src="/features/tax-center.png" 
+                  alt="Tax Center Dashboard" 
+                  className="w-full h-auto block rounded-2xl"
+                />
+              </div>
+
+              {/* Text */}
+              <div className="space-y-4">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  Automated GST & Tax Reporting
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: spotify.textMuted }}>
+                  Real-time GST/VAT liability calculation and tax rate breakdowns. View total revenues, taxable sales, and exempt sales for any custom period. Instantly export reports to CSV for stress-free accounting.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 4: Invoices Directory */}
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Text */}
+              <div className="space-y-4 order-2 lg:order-1">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  Centralized Invoice & PDF Directory
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: spotify.textMuted }}>
+                  Track, organize, and manage your entire invoicing pipeline. Filter by status, search by client details or invoice numbers, export directories to CSV, and run bulk PDF downloads.
+                </p>
+              </div>
+
+              {/* Image Box */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] order-1 lg:order-2">
+                <img 
+                  src="/features/invoices-list.png" 
+                  alt="Invoices Directory Dashboard" 
+                  className="w-full h-auto block rounded-2xl"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -764,94 +796,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="py-16 px-6" style={{ background: spotify.darkSurface }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>Pricing</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-sm" style={{ color: spotify.textMuted }}>Start free. Scale when you're ready.</p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-4 items-start">
-            {/* Free */}
-            <Card className="p-6">
-              <div className="mb-5">
-                <div className="text-xs font-bold" style={{ color: spotify.textMuted }}>Free</div>
-                <div className="text-3xl font-bold text-white">$0</div>
-                <div className="text-[10px]" style={{ color: spotify.textMuted }}>Forever free</div>
-              </div>
-              <PillButton href="/auth/signup" variant="outlined" size="sm" className="w-full mb-6">
-                Get Started
-              </PillButton>
-              <ul className="space-y-2.5">
-                {[['Unlimited invoices', true], ['3 clients', true], ['3 templates', true], ['PDF export', false], ['Payment links', false], ['Analytics', false]].map(([feat, inc]) => (
-                  <li key={feat as string} className="flex items-center gap-2 text-xs">
-                    {inc ? <Check className="w-4 h-4" style={{ color: spotify.green }} /> : <X className="w-4 h-4" style={{ color: spotify.borderGray }} />}
-                    <span className="font-medium" style={{ color: inc ? spotify.textBase : spotify.borderGray }}>{feat as string}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            {/* Pro - Featured */}
-            <Card
-              className="p-6"
-              elevated
-              style={{ border: `1px solid ${spotify.green}`, boxShadow: spotify.shadowHeavy }}
-            >
-              <div className="mb-5">
-                <div className="text-xs font-bold" style={{ color: spotify.green }}>Pro</div>
-                <div className="flex items-baseline gap-1">
-                  <div className="text-3xl font-bold text-white">₹299</div>
-                  <div className="text-xs" style={{ color: spotify.textMuted }}>/mo</div>
-                </div>
-              </div>
-              <PillButton href="/auth/signup" variant="green" size="sm" className="w-full mb-6">
-                Start Trial
-              </PillButton>
-              <ul className="space-y-2.5">
-                {[['Unlimited invoices', true], ['Unlimited clients', true], ['All 12 templates', true], ['Payment links', true], ['Analytics', true], ['Auto reminders', true]].map(([feat, inc]) => (
-                  <li key={feat as string} className="flex items-center gap-2 text-xs">
-                    <Check className="w-4 h-4" style={{ color: spotify.green }} />
-                    <span className="font-medium text-white">{feat as string}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            {/* Business */}
-            <Card className="p-6">
-              <div className="mb-5">
-                <div className="text-xs font-bold" style={{ color: spotify.textMuted }}>Business</div>
-                <div className="flex items-baseline gap-1">
-                  <div className="text-3xl font-bold text-white">₹999</div>
-                  <div className="text-xs" style={{ color: spotify.textMuted }}>/mo</div>
-                </div>
-              </div>
-              <PillButton href="/auth/signup" variant="outlined" size="sm" className="w-full mb-6">
-                Contact Sales
-              </PillButton>
-              <ul className="space-y-2.5">
-                {[['Everything in Pro', true], ['Team accounts', true], ['Custom branding', true], ['Client portal', true], ['API access', true], ['Priority support', true]].map(([feat, inc]) => (
-                  <li key={feat as string} className="flex items-center gap-2 text-xs">
-                    <Check className="w-4 h-4" style={{ color: spotify.green }} />
-                    <span className="font-medium text-white">{feat as string}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-
-          <div className="text-center mt-6">
-            <p className="text-xs" style={{ color: spotify.textMuted }}>
-              No credit card required · 14-day money-back guarantee · Cancel anytime
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* ═══ FAQ ═══ */}
       <section id="faq" className="py-16 px-6">
@@ -922,7 +867,7 @@ export default function LandingPage() {
               </p>
             </div>
             {[
-              { title: 'Product', links: ['Features', 'Templates', 'Pricing'] },
+              { title: 'Product', links: ['Features', 'Templates', 'Security'] },
               { title: 'Resources', links: ['Documentation', 'API', 'Blog'] },
               { title: 'Company', links: ['About', 'Privacy', 'Terms'] },
             ].map(({ title, links }) => (

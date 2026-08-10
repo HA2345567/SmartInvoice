@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
-import { AiChatbot } from '@/components/ai/AiChatbot';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
 
 // Spotify design system colors
@@ -325,7 +324,6 @@ export default function DashboardLayout({
       </Link>
 
       <FeedbackWidget />
-      <AiChatbot />
     </div>
   );
 }
