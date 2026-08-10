@@ -17,7 +17,6 @@
     "@hookform/resolvers": "^3.9.0",
     "@neondatabase/serverless": "^1.1.0",
     "@next/swc-wasm-nodejs": "14.2.29",
-    "@next/swc-win32-x64-msvc": "14.2.33",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -103,6 +102,9 @@
     "@types/pg": "^8.15.4",
     "@types/qrcode": "^1.5.5",
     "@types/uuid": "^9.0.7"
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "14.2.33"
   },
   "engines": {
     "node": ">=18.0.0",
