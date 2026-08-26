@@ -150,24 +150,24 @@ export function InvoiceTypeSelector({ selected, onChange }: InvoiceTypeSelectorP
     const selectedOption = invoiceTypes.find(t => t.type === selected) || invoiceTypes[0];
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+        <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/10 pb-5">
                 <div>
-                    <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                        <span>Select Document Type</span>
-                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                        <span>Select Document Format</span>
+                        <Sparkles className="w-4 h-4 text-green-400 animate-pulse" />
                     </h3>
-                    <p className="text-sm text-zinc-400 mt-0.5">
-                        Choose a tailored document schema designed for your specific workflow
+                    <p className="text-xs text-gray-400 mt-1">
+                        Choose a tailored document schema designed for your specific billing workflow
                     </p>
                 </div>
-                <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 text-sm font-semibold">
-                    {selectedOption.label} Selected
+                <Badge className="bg-green-500/15 text-green-400 border border-green-500/30 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-full shadow-lg shadow-green-500/10">
+                    ✨ {selectedOption.label} Selected
                 </Badge>
             </div>
 
             {/* Grid of Invoice Types */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {invoiceTypes.map((invoiceType) => {
                     const Icon = invoiceType.icon;
                     const isSelected = selected === invoiceType.type;
@@ -176,29 +176,29 @@ export function InvoiceTypeSelector({ selected, onChange }: InvoiceTypeSelectorP
                         <div
                             key={invoiceType.type}
                             onClick={() => onChange(invoiceType.type)}
-                            className={`group relative cursor-pointer rounded-xl p-5 border transition-all duration-300 transform hover:-translate-y-1 ${
+                            className={`group relative cursor-pointer rounded-2xl p-5 border transition-all duration-300 transform hover:-translate-y-1.5 ${
                                 isSelected
-                                    ? `bg-zinc-900/90 border-emerald-500 shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/50`
-                                    : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/80'
+                                    ? 'bg-gradient-to-br from-green-950/40 via-zinc-900/90 to-zinc-900/90 border-green-500/80 shadow-[0_0_30px_rgba(30,215,96,0.15)] ring-1 ring-green-500/50'
+                                    : 'bg-white/[0.03] border-white/10 hover:border-green-500/40 hover:bg-white/[0.06] hover:shadow-xl'
                             }`}
                         >
-                            <div className="flex items-start justify-between mb-3">
-                                <div className={`p-3 rounded-lg border border-zinc-800 ${invoiceType.bgColor} transition-transform group-hover:scale-110`}>
+                            <div className="flex items-start justify-between mb-4">
+                                <div className={`p-3 rounded-xl border border-white/10 ${invoiceType.bgColor} transition-transform group-hover:scale-110 shadow-md`}>
                                     <Icon className={`w-6 h-6 ${invoiceType.color}`} />
                                 </div>
                                 {isSelected ? (
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-black shadow-md shadow-emerald-500/50">
-                                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-black shadow-lg shadow-green-500/40">
+                                        <Check className="w-4 h-4 stroke-[3]" />
                                     </div>
                                 ) : (
-                                    <div className="w-5 h-5 rounded-full border border-zinc-700 group-hover:border-zinc-500 transition-colors" />
+                                    <div className="w-5 h-5 rounded-full border border-gray-600 group-hover:border-green-400/60 transition-colors" />
                                 )}
                             </div>
 
-                            <h4 className="font-bold text-white text-base mb-1 group-hover:text-emerald-400 transition-colors">
+                            <h4 className="font-extrabold text-white text-base mb-1.5 group-hover:text-green-400 transition-colors">
                                 {invoiceType.label}
                             </h4>
-                            <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed mb-3">
+                            <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed mb-4">
                                 {invoiceType.description}
                             </p>
 
@@ -206,7 +206,7 @@ export function InvoiceTypeSelector({ selected, onChange }: InvoiceTypeSelectorP
                                 {invoiceType.bestFor.slice(0, 2).map((use, idx) => (
                                     <span
                                         key={idx}
-                                        className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50"
+                                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-gray-300 border border-white/10"
                                     >
                                         {use}
                                     </span>
@@ -219,31 +219,31 @@ export function InvoiceTypeSelector({ selected, onChange }: InvoiceTypeSelectorP
 
             {/* Detailed Info Card for Selected Document */}
             {selectedOption && (
-                <div className="rounded-xl p-5 border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-zinc-900/60 to-zinc-900/60 backdrop-blur-xl">
-                    <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-xl border border-emerald-500/30 ${selectedOption.bgColor}`}>
-                            <selectedOption.icon className={`w-7 h-7 ${selectedOption.color}`} />
+                <div className="rounded-2xl p-6 border border-green-500/30 bg-gradient-to-r from-green-950/20 via-zinc-900/80 to-zinc-900/80 backdrop-blur-xl shadow-xl">
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                        <div className={`p-3.5 rounded-2xl border border-green-500/30 ${selectedOption.bgColor} shadow-lg`}>
+                            <selectedOption.icon className={`w-8 h-8 ${selectedOption.color}`} />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <h4 className="text-base font-bold text-white">
-                                    {selectedOption.label} Setup
+                                <h4 className="text-base font-extrabold text-white">
+                                    {selectedOption.label} Active Configuration
                                 </h4>
-                                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">
+                                <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-bold">
                                     Active Preset
                                 </Badge>
                             </div>
-                            <p className="text-xs text-zinc-300 mb-3">
+                            <p className="text-xs text-gray-300 mb-3">
                                 {selectedOption.description}
                             </p>
                             <div>
-                                <span className="text-xs font-semibold text-emerald-400 block mb-1.5">
-                                    Included Features & Recommended Use Cases:
+                                <span className="text-xs font-bold text-green-400 block mb-2">
+                                    Recommended Use Cases & Included Fields:
                                 </span>
                                 <div className="flex flex-wrap gap-2">
                                     {selectedOption.bestFor.map((use, idx) => (
-                                        <span key={idx} className="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 flex items-center gap-1.5">
-                                            <Check className="w-3 h-3 text-emerald-400" />
+                                        <span key={idx} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/5 text-gray-200 border border-white/10 flex items-center gap-1.5">
+                                            <Check className="w-3.5 h-3.5 text-green-400" />
                                             {use}
                                         </span>
                                     ))}

@@ -11,21 +11,27 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
 
-export default function LoginPage() {
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get('redirect') || '/dashboard';
   const { toast } = useToast();
   const { signIn, user, loading } = useAuth();
 
   // Auto-redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard');
+      router.push(redirectTarget);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectTarget]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +55,7 @@ export default function LoginPage() {
           title: 'Success!',
           description: 'Welcome back!',
         });
+        router.push(redirectTarget);
       } else {
         toast({
           title: 'Login Failed',
@@ -88,16 +95,25 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full max-w-md mx-auto space-y-8">
-          {/* Header */}
-          <div className="space-y-2">
-            <Link href="/" className="inline-flex items-center mb-8">
-              <Logo variant="full" size="md" />
-            </Link>
-            <h1 className="text-3xl font-bold text-white">
+          {/* Back button & Logo */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="inline-flex items-center">
+                <Logo variant="full" size="md" />
+              </Link>
+              <Link 
+                href="/dashboard/create" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Create Invoice (Guest)</span>
+              </Link>
+            </div>
+            <h1 className="text-3xl font-bold text-white pt-4">
               Welcome back
             </h1>
             <p className="text-base" style={{ color: '#b3b3b3' }}>
-              Sign in to manage your invoices.
+              Sign in to access your cloud invoices & tools.
             </p>
           </div>
 
@@ -226,5 +242,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

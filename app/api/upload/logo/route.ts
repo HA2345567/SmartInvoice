@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService } from '@/lib/auth';
+import { getAuthUserOrGuest } from '@/lib/auth-helpers';
 
 export async function POST(req: NextRequest) {
     try {
-        const user = await AuthService.getUserFromRequest(req);
+        const user = await getAuthUserOrGuest(req);
 
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

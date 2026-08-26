@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import jsPDF from 'jspdf';
+import { PremiumPDFGenerator } from '@/lib/pdf-generator';
 import { AiClientSelector } from '@/components/ai/smart-inputs/AiClientSelector';
 import { AiInvoiceDescription } from '@/components/ai/smart-inputs/AiInvoiceDescription';
 import TemplateSelector from '@/components/invoices/TemplateSelector';
@@ -399,59 +400,54 @@ export default function CreateInvoice() {
       return;
     }
 
-    toast({ title: 'Generating PDF', description: 'Your PDF is being generated...' });
-    const doc = new jsPDF();
-    const currency = invoiceData.clientCurrency || '$';
+    try {
+      toast({ title: 'Generating PDF', description: 'Your PDF is being generated...' });
+      const generator = new PremiumPDFGenerator();
+      const pdfBuffer = generator.generatePDF({
+        invoiceNumber: invoiceData.invoiceNumber || 'INV-0001',
+        date: invoiceData.date,
+        dueDate: invoiceData.dueDate,
+        clientName: invoiceData.clientName,
+        clientEmail: invoiceData.clientEmail,
+        clientCompany: invoiceData.clientCompany,
+        clientAddress: invoiceData.clientAddress,
+        clientGST: invoiceData.clientGST,
+        clientCurrency: invoiceData.clientCurrency || '$',
+        items: invoiceData.items,
+        notes: invoiceData.notes,
+        terms: invoiceData.terms,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        discountAmount: totals.discountAmount,
+        amount: totals.total,
+        taxRate: invoiceData.taxRate,
+        discountRate: invoiceData.discountRate,
+        paymentLink: invoiceData.paymentLink,
+        companyName: user?.company || 'SmartInvoice',
+        companyAddress: (user as any)?.companyAddress || '',
+        companyGST: (user as any)?.companyGST || '',
+        companyEmail: user?.email || '',
+        companyLogo: invoiceData.companyLogo || undefined,
+        whiteLabelMode: invoiceData.whiteLabelMode || false,
+        theme: invoiceData.theme || 'ultra-luxury',
+        invoiceType: invoiceData.invoiceType || 'sales',
+        customColors: invoiceData.customColors
+      });
 
-    doc.setFontSize(16);
-    doc.text('INVOICE', 105, 20, { align: 'center' });
-
-    doc.setFontSize(12);
-    doc.text(`Invoice Number: ${invoiceData.invoiceNumber || 'N/A'}`, 10, 40);
-    doc.text(`Date: ${invoiceData.date}`, 10, 50);
-    doc.text(`Due Date: ${invoiceData.dueDate}`, 10, 60);
-
-    doc.text(`To: ${invoiceData.clientName || 'N/A'}`, 10, 80);
-    doc.text(`Email: ${invoiceData.clientEmail || 'N/A'}`, 10, 90);
-    doc.text(`Company: ${invoiceData.clientCompany || 'N/A'}`, 10, 100);
-
-    let y = 120;
-    doc.setFontSize(14);
-    doc.text('Items:', 10, y);
-    y += 10;
-    doc.setFontSize(12);
-    invoiceData.items.forEach((item) => {
-      doc.text(
-        `${item.description || 'N/A'} | Qty: ${item.quantity} | Rate: ${currency}${item.rate} | Amount: ${currency}${item.amount.toFixed(2)}`,
-        10,
-        y
-      );
-      y += 8;
-    });
-
-    y += 10;
-    doc.setFontSize(14);
-    doc.text(`Subtotal: ${currency}${totals.subtotal.toFixed(2)}`, 130, y);
-    y += 8;
-    if (invoiceData.discountRate > 0) {
-      doc.text(`Discount (${invoiceData.discountRate}%): -${currency}${totals.discountAmount.toFixed(2)}`, 130, y);
-      y += 8;
+      const blob = new Blob([pdfBuffer as BlobPart], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceData.invoiceNumber || 'draft'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast({ title: 'Success!', description: 'Invoice PDF downloaded successfully.' });
+    } catch (e: any) {
+      console.error('PDF Download Error:', e);
+      toast({ title: 'Error', description: 'Failed to generate PDF invoice.', variant: 'destructive' });
     }
-    if (invoiceData.taxRate > 0) {
-      doc.text(`Tax (${invoiceData.taxRate}%): ${currency}${totals.taxAmount.toFixed(2)}`, 130, y);
-      y += 10;
-    }
-    doc.text(`Total: ${currency}${totals.total.toFixed(2)}`, 130, y);
-
-    if (invoiceData.notes) {
-      y += 20;
-      doc.setFontSize(12);
-      doc.text('Notes:', 10, y);
-      y += 7;
-      doc.text(invoiceData.notes, 10, y);
-    }
-
-    doc.save(`invoice-${invoiceData.invoiceNumber || 'N/A'}.pdf`);
   };
 
   return (
@@ -475,23 +471,47 @@ export default function CreateInvoice() {
 
           <Card className="card-green-mist animate-slide-in border-green-500/30" style={{ animationDelay: '0.03s' }}>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-green-primary" />
+                  <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400">
+                    <FileText className="w-5 h-5" />
+                  </div>
                   <div>
-                    <p className="text-xs text-green-muted">Invoice Type</p>
-                    <p className="text-sm font-semibold text-white capitalize">
-                      {invoiceData.invoiceType.replace('-', ' ')}
-                    </p>
+                    <p className="text-xs text-green-muted font-bold">Document / Invoice Format</p>
+                    <Select
+                      value={invoiceData.invoiceType}
+                      onValueChange={(val: any) => {
+                        sessionStorage.setItem('invoiceType', val);
+                        setInvoiceData(prev => ({ ...prev, invoiceType: val }));
+                      }}
+                    >
+                      <SelectTrigger className="h-7 text-xs bg-transparent border-0 p-0 text-white font-extrabold capitalize focus:ring-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                        <SelectItem value="sales">Sales Invoice</SelectItem>
+                        <SelectItem value="proforma">Proforma Invoice</SelectItem>
+                        <SelectItem value="interim">Interim Invoice</SelectItem>
+                        <SelectItem value="final">Final Invoice</SelectItem>
+                        <SelectItem value="recurring">Recurring Invoice</SelectItem>
+                        <SelectItem value="credit-note">Credit Note</SelectItem>
+                        <SelectItem value="past-due">Past Due Invoice</SelectItem>
+                        <SelectItem value="commercial">Commercial Invoice</SelectItem>
+                        <SelectItem value="tax">Tax Invoice (VAT/GST)</SelectItem>
+                        <SelectItem value="timesheet">Timesheet Invoice</SelectItem>
+                        <SelectItem value="retainer">Retainer Invoice</SelectItem>
+                        <SelectItem value="expense">Expense Report</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => router.push('/dashboard/create/select-type')}
-                  className="btn-green-secondary text-xs"
+                  className="btn-green-secondary text-xs h-8 px-3"
                 >
-                  Change Type
+                  Visual Selector
                 </Button>
               </div>
             </CardContent>

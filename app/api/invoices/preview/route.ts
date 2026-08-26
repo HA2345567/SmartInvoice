@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService } from '@/lib/auth';
+import { getAuthUserOrGuest } from '@/lib/auth-helpers';
 import { PremiumPDFGenerator } from '@/lib/pdf-generator';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await AuthService.getUserFromRequest(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getAuthUserOrGuest(request);
 
     const invoiceData = await request.json();
 
@@ -38,12 +35,15 @@ export async function POST(request: NextRequest) {
       companyEmail: '',
       companyPhone: user.companyPhone || '',
       companyWebsite: user.companyWebsite || '',
+      companyLogo: invoiceData.companyLogo || undefined,
+      whiteLabelMode: invoiceData.whiteLabelMode || false,
       invoiceStatus: 'PENDING',
       theme: invoiceData.theme || 'professional',
+      invoiceType: invoiceData.invoiceType || 'sales',
       customColors: invoiceData.customColors
     });
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="invoice-preview-${invoiceData.invoiceNumber}.pdf"`,

@@ -65,38 +65,40 @@ const InvoiceRenderer: React.FC<InvoiceRendererProps> = ({ type, style, data }) 
     const InvoiceComponent = INVOICE_TYPES[type] || SalesInvoice;
     const styleClass = STYLE_CLASSES[style] || ultraLuxury;
 
+    const logoUrl = (data as any)?.companyLogo || data?.from?.logoUrl || '';
+
     const safeFrom = data?.from ? {
-        name: data.from.name || 'Your Company Name',
-        email: data.from.email || '',
-        address: data.from.address || '',
+        name: data.from.name || (data as any)?.companyName || 'Your Company Name',
+        email: data.from.email || (data as any)?.companyEmail || '',
+        address: data.from.address || (data as any)?.companyAddress || '',
         city: data.from.city || '',
-        phone: data.from.phone || '',
-        gst: data.from.gst || '',
-        logoUrl: data.from.logoUrl || '',
+        phone: data.from.phone || (data as any)?.companyPhone || '',
+        gst: data.from.gst || (data as any)?.companyGST || '',
+        logoUrl: logoUrl,
     } : {
-        name: 'Your Company Name',
-        email: '',
-        address: '',
+        name: (data as any)?.companyName || 'Your Company Name',
+        email: (data as any)?.companyEmail || '',
+        address: (data as any)?.companyAddress || '',
         city: '',
-        phone: '',
-        gst: '',
-        logoUrl: '',
+        phone: (data as any)?.companyPhone || '',
+        gst: (data as any)?.companyGST || '',
+        logoUrl: logoUrl,
     };
 
     const safeTo = data?.to ? {
-        name: data.to.name || 'Client Name',
-        email: data.to.email || '',
-        address: data.to.address || '',
+        name: data.to.name || (data as any)?.clientName || 'Client Name',
+        email: data.to.email || (data as any)?.clientEmail || '',
+        address: data.to.address || (data as any)?.clientAddress || '',
         city: data.to.city || '',
-        company: data.to.company || '',
-        gst: data.to.gst || '',
+        company: data.to.company || (data as any)?.clientCompany || '',
+        gst: data.to.gst || (data as any)?.clientGST || '',
     } : {
-        name: 'Client Name',
-        email: '',
-        address: '',
+        name: (data as any)?.clientName || 'Client Name',
+        email: (data as any)?.clientEmail || '',
+        address: (data as any)?.clientAddress || '',
         city: '',
-        company: '',
-        gst: '',
+        company: (data as any)?.clientCompany || '',
+        gst: (data as any)?.clientGST || '',
     };
 
     const normalizedData: InvoiceData = {
@@ -104,14 +106,15 @@ const InvoiceRenderer: React.FC<InvoiceRendererProps> = ({ type, style, data }) 
         from: safeFrom,
         to: safeTo,
         invoiceNumber: data?.invoiceNumber || 'INV-0001',
-        issuedDate: data?.issuedDate || new Date().toISOString().split('T')[0],
+        issuedDate: data?.issuedDate || (data as any)?.date || new Date().toISOString().split('T')[0],
         dueDate: data?.dueDate || '',
-        currencySymbol: data?.currencySymbol || '$',
+        currencySymbol: data?.currencySymbol || (data as any)?.clientCurrency || '$',
         items: data?.items || [],
         subtotal: data?.subtotal || 0,
         tax: data?.tax || 0,
         discount: data?.discount || 0,
-        total: data?.total || 0,
+        total: data?.total || (data as any)?.amount || 0,
+        whiteLabelMode: (data as any)?.whiteLabelMode || false,
     };
 
     return <InvoiceComponent data={normalizedData} styleClass={styleClass} />;

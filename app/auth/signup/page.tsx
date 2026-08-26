@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Loader as Loader2, Zap, Globe, Users, Shield, Target } from 'lucide-react';
+import { Eye, EyeOff, Loader as Loader2, Zap, Globe, Users, Shield, Target, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -43,7 +43,7 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.password) {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields.',
@@ -119,11 +119,20 @@ export default function SignupPage() {
       <div className="flex flex-col justify-center px-4 sm:px-12 md:px-20 lg:px-24 xl:px-32 py-8 relative">
         <div className="w-full max-w-md mx-auto space-y-6">
           {/* Header */}
-          <div className="space-y-2">
-            <Link href="/" className="inline-flex items-center mb-6">
-              <Logo variant="full" size="md" />
-            </Link>
-            <h1 className="text-3xl font-bold text-white">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="inline-flex items-center">
+                <Logo variant="full" size="md" />
+              </Link>
+              <Link 
+                href="/dashboard/create" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Create Invoice (Guest)</span>
+              </Link>
+            </div>
+            <h1 className="text-3xl font-bold text-white pt-2">
               Create an account
             </h1>
             <p className="text-base" style={{ color: '#b3b3b3' }}>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/auth-helpers';
+import { getAuthUser, getAuthUserOrGuest } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
@@ -27,10 +27,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getAuthUserOrGuest(request);
 
     const data = await request.json();
 

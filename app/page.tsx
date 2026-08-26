@@ -66,9 +66,9 @@ const PillButton = ({
   className?: string;
 }) => {
   const sizes = {
-    sm: 'px-4 py-2 text-xs',
-    md: 'py-3 px-8 text-sm',
-    lg: 'py-4 px-10 text-sm',
+    sm: 'px-4.5 py-2 text-xs font-bold',
+    md: 'py-3 px-7 text-xs sm:text-sm font-extrabold',
+    lg: 'py-3.5 px-9 text-sm sm:text-base font-extrabold',
   };
 
   const variants: Record<
@@ -93,7 +93,7 @@ const PillButton = ({
         border: v.border || 'none',
         borderRadius: '9999px',
         textTransform: 'uppercase',
-        letterSpacing: '1.4px',
+        letterSpacing: '0.8px',
         boxShadow: variant === 'green' ? spotify.shadowMedium : 'none',
       }}
     >
@@ -427,11 +427,11 @@ export default function LandingPage() {
                 }`}
                 style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.4px' }}
               >
-                Sign in
+                Sign In
               </Link>
               <Link
-                href="/auth/signup"
-                className={`relative inline-flex items-center justify-center font-bold transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] text-black shadow-[0_4px_12px_rgba(30,215,96,0.3)] hover:shadow-[0_4px_20px_rgba(30,215,96,0.5)] ${
+                href="/dashboard/create"
+                className={`relative inline-flex items-center justify-center font-extrabold transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] text-black shadow-[0_4px_20px_rgba(30,215,96,0.4)] ${
                   scrollY > 20 ? 'px-4 py-2 text-[10px] gap-1' : 'px-5 py-2.5 text-xs gap-1.5'
                 }`}
                 style={{
@@ -441,7 +441,8 @@ export default function LandingPage() {
                   letterSpacing: '1.4px',
                 }}
               >
-                <span>Get Started</span>
+                <Sparkles className="w-3.5 h-3.5 mr-0.5 animate-pulse" />
+                <span>Create Free Invoice</span>
                 <ArrowRight className={`transition-all duration-500 ${scrollY > 20 ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
               </Link>
             </div>
@@ -494,10 +495,10 @@ export default function LandingPage() {
                 className="block text-center py-3 text-xs font-bold rounded-full transition-colors hover:bg-white/10 border border-white/10"
                 style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.2px' }}
               >
-                Sign in
+                Sign In
               </Link>
               <Link
-                href="/auth/signup"
+                href="/dashboard/create"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center py-3 text-xs font-bold rounded-full transition-transform hover:scale-[1.02]"
                 style={{
@@ -507,7 +508,7 @@ export default function LandingPage() {
                   letterSpacing: '1.2px'
                 }}
               >
-                Get Started
+                Create Invoice
               </Link>
             </div>
           </div>
@@ -521,17 +522,6 @@ export default function LandingPage() {
         {/* Ambient Gradient Overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
         <div className="relative max-w-4xl mx-auto text-center z-10">
-          {/* Badge */}
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-            style={{ background: spotify.midDark }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: spotify.green }} />
-            <span className="text-xs font-bold" style={{ color: spotify.green, textTransform: 'uppercase', letterSpacing: '1.4px' }}>
-              Introducing AI invoicing
-            </span>
-            <ChevronRight className="w-3.5 h-3.5" style={{ color: spotify.textMuted }} />
-          </div>
 
           {/* Headline - 24px Section Title weight */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
@@ -542,19 +532,22 @@ export default function LandingPage() {
 
           {/* Body text - 16px weight 400 */}
           <p className="text-base max-w-xl mx-auto mb-10" style={{ color: spotify.textMuted }}>
-            The premium invoicing platform for professionals. Create stunning invoices in seconds with AI, track payments effortlessly, and get paid faster.
+            Create and download stunning PDF invoices instantly as a guest. No credit card, password, or registration needed.
           </p>
 
           {/* CTAs - Pill buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-            <PillButton href="/auth/signup" variant="green" size="lg">
-              Start Free
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+            <PillButton href="/dashboard/create" variant="green" size="lg">
+              <Sparkles className="w-4 h-4 mr-0.5 animate-pulse" />
+              Create Free Invoice
               <ArrowRight className="w-4 h-4" />
             </PillButton>
-            <PillButton href="#demo" variant="outlined" size="lg" icon={<ArrowRight className="w-4 h-4" style={{ color: spotify.green }} />}>
-              Explore App
+            <PillButton href="/auth/signup" variant="outlined" size="lg" icon={<ArrowRight className="w-4 h-4" style={{ color: spotify.green }} />}>
+              Create Account
             </PillButton>
           </div>
+
+          <p className="text-xs text-gray-400 mb-10">Instant PDF download • No sign up required • 100% Free</p>
 
           {/* Social proof */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12" style={{ color: spotify.textMuted }}>
@@ -834,8 +827,8 @@ export default function LandingPage() {
               Join 10,000+ professionals getting paid faster with SmartInvoice.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <PillButton href="/auth/signup" variant="green" size="md">
-                Start Free Today
+              <PillButton href="/dashboard/create" variant="green" size="md">
+                Create Free Invoice Now
                 <ArrowRight className="w-4 h-4" />
               </PillButton>
             </div>

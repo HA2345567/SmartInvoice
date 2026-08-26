@@ -299,7 +299,11 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
           <div className={styleClass.header}>
             <div className={getClasses('brandHeader', 'sfdcHeader', 'shopifyBrand', 'slackLogo')}>
               <div className={styleClass.logoArea}>
-                <div className={getClasses('logoPlaceholder', 'shopifyLogo', 'sfdcLogo')}></div>
+                {data?.from?.logoUrl ? (
+                  <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain mb-2" />
+                ) : (
+                  <div className={getClasses('logoPlaceholder', 'shopifyLogo', 'sfdcLogo')}></div>
+                )}
                 <span className={getClasses('title', 'slackText', 'shopifyText')}>{data?.from?.name}</span>
               </div>
               {(styleClass.invoiceBadge || styleClass.invoiceLabel) && (
@@ -439,6 +443,9 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
   return (
     <div className={styleClass.container}>
       <header className={styleClass.header}>
+        {data?.from?.logoUrl ? (
+          <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain mb-2" />
+        ) : null}
         <div className={styleClass.title}>{data?.from?.name || 'Company Name'}</div>
         <div className={getClasses('subtitle', 'subHeader', 'subHeader')}>INVOICE</div>
       </header>

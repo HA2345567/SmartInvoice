@@ -110,7 +110,7 @@ export class AuthService {
       const user = await this.getUserById(decoded.userId);
       if (!user) return null;
 
-      if (user && 'password' in user) {
+      if ('password' in user) {
         const { password, ...userWithoutPassword } = user as any;
         return userWithoutPassword;
       }
@@ -130,10 +130,7 @@ export class AuthService {
 
 export async function verifyAuth(request: NextRequest): Promise<AuthResult | null> {
   const user = await AuthService.getUserFromRequest(request);
-  if (!user) {
-    return null;
-  }
-
+  if (!user) return null;
   return {
     user,
     userId: user.id

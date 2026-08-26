@@ -143,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(null);
     setUser(null);
     setSession(null);
-    router.push('/');
+    router.push('/auth/login');
   }, [router]);
 
   const value = useMemo(() => ({

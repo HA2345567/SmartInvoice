@@ -30,6 +30,8 @@ export interface InvoiceData {
     notes?: string;
     currencySymbol?: string;
     discount?: number;
+    companyLogo?: string;
+    whiteLabelMode?: boolean;
 
     // Specific fields
     proforma?: {

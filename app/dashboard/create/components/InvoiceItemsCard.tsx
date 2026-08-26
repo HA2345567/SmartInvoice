@@ -91,25 +91,32 @@ export const InvoiceItemsCard = React.memo(({
                                 />
                             </div>
                             <div className="col-span-2">
-                                <Label htmlFor={`rate-${item.id}`} className="text-white">Rate *</Label>
-                                <Input
-                                    id={`rate-${item.id}`}
-                                    type="number"
-                                    value={item.rate}
-                                    onChange={(e: any) => updateItem(item.id, 'rate', parseFloat(e.target.value) || 0)}
-                                    min="0"
-                                    step="0.01"
-                                    className="input-green"
-                                    required
-                                />
+                                <Label htmlFor={`rate-${item.id}`} className="text-white text-xs font-bold mb-1.5 block">Rate *</Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-extrabold text-green-400 select-none">
+                                        {invoiceData.clientCurrency || '$'}
+                                    </span>
+                                    <Input
+                                        id={`rate-${item.id}`}
+                                        type="number"
+                                        value={item.rate || ''}
+                                        onChange={(e: any) => updateItem(item.id, 'rate', parseFloat(e.target.value) || 0)}
+                                        min="0"
+                                        step="0.01"
+                                        className="input-green pl-7 font-bold text-white text-sm"
+                                        placeholder="0.00"
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div className="col-span-2">
-                                <Label className="text-white">Amount</Label>
-                                <Input
-                                    value={`${invoiceData.clientCurrency}${item.amount.toFixed(2)}`}
-                                    disabled
-                                    className="input-green opacity-75"
-                                />
+                                <Label className="text-white text-xs font-bold mb-1.5 block">Amount</Label>
+                                <div className="h-10 px-3 rounded-md bg-green-500/10 border border-green-500/30 text-white font-extrabold text-sm flex items-center justify-between shadow-sm">
+                                    <span className="text-xs text-green-400 font-bold">{invoiceData.clientCurrency || '$'}</span>
+                                    <span className="text-sm font-extrabold text-green-300 font-mono tracking-wide">
+                                        {Number(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                </div>
                             </div>
                             <div className="col-span-1">
                                 {invoiceData.items.length > 1 && (

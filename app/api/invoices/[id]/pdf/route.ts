@@ -57,13 +57,15 @@ export async function GET(
       theme: (invoice.theme || 'ultra-luxury') as any,
       invoiceType: (invoice.invoiceType || 'sales') as any,
       customColors: invoice.customColors || undefined,
+      companyLogo: (invoice as any).companyLogo || undefined,
+      whiteLabelMode: (invoice as any).whiteLabelMode || false,
     };
 
     // Generate PDF using PremiumPDFGenerator
     const generator = new PremiumPDFGenerator();
     const pdfBuffer = generator.generatePDF(invoiceData);
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`,

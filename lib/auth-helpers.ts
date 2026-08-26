@@ -22,16 +22,34 @@ export function getAuthToken(request: NextRequest): string | null {
   return token || null;
 }
 
+export const DEFAULT_DEMO_USER = {
+  id: '00000000-0000-0000-0000-000000000000',
+  email: 'demo@smartinvoice.app',
+  name: 'Demo User',
+  company: 'SmartInvoice Inc',
+  companyAddress: '123 Business Way, Suite 100',
+  companyGST: 'GST123456789',
+  companyPhone: '+1 (555) 019-2834',
+  companyWebsite: 'https://smartinvoice.app',
+};
+
 // Get user from request - either from Authorization header or cookies
-export async function getAuthUser(request: NextRequest): Promise<{ id: string; email: string; name?: string } | null> {
+export async function getAuthUser(request: NextRequest): Promise<{
+  id: string;
+  email: string;
+  name?: string;
+  company?: string;
+  companyAddress?: string;
+  companyGST?: string;
+  companyPhone?: string;
+  companyWebsite?: string;
+} | null> {
   try {
     const token = getAuthToken(request);
     if (!token) return null;
 
     const payload = AuthService.verifyToken(token);
-    if (!payload || !payload.userId) {
-      return null;
-    }
+    if (!payload || !payload.userId) return null;
 
     const user = await DatabaseService.getUserById(payload.userId);
     if (!user) return null;
@@ -40,11 +58,31 @@ export async function getAuthUser(request: NextRequest): Promise<{ id: string; e
       id: user.id,
       email: user.email || '',
       name: user.name,
+      company: user.company,
+      companyAddress: user.companyAddress || user.address,
+      companyGST: user.companyGST || user.gstNumber,
+      companyPhone: user.companyPhone || user.phone,
+      companyWebsite: user.companyWebsite,
     };
   } catch (error) {
     console.error('Auth error:', error);
     return null;
   }
+}
+
+// Helper for guest-friendly endpoints (e.g. create invoice) that fall back to demo user if not logged in
+export async function getAuthUserOrGuest(request: NextRequest): Promise<{
+  id: string;
+  email: string;
+  name?: string;
+  company?: string;
+  companyAddress?: string;
+  companyGST?: string;
+  companyPhone?: string;
+  companyWebsite?: string;
+}> {
+  const user = await getAuthUser(request);
+  return user || DEFAULT_DEMO_USER;
 }
 
 // Legacy compatibility helper for user database client

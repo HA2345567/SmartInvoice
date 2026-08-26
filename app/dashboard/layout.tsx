@@ -33,12 +33,12 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { toast } = useToast();
 
-  // Redirect to login if not authenticated
+  // Protect all dashboard routes except /dashboard/create (Guest allowed)
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
+    if (!loading && !user && !pathname.startsWith('/dashboard/create')) {
+      router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
     }
-  }, [user, loading, router]);
+  }, [user, loading, pathname, router]);
 
   const navigation = useMemo(() => [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -131,13 +131,13 @@ export default function DashboardLayout({
     );
   }
 
-  // Not authenticated
-  if (!user) {
+  // Not authenticated & on protected route
+  if (!user && !pathname.startsWith('/dashboard/create')) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: spotify.nearBlack }}>
         <div className="text-center">
           <LogoMarkOnly size={64} className="mx-auto mb-4" />
-          <p className="text-sm" style={{ color: spotify.textMuted }}>Redirecting...</p>
+          <p className="text-sm" style={{ color: spotify.textMuted }}>Redirecting to sign in...</p>
         </div>
       </div>
     );
@@ -252,26 +252,54 @@ export default function DashboardLayout({
 
         {/* User Profile */}
         <div className="p-4 flex-shrink-0" style={{ borderTop: `1px solid ${spotify.borderGray}` }}>
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: spotify.green, color: '#000' }}
-            >
-              {(user?.name || 'U').charAt(0).toUpperCase()}
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: spotify.green, color: '#000' }}
+                >
+                  {(user.name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{user.name || 'User'}</p>
+                  <p className="text-xs truncate" style={{ color: spotify.textMuted }}>{user.email || ''}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded text-xs font-bold transition-colors hover:bg-white/5"
+                style={{ color: 'rgba(243,114,127,0.9)' }}
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Log out</span>
+              </button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-xs font-bold text-amber-400">Guest Mode</span>
+              </div>
+              <p className="text-[11px] text-gray-400 mb-3">Sign in to save invoices to cloud & unlock all features.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/auth/login"
+                  className="px-3 py-2 rounded text-center text-xs font-bold transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid ${spotify.borderGray}` }}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="px-3 py-2 rounded text-center text-xs font-bold transition-colors"
+                  style={{ background: spotify.green, color: '#000' }}
+                >
+                  Sign Up
+                </Link>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
-              <p className="text-xs truncate" style={{ color: spotify.textMuted }}>{user?.email || ''}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded text-xs font-bold transition-colors hover:bg-white/5"
-            style={{ color: 'rgba(243,114,127,0.9)' }}
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Log out</span>
-          </button>
+          )}
         </div>
       </aside>
 
@@ -285,6 +313,15 @@ export default function DashboardLayout({
           >
             <Menu className="w-5 h-5" style={{ color: spotify.textMuted }} />
           </button>
+
+          {!user && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)' }}>
+              <span>Guest Mode — Create and download invoices freely!</span>
+              <Link href="/auth/signup" className="underline font-black ml-1 text-white hover:text-amber-400">
+                Sign up to save
+              </Link>
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             <Link
