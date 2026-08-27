@@ -12,18 +12,35 @@ export async function GET(request: NextRequest) {
     // Get all invoices for analytics from Neon DB
     const invoices = await DatabaseService.getInvoices(user.id);
 
-    // Calculate core analytics
-    const totalRevenue = invoices
-      .filter((inv: any) => inv.status === 'paid')
-      .reduce((sum: number, inv: any) => sum + (inv.amount || 0), 0);
+    // Calculate core analytics with strict type/case handling & type exclusions
+    const paidInvoicesList = invoices.filter((inv: any) => {
+      const status = String(inv.status || '').trim().toLowerCase();
+      const type = String(inv.invoiceType || '').toLowerCase();
+      return status === 'paid' && type !== 'proforma' && type !== 'expense';
+    });
+
+    const totalRevenue = Math.round(
+      paidInvoicesList.reduce((sum: number, inv: any) => {
+        const amt = Number(inv.amount) || 0;
+        const type = String(inv.invoiceType || '').toLowerCase();
+        if (type === 'credit-note') {
+          return sum - amt;
+        }
+        return sum + amt;
+      }, 0) * 100
+    ) / 100;
 
     const totalInvoices = invoices.length;
-    const paidInvoices = invoices.filter((inv: any) => inv.status === 'paid').length;
-    const pendingInvoices = invoices.filter((inv: any) => inv.status === 'sent' || inv.status === 'overdue').length;
+    const paidInvoices = paidInvoicesList.length;
+    
+    const pendingInvoices = invoices.filter((inv: any) => {
+      const status = String(inv.status || '').trim().toLowerCase();
+      const type = String(inv.invoiceType || '').toLowerCase();
+      return (status === 'sent' || status === 'overdue') && type !== 'proforma' && type !== 'expense';
+    }).length;
 
-    const activeInvoices = invoices.filter((inv: any) => inv.status !== 'draft');
-    const averageInvoiceValue = activeInvoices.length > 0
-      ? activeInvoices.reduce((sum: number, inv: any) => sum + (inv.amount || 0), 0) / activeInvoices.length
+    const averageInvoiceValue = paidInvoices > 0
+      ? Math.round((totalRevenue / paidInvoices) * 100) / 100
       : 0;
 
     // Monthly data calculation
@@ -35,8 +52,8 @@ export async function GET(request: NextRequest) {
     const invoiceStatusDistribution = {
       paid: paidInvoices,
       pending: pendingInvoices,
-      draft: invoices.filter((inv: any) => inv.status === 'draft').length,
-      overdue: invoices.filter((inv: any) => inv.status === 'overdue').length,
+      draft: invoices.filter((inv: any) => String(inv.status || '').trim().toLowerCase() === 'draft').length,
+      overdue: invoices.filter((inv: any) => String(inv.status || '').trim().toLowerCase() === 'overdue').length,
     };
 
     // Business Health Score (0-100)
@@ -55,11 +72,11 @@ export async function GET(request: NextRequest) {
     const overdueAnalysis = analyzeOverdue(invoices);
 
     return NextResponse.json({
-      totalRevenue,
+      totalRevenue: Math.max(0, totalRevenue),
       totalInvoices,
       paidInvoices,
       pendingInvoices,
-      averageInvoiceValue,
+      averageInvoiceValue: Math.max(0, averageInvoiceValue),
       monthlyData,
       topClients,
       invoiceStatusDistribution,
@@ -76,32 +93,75 @@ export async function GET(request: NextRequest) {
 }
 
 function calculateMonthlyData(invoices: any[]): Array<{ month: string; revenue: number; invoices: number }> {
-  const monthly: { [key: string]: { revenue: number; invoices: number } } = {};
+  const result: Array<{ month: string; yearMonth: string; revenue: number; invoices: number }> = [];
+  const now = new Date();
 
-  invoices
-    .filter((i: any) => i.status === 'paid' && (i.paidDate || i.date))
-    .forEach((invoice: any) => {
-      const dateStr = invoice.paidDate || invoice.date;
-      const date = new Date(dateStr);
-      const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      if (!monthly[month]) {
-        monthly[month] = { revenue: 0, invoices: 0 };
+  // Generate the last 6 calendar months in chronological order ending with the current month
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthName = d.toLocaleString('en-US', { month: 'short' });
+    const yearTwoDigits = d.getFullYear().toString().slice(-2);
+    const label = `${monthName} ${yearTwoDigits}`;
+    const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    result.push({ month: label, yearMonth, revenue: 0, invoices: 0 });
+  }
+
+  const monthMap = new Map<string, number>();
+  result.forEach((item, index) => {
+    monthMap.set(item.yearMonth, index);
+  });
+
+  (invoices || []).forEach((invoice: any) => {
+    const status = String(invoice.status || '').trim().toLowerCase();
+    if (status !== 'paid') return;
+
+    const type = String(invoice.invoiceType || '').toLowerCase();
+    if (type === 'proforma' || type === 'expense') return;
+
+    const dateStr = invoice.paidDate || invoice.date || invoice.createdAt;
+    if (!dateStr) return;
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return;
+
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      const parts = dateStr.split('T')[0].split('-');
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+    }
+
+    const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+    const index = monthMap.get(yearMonth);
+    if (index !== undefined) {
+      const amt = Number(invoice.amount) || 0;
+      if (type === 'credit-note') {
+        result[index].revenue -= amt;
+      } else {
+        result[index].revenue += amt;
+        result[index].invoices += 1;
       }
-      monthly[month].revenue += invoice.amount || 0;
-      monthly[month].invoices += 1;
-    });
+    }
+  });
 
-  return Object.entries(monthly)
-    .map(([month, data]) => ({ month, ...data }))
-    .slice(-6);
+  return result.map(({ month, revenue, invoices }) => ({
+    month,
+    revenue: Math.round(Math.max(0, revenue) * 100) / 100,
+    invoices,
+  }));
 }
 
 function calculateTopClients(invoices: any[]): Array<{ name: string; company?: string; totalAmount: number; totalInvoices: number }> {
   const clientMap: { [key: string]: { name: string; company?: string; totalAmount: number; totalInvoices: number } } = {};
 
-  invoices
-    .filter((i: any) => i.status === 'paid')
+  (invoices || [])
+    .filter((i: any) => String(i.status || '').trim().toLowerCase() === 'paid')
     .forEach((invoice: any) => {
+      const type = String(invoice.invoiceType || '').toLowerCase();
+      if (type === 'proforma' || type === 'expense') return;
+
       const clientName = invoice.clientName || 'Unknown';
       if (!clientMap[clientName]) {
         clientMap[clientName] = {
@@ -111,11 +171,21 @@ function calculateTopClients(invoices: any[]): Array<{ name: string; company?: s
           totalInvoices: 0,
         };
       }
-      clientMap[clientName].totalAmount += invoice.amount || 0;
-      clientMap[clientName].totalInvoices += 1;
+
+      const amt = Number(invoice.amount) || 0;
+      if (type === 'credit-note') {
+        clientMap[clientName].totalAmount -= amt;
+      } else {
+        clientMap[clientName].totalAmount += amt;
+        clientMap[clientName].totalInvoices += 1;
+      }
     });
 
   return Object.values(clientMap)
+    .map(c => ({
+      ...c,
+      totalAmount: Math.round(Math.max(0, c.totalAmount) * 100) / 100
+    }))
     .sort((a, b) => b.totalAmount - a.totalAmount)
     .slice(0, 5);
 }

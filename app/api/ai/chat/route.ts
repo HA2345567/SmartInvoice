@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
 
         // Fetch user data via Neon DB DatabaseService
         const userProfile = await DatabaseService.getUserById(user.id);
-        const apiKey = userProfile?.googleApiKey;
+        const apiKey = userProfile?.aiApiKey || userProfile?.googleApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
 
         if (!apiKey) {
             return NextResponse.json(
-                { error: 'AI features are disabled. Please configure your Google Gemini API Key in Settings.' },
+                { error: 'AI features are disabled. Please configure your AI API Key in Settings.' },
                 { status: 400 }
             );
         }

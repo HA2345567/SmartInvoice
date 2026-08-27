@@ -123,7 +123,8 @@ export default function Dashboard() {
     }
   };
 
-  const currentMonth = new Date().toLocaleString('default', { month: 'short', year: '2-digit' });
+  const now = new Date();
+  const currentMonth = `${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear().toString().slice(-2)}`;
   const currentMonthRevenue = analytics?.monthlyData.find(m => m.month === currentMonth)?.revenue || 0;
 
   const stats = analytics ? [

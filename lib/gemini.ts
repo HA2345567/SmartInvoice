@@ -1,15 +1,15 @@
 import axios from 'axios';
 
 export interface AIConfig {
-    provider: string; // 'gemini' | 'openai' | 'custom'
+    provider: string; // 'gemini' | 'openai' | 'claude' | 'groq' | 'openrouter' | 'deepseek' | 'custom'
     apiKey: string;
     model: string;
     baseUrl?: string;
 }
 
 async function callAI(config: AIConfig, prompt: string, systemInstruction?: string, base64Image?: string, mimeType?: string): Promise<string> {
-    const provider = config.provider || 'gemini';
-    const apiKey = config.apiKey;
+    const provider = (config.provider || 'gemini').toLowerCase();
+    const apiKey = config.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.OPENAI_API_KEY || '';
     const model = config.model;
     const baseUrl = config.baseUrl;
 
@@ -51,11 +51,66 @@ async function callAI(config: AIConfig, prompt: string, systemInstruction?: stri
             throw new Error('Invalid response received from Gemini API');
         }
         return text;
+    } else if (provider === 'claude' && (!baseUrl || baseUrl.includes('anthropic.com'))) {
+        // Native Anthropic Messages API
+        const activeBaseUrl = baseUrl || 'https://api.anthropic.com/v1';
+        const activeModel = model || 'claude-3-5-sonnet-20241022';
+        const url = `${activeBaseUrl}/messages`;
+
+        const content: any[] = [];
+        if (base64Image && mimeType) {
+            content.push({
+                type: 'image',
+                source: {
+                    type: 'base64',
+                    media_type: mimeType,
+                    data: base64Image
+                }
+            });
+        }
+        content.push({ type: 'text', text: prompt });
+
+        const body: any = {
+            model: activeModel,
+            max_tokens: 2048,
+            messages: [{ role: 'user', content }]
+        };
+
+        if (systemInstruction) {
+            body.system = systemInstruction;
+        }
+
+        const response = await axios.post(url, body, {
+            headers: {
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json'
+            }
+        });
+
+        const text = response.data?.content?.[0]?.text;
+        if (!text) {
+            throw new Error('Invalid response received from Anthropic Claude API');
+        }
+        return text;
     } else {
-        // OpenAI or OpenAI-Compatible Custom Provider
-        const defaultBaseUrl = 'https://api.openai.com/v1';
+        // OpenAI, Groq, OpenRouter, DeepSeek, or Custom OpenAI-Compatible
+        let defaultBaseUrl = 'https://api.openai.com/v1';
+        let defaultModel = 'gpt-4o-mini';
+
+        if (provider === 'groq') {
+            defaultBaseUrl = 'https://api.groq.com/openai/v1';
+            defaultModel = 'llama-3.3-70b-versatile';
+        } else if (provider === 'openrouter') {
+            defaultBaseUrl = 'https://openrouter.ai/api/v1';
+            defaultModel = 'google/gemini-2.5-flash';
+        } else if (provider === 'deepseek') {
+            defaultBaseUrl = 'https://api.deepseek.com/v1';
+            defaultModel = 'deepseek-chat';
+        }
+
         const activeBaseUrl = baseUrl || defaultBaseUrl;
-        const activeModel = model || 'gpt-4o-mini';
+        const activeModel = model || defaultModel;
         const url = `${activeBaseUrl}/chat/completions`;
 
         const messages: any[] = [];
@@ -80,20 +135,25 @@ async function callAI(config: AIConfig, prompt: string, systemInstruction?: stri
             messages.push({ role: 'user', content: prompt });
         }
 
+        const headers: Record<string, string> = {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        };
+
+        if (provider === 'openrouter') {
+            headers['HTTP-Referer'] = 'http://localhost:3000';
+            headers['X-Title'] = 'SmartInvoice';
+        }
+
         const response = await axios.post(url, {
             model: activeModel,
             messages
-        }, {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        }, { headers });
 
         const text = response.data?.choices?.[0]?.message?.content;
         if (!text) {
-            console.error('OpenAI-Compatible API Error Response:', response.data);
-            throw new Error('Invalid response received from OpenAI-compatible API');
+            console.error('AI API Error Response:', response.data);
+            throw new Error(`Invalid response received from ${provider} API`);
         }
         return text;
     }
@@ -122,7 +182,6 @@ export async function scanReceipt(config: AIConfig, base64Image: string, mimeTyp
     const text = await callAI(config, prompt, undefined, base64Image, mimeType);
     console.log("RAW AI RESPONSE:", text);
 
-    // Clean potential markdown code blocks
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     const cleanJson = jsonMatch ? jsonMatch[0] : text;
 

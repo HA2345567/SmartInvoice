@@ -5,12 +5,41 @@ import { getNeonSql } from '@/lib/database-config';
 
 export const dynamic = 'force-dynamic';
 
+async function ensureUserColumnsExist(sql: any) {
+  try {
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS company TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS gstnumber TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'USD';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS invoiceprefix TEXT DEFAULT 'INV';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS defaultterms TEXT DEFAULT 'Payment due within 30 days';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS defaultnotes TEXT DEFAULT 'Thank you for your business!';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS defaultgstrate NUMERIC DEFAULT 18;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS defaulttaxrate NUMERIC DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS emailnotifications BOOLEAN DEFAULT true;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS reminderemails BOOLEAN DEFAULT true;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS reminderdays INTEGER DEFAULT 7;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS autogeneratenumbers BOOLEAN DEFAULT true;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS aiprovider TEXT DEFAULT 'gemini';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS aiapikey TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS aimodel TEXT DEFAULT 'gemini-2.0-flash';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS aibaseurl TEXT;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;`;
+  } catch (err) {
+    console.warn('ensureUserColumnsExist warning:', err);
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const sql = getNeonSql();
+    await ensureUserColumnsExist(sql);
 
     const profile = await DatabaseService.getUserById(user.id);
 
@@ -61,6 +90,8 @@ export async function PUT(request: NextRequest) {
 
     const data = await request.json();
     const sql = getNeonSql();
+    await ensureUserColumnsExist(sql);
+
     const now = new Date().toISOString();
 
     const current = await DatabaseService.getUserById(user.id);
@@ -68,26 +99,27 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
 
-    const name = data.name ?? current.name;
-    const company = data.company ?? current.company;
-    const phone = data.phone ?? current.phone;
-    const address = data.address ?? current.address;
-    const gstNumber = data.gstNumber ?? current.gstNumber;
-    const currency = data.currency ?? current.currency;
-    const invoicePrefix = data.invoicePrefix ?? current.invoicePrefix;
-    const defaultTerms = data.defaultTerms ?? current.defaultTerms;
-    const defaultNotes = data.defaultNotes ?? current.defaultNotes;
-    const defaultGstRate = data.defaultGstRate ?? current.defaultGstRate;
-    const defaultTaxRate = data.defaultTaxRate ?? current.defaultTaxRate;
-    const emailNotifications = data.emailNotifications ?? current.emailNotifications;
-    const reminderEmails = data.reminderEmails ?? current.reminderEmails;
-    const reminderDays = data.reminderDays ?? current.reminderDays;
-    const autoGenerateNumbers = data.autoGenerateNumbers ?? current.autoGenerateNumbers;
+    const name = data.name ?? current.name ?? user.name ?? '';
+    const company = data.company ?? current.company ?? '';
+    const phone = data.phone ?? current.phone ?? '';
+    const address = data.address ?? current.address ?? '';
+    const gstNumber = data.gstNumber ?? current.gstNumber ?? '';
+    const currency = data.currency ?? current.currency ?? 'USD';
+    const invoicePrefix = data.invoicePrefix ?? current.invoicePrefix ?? 'INV';
+    const defaultTerms = data.defaultTerms ?? current.defaultTerms ?? 'Payment due within 30 days';
+    const defaultNotes = data.defaultNotes ?? current.defaultNotes ?? 'Thank you for your business!';
+    const defaultGstRate = typeof data.defaultGstRate === 'number' ? data.defaultGstRate : parseFloat(data.defaultGstRate || current.defaultGstRate || 18);
+    const defaultTaxRate = typeof data.defaultTaxRate === 'number' ? data.defaultTaxRate : parseFloat(data.defaultTaxRate || current.defaultTaxRate || 0);
+    const emailNotifications = Boolean(data.emailNotifications ?? current.emailNotifications ?? true);
+    const reminderEmails = Boolean(data.reminderEmails ?? current.reminderEmails ?? true);
+    const reminderDays = parseInt(data.reminderDays ?? current.reminderDays ?? 7, 10);
+    const autoGenerateNumbers = Boolean(data.autoGenerateNumbers ?? current.autoGenerateNumbers ?? true);
     const aiProvider = data.aiProvider ?? current.aiProvider ?? 'gemini';
-    const aiApiKey = data.aiApiKey ?? current.aiApiKey;
+    const aiApiKey = data.aiApiKey ?? current.aiApiKey ?? '';
     const aiModel = data.aiModel ?? current.aiModel ?? 'gemini-2.0-flash';
-    const aiBaseUrl = data.aiBaseUrl ?? current.aiBaseUrl;
- 
+    const aiBaseUrl = data.aiBaseUrl ?? current.aiBaseUrl ?? '';
+    const avatar = data.avatar ?? current.avatar ?? null;
+
     await sql`
       UPDATE users
       SET name = ${name}, company = ${company}, phone = ${phone}, address = ${address},
@@ -96,16 +128,17 @@ export async function PUT(request: NextRequest) {
           defaulttaxrate = ${defaultTaxRate}, emailnotifications = ${emailNotifications},
           reminderemails = ${reminderEmails}, reminderdays = ${reminderDays},
           autogeneratenumbers = ${autoGenerateNumbers}, aiprovider = ${aiProvider}, 
-          aiapikey = ${aiApiKey}, aimodel = ${aiModel}, aibaseurl = ${aiBaseUrl}, updatedat = ${now}
+          aiapikey = ${aiApiKey}, aimodel = ${aiModel}, aibaseurl = ${aiBaseUrl},
+          avatar = ${avatar}, updatedat = ${now}
       WHERE id = ${user.id}
     `;
 
     return NextResponse.json({ success: true, message: 'Settings updated successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update settings error:', error);
     return NextResponse.json({
       error: 'Failed to update settings',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
 }

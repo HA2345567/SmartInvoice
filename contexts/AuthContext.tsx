@@ -23,6 +23,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -146,6 +147,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/auth/login');
   }, [router]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const token = getStoredToken();
+      if (!token) return;
+      const res = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          setSession({ access_token: token, user: data.user });
+        }
+      }
+    } catch (err) {
+      console.error('Refresh user error:', err);
+    }
+  }, []);
+
   const value = useMemo(() => ({
     user,
     session,
@@ -153,7 +173,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
-  }), [user, session, loading, signUp, signIn, signOut]);
+    refreshUser,
+  }), [user, session, loading, signUp, signIn, signOut, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

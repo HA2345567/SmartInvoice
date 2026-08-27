@@ -11,34 +11,35 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const body = await request.json();
+        const { text, mode, provider, apiKey, model, baseUrl } = body || {};
+
         const aiConfig = {
-            provider: (user as any).aiProvider || 'gemini',
-            apiKey: (user as any).aiApiKey,
-            model: (user as any).aiModel || 'gemini-2.0-flash',
-            baseUrl: (user as any).aiBaseUrl
+            provider: provider || (user as any).aiProvider || 'gemini',
+            apiKey: apiKey || (user as any).aiApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY,
+            model: model || (user as any).aiModel || 'gemini-2.0-flash',
+            baseUrl: baseUrl || (user as any).aiBaseUrl
         };
 
         if (!aiConfig.apiKey) {
             return NextResponse.json({
-                error: 'AI feature is disabled. Please configure your AI API Key in Settings.'
+                error: 'AI API Key is required. Please enter your API Key.'
             }, { status: 400 });
         }
 
-        const { text, mode } = await request.json();
+        const textToEnhance = text || 'Thank you for your business!';
+        const modeToUse = mode || 'formal';
 
-        if (!text) {
-            return NextResponse.json({ error: 'No text provided' }, { status: 400 });
-        }
-
-        const enhancedText = await enhanceText(aiConfig, text, mode);
+        const enhancedText = await enhanceText(aiConfig, textToEnhance, modeToUse);
 
         return NextResponse.json({ enhancedText });
 
     } catch (error: any) {
-        console.error('Enhance text error:', error);
+        console.error('Enhance text error:', error?.response?.data || error);
+        const detailMsg = error.response?.data?.error?.message || error.message || String(error);
         return NextResponse.json({
-            error: 'Failed to enhance text',
-            details: error.message || String(error)
+            error: 'AI Connection Failed',
+            details: detailMsg
         }, { status: 500 });
     }
 }
