@@ -150,19 +150,23 @@ body {
   --brand-green-hover: #1fdf64;
 }
 
-.bg-brand-green, .bg-green-primary {
+.bg-brand-green,
+.bg-green-primary {
   background-color: #1ed760 !important;
 }
 
-.text-brand-green, .text-green-primary {
+.text-brand-green,
+.text-green-primary {
   color: #1ed760 !important;
 }
 
-.border-brand-green, .border-green-primary {
+.border-brand-green,
+.border-green-primary {
   border-color: #1ed760 !important;
 }
 
-.btn-brand-green, .btn-green-primary {
+.btn-brand-green,
+.btn-green-primary {
   background-color: #1ed760 !important;
   color: #000000 !important;
   font-weight: 700 !important;
@@ -171,7 +175,8 @@ body {
   box-shadow: 0 4px 15px rgba(30, 215, 96, 0.35) !important;
 }
 
-.btn-brand-green:hover, .btn-green-primary:hover {
+.btn-brand-green:hover,
+.btn-green-primary:hover {
   background-color: #1fdf64 !important;
   color: #000000 !important;
   transform: scale(1.03) !important;

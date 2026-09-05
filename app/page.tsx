@@ -377,11 +377,10 @@ export default function LandingPage() {
 
       {/* ═══ HEADER ═══ */}
       <header
-        className={`fixed left-1/2 z-50 rounded-full transition-all duration-500 ease-out border backdrop-blur-lg ${
-          scrollY > 20
-            ? 'top-3 bg-black/80 border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)] w-[calc(100%-4rem)] max-w-4xl py-1.5'
-            : 'top-6 bg-[#121212]/30 border-white/5 w-[calc(100%-2rem)] max-w-5xl py-3'
-        }`}
+        className={`fixed left-1/2 z-50 rounded-full transition-all duration-500 ease-out border backdrop-blur-lg ${scrollY > 20
+          ? 'top-3 bg-black/80 border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)] w-[calc(100%-4rem)] max-w-4xl py-1.5'
+          : 'top-6 bg-[#121212]/30 border-white/5 w-[calc(100%-2rem)] max-w-5xl py-3'
+          }`}
         style={{
           transform: scrollY > 20 ? 'translateX(-50%) scale(0.95)' : 'translateX(-50%) scale(1)',
         }}
@@ -391,9 +390,8 @@ export default function LandingPage() {
             {/* Logo */}
             <Link
               href="/"
-              className={`group flex items-center transition-all duration-500 origin-left ${
-                scrollY > 20 ? 'scale-90' : 'scale-100'
-              }`}
+              className={`group flex items-center transition-all duration-500 origin-left ${scrollY > 20 ? 'scale-90' : 'scale-100'
+                }`}
             >
               <Logo variant="full" size="sm" className="transition-opacity" />
             </Link>
@@ -404,9 +402,8 @@ export default function LandingPage() {
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className={`relative font-bold rounded-full transition-all duration-300 hover:bg-white/10 hover:text-white group-hover/nav:opacity-60 hover:!opacity-100 ${
-                    scrollY > 20 ? 'px-3 py-1 text-[10px]' : 'px-4 py-2 text-xs'
-                  }`}
+                  className={`relative font-bold rounded-full transition-all duration-300 hover:bg-white/10 hover:text-white group-hover/nav:opacity-60 hover:!opacity-100 ${scrollY > 20 ? 'px-3 py-1 text-[10px]' : 'px-4 py-2 text-xs'
+                    }`}
                   style={{
                     color: spotify.textMuted,
                     letterSpacing: '0.8px',
@@ -422,18 +419,16 @@ export default function LandingPage() {
             <div className={`hidden md:flex items-center transition-all duration-500 ${scrollY > 20 ? 'gap-3' : 'gap-4'}`}>
               <Link
                 href="/auth/login"
-                className={`font-extrabold transition-all duration-300 hover:text-white hover:scale-[1.05] ${
-                  scrollY > 20 ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
-                }`}
+                className={`font-extrabold transition-all duration-300 hover:text-white hover:scale-[1.05] ${scrollY > 20 ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
+                  }`}
                 style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.4px' }}
               >
                 Sign In
               </Link>
               <Link
                 href="/dashboard/create"
-                className={`relative inline-flex items-center justify-center font-extrabold transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] text-black shadow-[0_4px_20px_rgba(30,215,96,0.4)] ${
-                  scrollY > 20 ? 'px-4 py-2 text-[10px] gap-1' : 'px-5 py-2.5 text-xs gap-1.5'
-                }`}
+                className={`relative inline-flex items-center justify-center font-extrabold transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] text-black shadow-[0_4px_20px_rgba(30,215,96,0.4)] ${scrollY > 20 ? 'px-4 py-2 text-[10px] gap-1' : 'px-5 py-2.5 text-xs gap-1.5'
+                  }`}
                 style={{
                   background: `linear-gradient(135deg, ${spotify.green} 0%, #1db954 100%)`,
                   borderRadius: '9999px',
@@ -516,8 +511,8 @@ export default function LandingPage() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section 
-        className="relative pt-32 pb-24 px-6 overflow-hidden transition-all duration-500" 
+      <section
+        className="relative pt-32 pb-24 px-6 overflow-hidden transition-all duration-500"
       >
         {/* Ambient Gradient Overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
@@ -604,17 +599,17 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div 
+          <div
             className="relative rounded-xl overflow-hidden border transition-all duration-300 hover:scale-[1.01]"
-            style={{ 
+            style={{
               borderColor: spotify.borderGray,
               boxShadow: spotify.shadowHeavy
             }}
           >
-            <img 
-              src="/dashboard-screenshot.png" 
-              alt="SmartInvoice Dashboard Preview" 
-              className="w-full h-auto block" 
+            <img
+              src="/dashboard-screenshot.png"
+              alt="SmartInvoice Dashboard Preview"
+              className="w-full h-auto block"
             />
           </div>
         </div>
@@ -639,13 +634,13 @@ export default function LandingPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Image Box */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
-                <img 
-                  src="/features/create-invoice.png" 
-                  alt="Create New Invoice Dashboard" 
+                <img
+                  src="/features/create-invoice.png"
+                  alt="Create New Invoice Dashboard"
                   className="w-full h-auto block rounded-2xl"
                 />
               </div>
-              
+
               {/* Text */}
               <div className="space-y-4">
                 <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
@@ -671,9 +666,9 @@ export default function LandingPage() {
 
               {/* Image Box */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] order-1 lg:order-2">
-                <img 
-                  src="/features/smart-reminders.png" 
-                  alt="Smart Reminders Dashboard" 
+                <img
+                  src="/features/smart-reminders.png"
+                  alt="Smart Reminders Dashboard"
                   className="w-full h-auto block rounded-2xl"
                 />
               </div>
@@ -683,9 +678,9 @@ export default function LandingPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Image Box */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
-                <img 
-                  src="/features/tax-center.png" 
-                  alt="Tax Center Dashboard" 
+                <img
+                  src="/features/tax-center.png"
+                  alt="Tax Center Dashboard"
                   className="w-full h-auto block rounded-2xl"
                 />
               </div>
@@ -715,9 +710,9 @@ export default function LandingPage() {
 
               {/* Image Box */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] order-1 lg:order-2">
-                <img 
-                  src="/features/invoices-list.png" 
-                  alt="Invoices Directory Dashboard" 
+                <img
+                  src="/features/invoices-list.png"
+                  alt="Invoices Directory Dashboard"
                   className="w-full h-auto block rounded-2xl"
                 />
               </div>
