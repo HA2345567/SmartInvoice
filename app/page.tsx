@@ -3,117 +3,101 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
-import {
-  FileText,
-  ArrowRight,
-  Sparkles,
-  Shield,
-  Star,
-  TrendingUp,
-  Users,
-  ChevronDown,
-  Menu,
-  X,
-  Lock,
-  Check,
-  Activity,
-  ArrowUpRight
-} from 'lucide-react';
+import { FileText, ArrowRight, Sparkles, Zap, Shield, ChartBar as BarChart3, Star, TrendingUp, DollarSign, Users, Clock, Globe, ChevronDown, ChevronRight, Play, Check, X, Menu, Lock, Repeat, Send, Download, Activity, Building, Twitter, Linkedin, Github, Headphones } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// AWESOMIC DESIGN SYSTEM — Editorial Zinc Grid with Confetti-Orange Punctuation
+// SPOTIFY DESIGN SYSTEM - Exact Implementation
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const awesomic = {
-  // Palette
-  obsidian: '#09090b',    // Primary CTA, hero headlines, dominant text
-  graphite: '#18181b',    // Body text, nav text, badge text
-  slate: '#27272a',       // Secondary headings, elevated dark card surfaces
-  iron: '#3f3f46',        // Muted text, button labels on light surfaces
-  steel: '#52525b',       // Icon strokes, supporting metadata
-  fog: '#71717a',         // Helper text, tertiary labels
-  ash: '#a1a1aa',         // Placeholder text, disabled labels
-  mist: '#d4d4d8',        // Subtle borders, secondary card fills
-  cloud: '#ececee',       // Primary border color across the system (1px hairline)
-  paper: '#f4f4f5',       // Canvas background
-  snow: '#ffffff',        // Elevated surfaces, card surfaces
-  ember: '#ff5a00',       // Accent badges, highlight chips
+const spotify = {
+  // Primary Brand Colors
+  green: '#1ed760',
+  greenHover: '#1fdf64',
+  greenBorder: '#1ed760',
 
-  // Elevation
-  darkBtnElevation:
-    'inset 0 0.5px 0 0 rgba(255,255,255,0.5), inset 0 9px 14px -5px rgba(117,123,133,0.4), 0 0 0 1.5px rgb(44,46,52), 0 4px 6px 0 rgba(0,0,0,0.14)',
-  cardBorder: '1px solid #ececee',
+  // Background Surfaces (Dark Immersive)
+  nearBlack: '#121212',      // Level 0 - Deepest background
+  darkSurface: '#181818',    // Level 1 - Cards, containers, elevated surfaces
+  midDark: '#1f1f1f',        // Level 1 - Button backgrounds, interactive surfaces
+  darkCard: '#252525',       // Level 2 - Elevated card surface
+  midCard: '#272727',        // Level 2 - Alternate card surface
+
+  // Text Colors
+  textBase: '#ffffff',       // Primary text
+  textMuted: '#b3b3b3',      // Secondary text, muted labels, inactive nav
+  textNearWhite: '#cbcbcb',  // Slightly brighter secondary text
+  textLight: '#fdfdfd',      // Near-pure white for max emphasis
+
+  // Semantic Colors
+  negative: '#f3727f',        // Error states
+  warning: '#ffa42b',        // Warning states
+  announcement: '#539df5',    // Info states
+
+  // Surface & Border
+  borderGray: '#4d4d4d',     // Button borders on dark
+  lightBorder: '#7c7c7c',    // Outlined button borders
+  separator: '#b3b3b3',      // Divider lines
+  lightSurface: '#eeeeee',   // Light-mode buttons (rare)
+
+  // Shadows (Discreet, matte, no neon glow)
+  shadowHeavy: '0 12px 32px rgba(0,0,0,0.5)',
+  shadowMedium: '0 4px 12px rgba(0,0,0,0.3)',
+  shadowInset: 'rgb(18,18,18) 0px 1px 0px, rgb(124,124,124) 0px 0px 0px 1px inset',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTS — Awesomic Geometry (36px cards, 14px buttons, 10000px pills)
+// COMPONENTS - Following Spotify Geometry Exactly
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Primary Action Button (Dark Filled) / Ghost Action Button (White) / Pill
-const ActionButton = ({
+// Pill Button (500px-9999px radius)
+const PillButton = ({
   children,
   href,
   variant = 'dark',
   size = 'md',
   icon,
-  className = '',
-  pill = false,
+  className = ''
 }: {
   children: React.ReactNode;
   href: string;
-  variant?: 'dark' | 'ghost' | 'light' | 'orange';
+  variant?: 'dark' | 'green' | 'light' | 'outlined';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
   className?: string;
-  pill?: boolean;
 }) => {
   const sizes = {
-    sm: 'px-4 py-2 text-xs font-medium',
-    md: 'px-5 py-2.5 text-sm font-medium',
-    lg: 'px-7 py-3.5 text-base font-medium',
+    sm: 'h-9 px-4.5 text-xs font-bold',
+    md: 'h-11 px-7 text-xs sm:text-sm font-extrabold',
+    lg: 'h-12 px-8 text-xs sm:text-sm font-extrabold',
   };
 
-  const borderRadius = pill ? '9999px' : '14px';
+  const variants: Record<
+    'dark' | 'green' | 'light' | 'outlined',
+    { bg: string; text: string; hover?: string; border?: string }
+  > = {
+    dark: { bg: spotify.midDark, text: spotify.textBase, hover: spotify.darkSurface, border: '1px solid transparent' },
+    green: { bg: spotify.green, text: '#000000', hover: spotify.greenHover, border: '1px solid transparent' },
+    light: { bg: spotify.lightSurface, text: spotify.darkSurface, hover: '#ffffff', border: '1px solid transparent' },
+    outlined: { bg: 'transparent', text: spotify.textBase, border: `1px solid ${spotify.lightBorder}` },
+  };
 
-  let customStyle: React.CSSProperties = {};
-
-  if (variant === 'dark') {
-    customStyle = {
-      background: awesomic.obsidian,
-      color: '#ffffff',
-      border: '1.5px solid #2c2e34',
-      boxShadow: awesomic.darkBtnElevation,
-      borderRadius,
-    };
-  } else if (variant === 'ghost') {
-    customStyle = {
-      background: awesomic.snow,
-      color: awesomic.iron,
-      border: `1px solid ${awesomic.mist}`,
-      borderRadius,
-    };
-  } else if (variant === 'orange') {
-    customStyle = {
-      background: awesomic.ember,
-      color: '#ffffff',
-      border: '1px solid #e04e00',
-      boxShadow: '0 2px 4px rgba(255, 90, 0, 0.2)',
-      borderRadius,
-    };
-  } else {
-    customStyle = {
-      background: '#fafafa',
-      color: awesomic.graphite,
-      border: `1px solid ${awesomic.cloud}`,
-      borderRadius,
-    };
-  }
+  const v = variants[variant];
 
   return (
     <Link
       href={href}
-      className={`inline-flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${sizes[size]} ${className}`}
-      style={customStyle}
+      className={`relative inline-flex items-center justify-center font-bold text-center whitespace-nowrap transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${sizes[size]} ${className}`}
+      style={{
+        background: v.bg,
+        color: v.text,
+        border: v.border || '1px solid transparent',
+        borderRadius: '9999px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.8px',
+        boxShadow: 'none',
+        boxSizing: 'border-box',
+        textAlign: 'center',
+      }}
     >
       {icon && <span className="flex-shrink-0">{icon}</span>}
       {children}
@@ -121,56 +105,255 @@ const ActionButton = ({
   );
 };
 
-// Section Label with editorial tag styling
+// Circular Button (50% radius)
+const CircularButton = ({
+  children,
+  href,
+  variant = 'dark',
+  size = 'md'
+}: {
+  children: React.ReactNode;
+  href?: string;
+  variant?: 'dark' | 'green';
+  size?: 'sm' | 'md' | 'lg';
+}) => {
+  const sizes = { sm: 'w-8 h-8', md: 'w-12 h-12', lg: 'w-16 h-16' };
+  const iconSizes = { sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-6 h-6' };
+
+  const style = {
+    dark: { bg: spotify.midDark, color: spotify.textBase },
+    green: { bg: spotify.green, color: '#000000' },
+  };
+
+  const s = style[variant];
+
+  const inner = (
+    <div
+      className={`${sizes[size]} rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-105`}
+      style={{ background: s.bg, boxShadow: spotify.shadowMedium }}
+    >
+      <span style={{ color: s.color }} className={iconSizes[size]}>{children}</span>
+    </div>
+  );
+
+  return href ? <Link href={href}>{inner}</Link> : inner;
+};
+
+// Card Component
+const Card = ({
+  children,
+  className = '',
+  hover = true,
+  elevated = false,
+  style = {}
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+  elevated?: boolean;
+  style?: React.CSSProperties;
+}) => (
+  <div
+    className={`transition-transform duration-200 ${hover ? 'hover:scale-[1.02]' : ''} ${className}`}
+    style={{
+      background: spotify.darkSurface,
+      borderRadius: '8px',
+      boxShadow: elevated ? spotify.shadowMedium : 'none',
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+// Section Label with decorative lines
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center justify-center mb-4">
+  <div className="flex items-center justify-center gap-4 mb-4">
     <span
-      className="inline-flex items-center px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-[12px]"
-      style={{
-        background: '#ffffff',
-        border: `1px solid ${awesomic.cloud}`,
-        color: awesomic.iron,
-      }}
+      className="text-[10.5px] font-semibold uppercase tracking-widest"
+      style={{ color: spotify.textMuted, letterSpacing: '0.15em' }}
     >
       {children}
     </span>
   </div>
 );
 
-// FAQ Accordion Item (Clean light surface with hairline border)
+// Badge (2px radius)
+const Badge = ({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'green' | 'warning' }) => {
+  const styles = {
+    default: { bg: 'rgba(255,255,255,0.1)', color: spotify.textMuted },
+    green: { bg: 'rgba(30,215,96,0.15)', color: spotify.green },
+    warning: { bg: 'rgba(255,164,43,0.15)', color: spotify.warning },
+  };
+  const s = styles[variant];
+  return (
+    <span
+      className="inline-block px-2 py-0.5 text-[10px] font-semibold"
+      style={{ background: s.bg, color: s.color, borderRadius: '2px', textTransform: 'capitalize' }}
+    >
+      {children}
+    </span>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD MOCK - App Preview
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const DashboardMock = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <div
+      className="relative w-full rounded-lg overflow-hidden"
+      style={{ background: spotify.darkSurface, boxShadow: spotify.shadowHeavy }}
+    >
+      {/* Chrome */}
+      <div
+        className="flex items-center gap-2 px-4 py-3"
+        style={{ background: spotify.nearBlack, borderBottom: `1px solid ${spotify.borderGray}` }}
+      >
+        <div className="flex gap-2">
+          <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+          <div className="w-3 h-3 rounded-full bg-[#1ed760]" />
+        </div>
+        <div
+          className="flex-1 mx-4"
+          style={{ background: spotify.midDark, borderRadius: '500px' }}
+        >
+          <div className="px-4 py-1.5 text-xs" style={{ color: spotify.textMuted }}>
+            smartinvoice.app/dashboard
+          </div>
+        </div>
+      </div>
+
+      {/* Layout */}
+      <div className="flex h-72 sm:h-80">
+        {/* Sidebar */}
+        <div
+          className="w-14 sm:w-48 flex flex-col py-4 px-2 sm:px-3 gap-1"
+          style={{ background: spotify.nearBlack }}
+        >
+          <div className="flex items-center gap-3 mb-6 px-2">
+            <LogoMarkOnly size={32} />
+            <span className="hidden sm:block text-sm font-bold text-white">SmartInvoice</span>
+          </div>
+
+          {[
+            { icon: BarChart3, label: 'Dashboard', active: true },
+            { icon: FileText, label: 'Invoices', active: false },
+            { icon: Users, label: 'Clients', active: false },
+            { icon: DollarSign, label: 'Payments', active: false },
+          ].map(({ icon: Icon, label, active }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 px-3 py-2 rounded text-sm font-bold transition-colors"
+              style={{
+                background: active ? spotify.midDark : 'transparent',
+                color: active ? spotify.textBase : spotify.textMuted
+              }}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="hidden sm:block">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Main */}
+        <div className="flex-1 p-4" style={{ background: spotify.darkSurface }}>
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+            {[
+              { label: 'Revenue', val: '$48,290', chg: '+12%' },
+              { label: 'Invoices', val: '184', chg: '+8' },
+              { label: 'Paid', val: '162', chg: '88%' },
+              { label: 'Pending', val: '22', chg: '3 due' },
+            ].map(s => (
+              <div key={s.label} className="p-3 rounded" style={{ background: spotify.midDark }}>
+                <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: spotify.textMuted }}>{s.label}</div>
+                <div className="text-lg font-bold text-white">{s.val}</div>
+                <div className="text-[10px] font-bold" style={{ color: spotify.green }}>{s.chg}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chart */}
+          <div className="p-3 rounded mb-3" style={{ background: spotify.midDark }}>
+            <div className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: spotify.textMuted }}>Monthly Revenue</div>
+            <div className="flex items-end gap-1 h-14">
+              {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 100].map((h, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-sm transition-all duration-500"
+                  style={{
+                    height: mounted ? `${h}%` : '0%',
+                    background: i === 11 ? spotify.green : `rgba(30,215,96,${0.1 + h / 400})`
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="rounded overflow-hidden" style={{ background: spotify.midDark }}>
+            {[
+              { name: 'Acme Corp', amount: '$2,400', status: 'Paid', isPaid: true },
+              { name: 'TechFlow Inc', amount: '$1,850', status: 'Pending', isPaid: false },
+            ].map((r, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between px-3 py-2.5"
+                style={{ borderBottom: i === 0 ? `1px solid ${spotify.borderGray}` : 'none' }}
+              >
+                <div className="text-sm text-white font-medium">{r.name}</div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold text-white">{r.amount}</span>
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"
+                    style={{
+                      background: r.isPaid ? 'rgba(30,215,96,0.15)' : 'rgba(255,164,43,0.15)',
+                      color: r.isPaid ? spotify.green : spotify.warning
+                    }}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FAQ ACCORDION
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
   return (
     <div
-      className="rounded-[20px] transition-all duration-200"
-      style={{
-        background: awesomic.snow,
-        border: `1px solid ${open ? awesomic.mist : awesomic.cloud}`,
-      }}
+      className="rounded-lg overflow-hidden transition-colors"
+      style={{ background: spotify.darkSurface }}
     >
       <button
-        className="w-full flex items-center justify-between px-6 py-5 text-left transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
         onClick={() => setOpen(!open)}
+        style={{ borderColor: open ? spotify.green : 'transparent' }}
       >
-        <span
-          className="text-base font-semibold pr-4"
-          style={{ color: awesomic.obsidian }}
-        >
-          {q}
-        </span>
+        <span className="text-sm font-bold text-white pr-4">{q}</span>
         <ChevronDown
           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          style={{ color: open ? awesomic.obsidian : awesomic.steel }}
+          style={{ color: spotify.textMuted }}
         />
       </button>
       {open && (
-        <div className="px-6 pb-5 pt-1">
-          <p
-            className="text-sm leading-relaxed"
-            style={{ color: awesomic.steel }}
-          >
-            {a}
-          </p>
+        <div className="px-5 pb-4">
+          <p className="text-sm leading-relaxed" style={{ color: spotify.textMuted }}>{a}</p>
         </div>
       )}
     </div>
@@ -178,7 +361,7 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LANDING PAGE COMPONENT
+// PAGE COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function LandingPage() {
@@ -192,55 +375,41 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div
-      className="min-h-screen selection:bg-[#ff5a00] selection:text-white"
-      style={{
-        background: awesomic.paper,
-        color: awesomic.graphite,
-        fontFamily: "'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      }}
-    >
-      {/* ═══ NAVIGATION BAR ═══ */}
+    <div className="min-h-screen text-white" style={{ background: spotify.nearBlack }}>
+
+      {/* ═══ HEADER ═══ */}
       <header
-        className={`fixed left-1/2 z-50 transition-all duration-500 ease-out ${
-          scrollY > 20
-            ? 'top-4 w-[calc(100%-2rem)] max-w-5xl py-2'
-            : 'top-6 w-[calc(100%-2rem)] max-w-6xl py-3'
-        }`}
+        className={`fixed left-1/2 z-50 rounded-full transition-all duration-500 ease-out border backdrop-blur-lg ${scrollY > 20
+          ? 'top-3 bg-black/80 border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)] w-[calc(100%-4rem)] max-w-4xl py-1.5'
+          : 'top-6 bg-[#121212]/30 border-white/5 w-[calc(100%-2rem)] max-w-5xl py-3'
+          }`}
         style={{
-          transform: 'translateX(-50%)',
+          transform: scrollY > 20 ? 'translateX(-50%) scale(0.95)' : 'translateX(-50%) scale(1)',
         }}
       >
-        <div
-          className="w-full rounded-[9999px] px-6 py-2.5 transition-all duration-300"
-          style={{
-            background: 'rgba(255, 255, 255, 0.88)',
-            backdropFilter: 'blur(16px)',
-            border: `1px solid ${awesomic.cloud}`,
-            boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
-          }}
-        >
-          <div className="flex items-center justify-between h-11">
+        <div className={`w-full transition-all duration-500 ${scrollY > 20 ? 'px-4 md:px-6' : 'px-6 md:px-8'}`}>
+          <div className="flex items-center justify-between min-h-[48px]">
             {/* Logo */}
-            <Link href="/" className="group flex items-center origin-left">
-              <Logo variant="full" size="sm" theme="light" />
+            <Link
+              href="/"
+              className={`group flex items-center transition-all duration-500 origin-left ${scrollY > 20 ? 'scale-95' : 'scale-100'
+                }`}
+            >
+              <Logo variant="full" size="sm" className="transition-opacity" />
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5 group/nav">
               {['Features', 'FAQ'].map(item => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="px-4 py-2 text-sm font-medium rounded-[9999px] transition-colors"
-                  style={{ color: awesomic.iron }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.color = awesomic.obsidian;
-                    e.currentTarget.style.background = '#f4f4f5';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.color = awesomic.iron;
-                    e.currentTarget.style.background = 'transparent';
+                  className={`relative font-bold rounded-full transition-all duration-300 hover:bg-white/10 hover:text-white group-hover/nav:opacity-60 hover:!opacity-100 ${scrollY > 20 ? 'px-3 py-1 text-[10px]' : 'px-4 py-2 text-xs'
+                    }`}
+                  style={{
+                    color: spotify.textMuted,
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase'
                   }}
                 >
                   {item}
@@ -249,40 +418,43 @@ export default function LandingPage() {
             </nav>
 
             {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className={`hidden md:flex items-center transition-all duration-500 ${scrollY > 20 ? 'gap-3' : 'gap-4'}`}>
               <Link
                 href="/auth/login"
-                className="px-4 py-2 text-sm font-medium transition-colors"
-                style={{ color: awesomic.iron }}
-                onMouseEnter={e => (e.currentTarget.style.color = awesomic.obsidian)}
-                onMouseLeave={e => (e.currentTarget.style.color = awesomic.iron)}
+                className={`font-extrabold transition-all duration-300 hover:text-white hover:scale-[1.05] whitespace-nowrap ${scrollY > 20 ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
+                  }`}
+                style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.4px' }}
               >
                 Sign In
               </Link>
-              <ActionButton
+              <Link
                 href="/dashboard/create"
-                variant="dark"
-                size="sm"
-                pill
-                icon={<Sparkles className="w-3.5 h-3.5 mr-0.5 text-[#ff5a00]" />}
+                className={`relative inline-flex items-center justify-center font-extrabold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-black whitespace-nowrap text-center ${scrollY > 20 ? 'px-4 py-2 text-[10px] gap-1.5' : 'px-5 py-2.5 text-xs gap-2'
+                  }`}
+                style={{
+                  background: '#1ed760',
+                  borderRadius: '9999px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.2px',
+                  textAlign: 'center',
+                }}
               >
-                <span>Create Free Invoice</span>
-                <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
-              </ActionButton>
+                <span className="text-center">Create Free Invoice</span>
+                <ArrowRight className={`transition-all duration-300 flex-shrink-0 ${scrollY > 20 ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
+              </Link>
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Menu */}
             <button
-              className="md:hidden p-2 rounded-full transition-colors"
+              className="md:hidden p-2 rounded-full transition-colors hover:bg-white/10"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              style={{
-                background: '#ffffff',
-                border: `1px solid ${awesomic.cloud}`,
-                color: awesomic.obsidian,
-              }}
-              aria-label="Toggle menu"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? (
+                <X className="w-4 h-4 text-white" />
+              ) : (
+                <Menu className="w-4 h-4" style={{ color: spotify.textBase }} />
+              )}
             </button>
           </div>
         </div>
@@ -290,11 +462,10 @@ export default function LandingPage() {
         {/* Mobile Menu Panel */}
         {mobileMenuOpen && (
           <div
-            className="md:hidden absolute top-[calc(100%+0.5rem)] left-0 right-0 p-5 rounded-[28px] space-y-2 animate-in fade-in slide-in-from-top-4 duration-300"
+            className="md:hidden absolute top-[calc(100%+0.5rem)] left-0 right-0 p-4 rounded-3xl border border-white/10 space-y-2 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300"
             style={{
-              background: '#ffffff',
-              border: `1px solid ${awesomic.cloud}`,
-              boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.08)',
+              background: 'rgba(18,18,18,0.95)',
+              backdropFilter: 'blur(20px)'
             }}
           >
             {['Features', 'FAQ'].map(item => (
@@ -302,10 +473,13 @@ export default function LandingPage() {
                 key={item}
                 href={`#${item.toLowerCase()}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 text-sm font-semibold rounded-[14px] transition-colors"
+                className="block px-5 py-3 text-xs font-extrabold rounded-full transition-colors hover:bg-white/10"
                 style={{
-                  color: awesomic.graphite,
-                  background: awesomic.paper,
+                  color: spotify.textMuted,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase'
                 }}
               >
                 {item}
@@ -315,22 +489,20 @@ export default function LandingPage() {
               <Link
                 href="/auth/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-3 text-sm font-medium rounded-[14px] transition-colors"
-                style={{
-                  background: '#ffffff',
-                  border: `1px solid ${awesomic.cloud}`,
-                  color: awesomic.iron,
-                }}
+                className="block text-center py-3 text-xs font-bold rounded-full transition-colors hover:bg-white/10 border border-white/10"
+                style={{ color: spotify.textMuted, textTransform: 'uppercase', letterSpacing: '1.2px' }}
               >
                 Sign In
               </Link>
               <Link
                 href="/dashboard/create"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-3 text-sm font-medium rounded-[14px] transition-transform hover:scale-[1.01]"
+                className="block text-center py-3 text-xs font-bold rounded-full transition-transform hover:scale-[1.02]"
                 style={{
-                  background: awesomic.obsidian,
-                  color: '#ffffff',
+                  background: spotify.green,
+                  color: '#000',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.2px'
                 }}
               >
                 Create Invoice
@@ -340,296 +512,417 @@ export default function LandingPage() {
         )}
       </header>
 
-      {/* ═══ HERO SECTION ═══ */}
-      <section className="relative pt-36 pb-20 px-6 overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Subtle Orange Punctuation Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[12px] text-xs font-semibold mb-8"
-            style={{
-              background: '#ffffff',
-              border: `1px solid ${awesomic.cloud}`,
-              color: awesomic.iron,
-            }}
-          >
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ background: awesomic.ember }}
-            />
-            <span>Instant PDF download • No sign up required • 100% Free</span>
-          </div>
+      {/* ═══ HERO ═══ */}
+      <section
+        className="relative pt-36 sm:pt-40 pb-24 px-6 overflow-hidden transition-all duration-500"
+      >
+        {/* Ambient Gradient Overlay for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
+        <div className="relative max-w-4xl mx-auto text-center z-10">
 
-          {/* Headline — Cosmica/DM Sans 56-64px Display Weight */}
-          <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.12] mb-6"
-            style={{ color: awesomic.obsidian }}
-          >
-            <span>Invoice smarter.</span>
+          {/* Headline - 24px Section Title weight */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+            <span className="text-white">Invoice smarter.</span>
             <br />
-            <span style={{ color: awesomic.graphite }}>Get paid faster.</span>
+            <span style={{ color: spotify.green }}>Get paid faster.</span>
           </h1>
 
-          {/* Subtitle — Compact 16px Weight 400 */}
-          <p
-            className="text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed font-normal"
-            style={{ color: awesomic.steel }}
-          >
+          {/* Body text - 16px weight 400 */}
+          <p className="text-base max-w-xl mx-auto mb-10" style={{ color: spotify.textMuted }}>
             Create and download stunning PDF invoices instantly as a guest. No credit card, password, or registration needed.
           </p>
 
-          {/* CTAs — 14px radius Awesomic Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
-            <ActionButton href="/dashboard/create" variant="dark" size="lg">
-              <Sparkles className="w-4 h-4 text-[#ff5a00]" />
-              <span>Create Free Invoice</span>
-              <ArrowRight className="w-4 h-4" />
-            </ActionButton>
-            <ActionButton href="/auth/signup" variant="ghost" size="lg">
-              <span>Create Account</span>
-              <ArrowUpRight className="w-4 h-4" style={{ color: awesomic.steel }} />
-            </ActionButton>
+          {/* CTAs - Pill buttons with dead-centered text and right-aligned arrow */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 mb-6">
+            <PillButton href="/dashboard/create" variant="green" size="lg" className="w-full sm:w-[270px] relative justify-center whitespace-nowrap">
+              <span className="text-center mx-auto">Create Free Invoice</span>
+              <ArrowRight className="w-4 h-4 absolute right-5 flex-shrink-0" />
+            </PillButton>
+            <PillButton href="/auth/signup" variant="outlined" size="lg" className="w-full sm:w-[270px] relative justify-center whitespace-nowrap">
+              <span className="text-center mx-auto">Create Account</span>
+              <ArrowRight className="w-4 h-4 absolute right-5 flex-shrink-0" style={{ color: spotify.green }} />
+            </PillButton>
           </div>
 
-          {/* Social Proof Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6" style={{ color: awesomic.steel }}>
-            <div className="flex items-center gap-2.5">
+          <p className="text-xs text-gray-400 mb-10">Instant PDF download • No sign up required • 100% Free</p>
+
+          {/* Social proof */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12" style={{ color: spotify.textMuted }}>
+            <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
-                {[awesomic.obsidian, '#27272a', '#3f3f46', '#52525b'].map((bg, i) => (
+                {['JS', 'MC', 'ER', 'AK'].map((initials, i) => (
                   <div
                     key={i}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                    style={{ background: bg, border: '2px solid #ffffff' }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold"
+                    style={{ background: '#222222', border: `2px solid ${spotify.nearBlack}`, color: '#1ed760' }}
                   >
-                    {['JS', 'MC', 'ER', 'AK'][i]}
+                    {initials}
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-medium" style={{ color: awesomic.graphite }}>
-                10,000+ professionals
-              </span>
+              <span className="text-xs">10,000+ professionals</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: awesomic.graphite }}>
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-3.5 h-3.5 fill-[#ff5a00] text-[#ff5a00]"
-                  />
-                ))}
-              </div>
-              <span className="ml-1">4.9/5</span>
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5" fill={spotify.warning} style={{ color: spotify.warning }} />
+              ))}
+              <span className="text-xs ml-1">4.9/5</span>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* ═══ DASHBOARD PREVIEW ═══ */}
       <section id="demo" className="py-16 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <div className="mb-10">
             <SectionLabel>Dashboard Preview</SectionLabel>
-            <h2
-              className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3"
-              style={{ color: awesomic.obsidian }}
-            >
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
               A powerful, intuitive workspace
             </h2>
-            <p
-              className="text-sm max-w-md mx-auto leading-relaxed"
-              style={{ color: awesomic.steel }}
-            >
+            <p className="text-sm max-w-md mx-auto" style={{ color: spotify.textMuted }}>
               Take a look at the comprehensive business overview and real-time tracking designed to get you paid faster.
             </p>
           </div>
 
-          {/* Clean 36px Card with 1px Hairline Border */}
           <div
-            className="relative rounded-[36px] overflow-hidden p-3 sm:p-4 transition-all duration-300 hover:scale-[1.005]"
+            className="relative rounded-xl overflow-hidden border transition-all duration-300 hover:scale-[1.01]"
             style={{
-              background: awesomic.snow,
-              border: `1px solid ${awesomic.cloud}`,
+              borderColor: spotify.borderGray,
+              boxShadow: spotify.shadowHeavy
             }}
           >
             <img
               src="/dashboard-screenshot.png"
               alt="SmartInvoice Dashboard Preview"
-              className="w-full h-auto block rounded-[26px]"
-              style={{ border: `1px solid ${awesomic.cloud}` }}
+              className="w-full h-auto block"
             />
           </div>
         </div>
       </section>
 
-      {/* ═══ FEATURES ═══ */}
-      <section id="features" className="py-20 px-6">
+      {/* ═══ FEATURES (CURSOR STYLE REFERENCE) ═══ */}
+      <section id="features" className="py-24 px-6 border-t border-b border-[#222226]" style={{ background: '#0e0e11' }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          {/* Section Header */}
+          <div className="text-center mb-20">
             <SectionLabel>Features</SectionLabel>
             <h2
-              className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3"
-              style={{ color: awesomic.obsidian }}
+              className="text-3xl sm:text-4xl lg:text-[42px] font-normal leading-tight tracking-[-0.025em] text-white mb-4"
+              style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
             >
-              Everything you need.<br />Nothing you don't.
+              Everything you need.<br />Nothing you don&apos;t.
             </h2>
             <p
-              className="text-sm max-w-md mx-auto leading-relaxed"
-              style={{ color: awesomic.steel }}
+              className="text-sm sm:text-base max-w-md mx-auto font-normal leading-relaxed"
+              style={{ color: spotify.textMuted }}
             >
               Powerful features designed for professionals who value their time.
             </p>
           </div>
 
-          {/* Feature Highlights — Alternating White Cards and Inverted Dark Feature Card */}
-          <div className="space-y-8">
-            {/* Feature 1: Create Invoice (White Card) */}
-            <div
-              className="rounded-[36px] p-8 sm:p-12 transition-all duration-300"
-              style={{
-                background: awesomic.snow,
-                border: `1px solid ${awesomic.cloud}`,
-              }}
-            >
-              <div className="grid lg:grid-cols-2 gap-10 items-center">
-                <div className="relative rounded-[24px] overflow-hidden order-1">
+          {/* Feature Highlights — Alternating 50/50 Cursor Layout with macOS Window Frames */}
+          <div className="space-y-24">
+            {/* Feature 1: Create Invoice */}
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* Screenshot Window Mockup Frame (4px sharp radius, hairline border, soft warm elevation) */}
+              <div className="lg:col-span-7 order-1">
+                <div
+                  className="rounded-[4px] overflow-hidden border transition-all duration-200"
+                  style={{
+                    background: '#151518',
+                    borderColor: '#282830',
+                    boxShadow: '0 28px 70px rgba(0, 0, 0, 0.6), 0 14px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  {/* macOS Window Chrome */}
+                  <div
+                    className="flex items-center justify-between px-4 py-2.5 border-b"
+                    style={{ background: '#0e0e11', borderColor: '#282830' }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ff5f56] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ffbd2e] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#1ed760] transition-colors" />
+                    </div>
+                    <div className="text-xs font-mono tracking-tight text-[#8e8e96]">
+                      templates/builder — create-invoice.tsx
+                    </div>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded-[2px]"
+                      style={{ background: '#1c1c22', color: spotify.green }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: spotify.green }} />
+                      v2.4
+                    </span>
+                  </div>
+                  {/* Image */}
                   <img
                     src="/features/create-invoice.png"
                     alt="Create New Invoice Dashboard"
-                    className="w-full h-auto block rounded-[24px]"
-                    style={{ border: `1px solid ${awesomic.cloud}` }}
+                    className="w-full h-auto block"
                   />
                 </div>
-                <div className="space-y-4 order-2">
-                  <span
-                    className="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[8px]"
-                    style={{ background: awesomic.paper, color: awesomic.iron }}
+              </div>
+
+              {/* Text Column */}
+              <div className="lg:col-span-5 space-y-4 order-2">
+                <h3
+                  className="text-2xl sm:text-3xl font-normal tracking-[-0.02em] text-white leading-tight"
+                  style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
+                >
+                  Create Professional Invoices
+                </h3>
+                <p className="text-sm sm:text-base leading-relaxed font-normal" style={{ color: spotify.textMuted }}>
+                  An intuitive invoice builder that lets you customize templates, choose modern themes, and customize visual appearance. Easily configure tax and discount rates with real-time dynamic total calculations.
+                </p>
+                <ul className="space-y-2 text-xs sm:text-sm font-mono pt-1 text-[#8e8e96]">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Real-time vector PDF compilation</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Live multi-currency tax calculators</span>
+                  </li>
+                </ul>
+                <div className="pt-2">
+                  <Link
+                    href="/dashboard/create"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono transition-all duration-150 hover:underline"
+                    style={{ color: spotify.green }}
                   >
-                    Template Builder
-                  </span>
-                  <h3
-                    className="text-2xl sm:text-3xl font-semibold tracking-tight"
-                    style={{ color: awesomic.obsidian }}
-                  >
-                    Create Professional Invoices
-                  </h3>
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: awesomic.steel }}
-                  >
-                    An intuitive invoice builder that lets you customize templates, choose modern themes, and customize visual appearance. Easily configure tax and discount rates with real-time dynamic total calculations.
-                  </p>
+                    <span>Launch invoice builder</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Feature 2: Smart Reminders (Inverted Dark Feature Card) */}
-            <div
-              className="rounded-[36px] p-8 sm:p-12 transition-all duration-300"
-              style={{
-                background: awesomic.graphite,
-                border: '1px solid #27272a',
-                color: '#ffffff',
-              }}
-            >
-              <div className="grid lg:grid-cols-2 gap-10 items-center">
-                <div className="space-y-4 order-2 lg:order-1">
-                  <span
-                    className="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[8px]"
-                    style={{ background: '#27272a', color: awesomic.ash }}
+            {/* Feature 2: Smart Reminders (Reversed 50/50 Layout) */}
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* Text Column */}
+              <div className="lg:col-span-5 space-y-4 order-2 lg:order-1">
+                <h3
+                  className="text-2xl sm:text-3xl font-normal tracking-[-0.02em] text-white leading-tight"
+                  style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
+                >
+                  Smart Reminders &amp; Overdue Tracking
+                </h3>
+                <p className="text-sm sm:text-base leading-relaxed font-normal" style={{ color: spotify.textMuted }}>
+                  Keep client relations professional while collecting payments faster. Our smart timing adjustments analyze invoice sizes and payment histories, scheduling automated escalation updates to recover unpaid balances.
+                </p>
+                <ul className="space-y-2 text-xs sm:text-sm font-mono pt-1 text-[#8e8e96]">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Behavior-based automated delivery timing</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Complete audit log of email delivery and opens</span>
+                  </li>
+                </ul>
+                <div className="pt-2">
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono transition-all duration-150 hover:underline"
+                    style={{ color: spotify.green }}
                   >
-                    Automation
-                  </span>
-                  <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-                    Smart Reminders & Overdue Tracking
-                  </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: awesomic.ash }}>
-                    Keep client relations professional while collecting payments faster. Our smart timing adjustments analyze invoice sizes and payment histories, scheduling automated escalation updates to recover unpaid balances.
-                  </p>
+                    <span>View automation schedule</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
-                <div className="relative rounded-[24px] overflow-hidden order-1 lg:order-2">
+              </div>
+
+              {/* Screenshot Window Mockup Frame */}
+              <div className="lg:col-span-7 order-1 lg:order-2">
+                <div
+                  className="rounded-[4px] overflow-hidden border transition-all duration-200"
+                  style={{
+                    background: '#151518',
+                    borderColor: '#282830',
+                    boxShadow: '0 28px 70px rgba(0, 0, 0, 0.6), 0 14px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  {/* macOS Window Chrome */}
+                  <div
+                    className="flex items-center justify-between px-4 py-2.5 border-b"
+                    style={{ background: '#0e0e11', borderColor: '#282830' }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ff5f56] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ffbd2e] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#1ed760] transition-colors" />
+                    </div>
+                    <div className="text-xs font-mono tracking-tight text-[#8e8e96]">
+                      automation/engine — smart-reminders.tsx
+                    </div>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded-[2px]"
+                      style={{ background: '#1c1c22', color: spotify.green }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: spotify.green }} />
+                      Running
+                    </span>
+                  </div>
+                  {/* Image */}
                   <img
                     src="/features/smart-reminders.png"
                     alt="Smart Reminders Dashboard"
-                    className="w-full h-auto block rounded-[24px]"
-                    style={{ border: '1px solid #3f3f46' }}
+                    className="w-full h-auto block"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Feature 3: Tax Center (White Card) */}
-            <div
-              className="rounded-[36px] p-8 sm:p-12 transition-all duration-300"
-              style={{
-                background: awesomic.snow,
-                border: `1px solid ${awesomic.cloud}`,
-              }}
-            >
-              <div className="grid lg:grid-cols-2 gap-10 items-center">
-                <div className="relative rounded-[24px] overflow-hidden order-1">
+            {/* Feature 3: Tax Center */}
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* Screenshot Window Mockup Frame */}
+              <div className="lg:col-span-7 order-1">
+                <div
+                  className="rounded-[4px] overflow-hidden border transition-all duration-200"
+                  style={{
+                    background: '#151518',
+                    borderColor: '#282830',
+                    boxShadow: '0 28px 70px rgba(0, 0, 0, 0.6), 0 14px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  {/* macOS Window Chrome */}
+                  <div
+                    className="flex items-center justify-between px-4 py-2.5 border-b"
+                    style={{ background: '#0e0e11', borderColor: '#282830' }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ff5f56] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ffbd2e] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#1ed760] transition-colors" />
+                    </div>
+                    <div className="text-xs font-mono tracking-tight text-[#8e8e96]">
+                      analytics/reports — tax-center.tsx
+                    </div>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded-[2px]"
+                      style={{ background: '#1c1c22', color: spotify.green }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: spotify.green }} />
+                      Calculated
+                    </span>
+                  </div>
+                  {/* Image */}
                   <img
                     src="/features/tax-center.png"
                     alt="Tax Center Dashboard"
-                    className="w-full h-auto block rounded-[24px]"
-                    style={{ border: `1px solid ${awesomic.cloud}` }}
+                    className="w-full h-auto block"
                   />
                 </div>
-                <div className="space-y-4 order-2">
-                  <span
-                    className="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[8px]"
-                    style={{ background: awesomic.paper, color: awesomic.iron }}
+              </div>
+
+              {/* Text Column */}
+              <div className="lg:col-span-5 space-y-4 order-2">
+                <h3
+                  className="text-2xl sm:text-3xl font-normal tracking-[-0.02em] text-white leading-tight"
+                  style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
+                >
+                  Automated GST &amp; Tax Reporting
+                </h3>
+                <p className="text-sm sm:text-base leading-relaxed font-normal" style={{ color: spotify.textMuted }}>
+                  Real-time GST/VAT liability calculation and tax rate breakdowns. View total revenues, taxable sales, and exempt sales for any custom period. Instantly export reports to CSV for stress-free accounting.
+                </p>
+                <ul className="space-y-2 text-xs sm:text-sm font-mono pt-1 text-[#8e8e96]">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Real-time breakdowns across CGST, SGST, IGST, &amp; VAT</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Instant 1-click CSV &amp; Excel reporting</span>
+                  </li>
+                </ul>
+                <div className="pt-2">
+                  <Link
+                    href="/dashboard/tax"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono transition-all duration-150 hover:underline"
+                    style={{ color: spotify.green }}
                   >
-                    Financial Intelligence
-                  </span>
-                  <h3
-                    className="text-2xl sm:text-3xl font-semibold tracking-tight"
-                    style={{ color: awesomic.obsidian }}
-                  >
-                    Automated GST & Tax Reporting
-                  </h3>
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: awesomic.steel }}
-                  >
-                    Real-time GST/VAT liability calculation and tax rate breakdowns. View total revenues, taxable sales, and exempt sales for any custom period. Instantly export reports to CSV for stress-free accounting.
-                  </p>
+                    <span>Explore Tax Center</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Feature 4: Invoices Directory (White Card) */}
-            <div
-              className="rounded-[36px] p-8 sm:p-12 transition-all duration-300"
-              style={{
-                background: awesomic.snow,
-                border: `1px solid ${awesomic.cloud}`,
-              }}
-            >
-              <div className="grid lg:grid-cols-2 gap-10 items-center">
-                <div className="space-y-4 order-2 lg:order-1">
-                  <span
-                    className="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[8px]"
-                    style={{ background: awesomic.paper, color: awesomic.iron }}
+            {/* Feature 4: Invoices Directory (Reversed) */}
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* Text Column */}
+              <div className="lg:col-span-5 space-y-4 order-2 lg:order-1">
+                <h3
+                  className="text-2xl sm:text-3xl font-normal tracking-[-0.02em] text-white leading-tight"
+                  style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
+                >
+                  Centralized Invoice &amp; PDF Directory
+                </h3>
+                <p className="text-sm sm:text-base leading-relaxed font-normal" style={{ color: spotify.textMuted }}>
+                  Track, organize, and manage your entire invoicing pipeline. Filter by status, search by client details or invoice numbers, export directories to CSV, and run bulk PDF downloads.
+                </p>
+                <ul className="space-y-2 text-xs sm:text-sm font-mono pt-1 text-[#8e8e96]">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Instant filter by Draft, Paid, Sent, or Overdue</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5" style={{ color: spotify.green }} />
+                    <span>Bulk ZIP export of PDF receipts &amp; audit trails</span>
+                  </li>
+                </ul>
+                <div className="pt-2">
+                  <Link
+                    href="/dashboard/invoices"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono transition-all duration-150 hover:underline"
+                    style={{ color: spotify.green }}
                   >
-                    Pipeline Management
-                  </span>
-                  <h3
-                    className="text-2xl sm:text-3xl font-semibold tracking-tight"
-                    style={{ color: awesomic.obsidian }}
-                  >
-                    Centralized Invoice & PDF Directory
-                  </h3>
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: awesomic.steel }}
-                  >
-                    Track, organize, and manage your entire invoicing pipeline. Filter by status, search by client details or invoice numbers, export directories to CSV, and run bulk PDF downloads.
-                  </p>
+                    <span>Browse directory</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
-                <div className="relative rounded-[24px] overflow-hidden order-1 lg:order-2">
+              </div>
+
+              {/* Screenshot Window Mockup Frame */}
+              <div className="lg:col-span-7 order-1 lg:order-2">
+                <div
+                  className="rounded-[4px] overflow-hidden border transition-all duration-200"
+                  style={{
+                    background: '#151518',
+                    borderColor: '#282830',
+                    boxShadow: '0 28px 70px rgba(0, 0, 0, 0.6), 0 14px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  {/* macOS Window Chrome */}
+                  <div
+                    className="flex items-center justify-between px-4 py-2.5 border-b"
+                    style={{ background: '#0e0e11', borderColor: '#282830' }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ff5f56] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#ffbd2e] transition-colors" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3a3a44] hover:bg-[#1ed760] transition-colors" />
+                    </div>
+                    <div className="text-xs font-mono tracking-tight text-[#8e8e96]">
+                      pipeline/archive — invoices-list.tsx
+                    </div>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded-[2px]"
+                      style={{ background: '#1c1c22', color: spotify.green }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: spotify.green }} />
+                      Synced
+                    </span>
+                  </div>
+                  {/* Image */}
                   <img
                     src="/features/invoices-list.png"
                     alt="Invoices Directory Dashboard"
-                    className="w-full h-auto block rounded-[24px]"
-                    style={{ border: `1px solid ${awesomic.cloud}` }}
+                    className="w-full h-auto block"
                   />
                 </div>
               </div>
@@ -638,81 +931,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ STATS BLOCK ═══ */}
-      <section className="py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div
-            className="rounded-[36px] p-8 sm:p-12"
-            style={{
-              background: awesomic.snow,
-              border: `1px solid ${awesomic.cloud}`,
-            }}
-          >
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { val: '1,000+', label: 'Invoices processed', icon: FileText },
-                { val: '200+', label: 'Active users', icon: Users },
-                { val: '40%', label: 'Faster payments', icon: TrendingUp },
-                { val: '99.99%', label: 'Uptime SLA', icon: Activity },
-              ].map(({ val, label, icon: Icon }) => (
-                <div key={label} className="text-left border-l pl-5" style={{ borderColor: awesomic.cloud }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-4 h-4" style={{ color: awesomic.steel }} />
-                  </div>
-                  <div
-                    className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-1"
-                    style={{ color: awesomic.obsidian }}
-                  >
-                    {val}
-                  </div>
-                  <div
-                    className="text-sm font-normal"
-                    style={{ color: awesomic.steel }}
-                  >
-                    {label}
-                  </div>
+      {/* ═══ STATS ═══ */}
+      <section className="py-12 px-6" style={{ background: spotify.darkSurface }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { val: '1,000+', label: 'Invoices processed', icon: FileText },
+              { val: '200+', label: 'Active users', icon: Users },
+              { val: '40%', label: 'Faster payments', icon: TrendingUp },
+              { val: '99.99%', label: 'Uptime SLA', icon: Activity },
+            ].map(({ val, label, icon: Icon }) => (
+              <div key={label} className="text-center">
+                <div className="flex justify-center mb-2">
+                  <Icon className="w-5 h-5" style={{ color: spotify.green }} />
                 </div>
-              ))}
-            </div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{val}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: spotify.textMuted }}>{label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ FAQ SECTION ═══ */}
-      <section id="faq" className="py-20 px-6">
+      {/* ═══ FAQ ═══ */}
+      <section id="faq" className="py-16 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel>FAQ</SectionLabel>
-            <h2
-              className="text-3xl sm:text-4xl font-semibold tracking-tight"
-              style={{ color: awesomic.obsidian }}
-            >
-              Questions? Answers.
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Questions? Answers.</h2>
           </div>
 
           <div className="space-y-3">
             {[
-              {
-                q: 'Is SmartInvoice really free?',
-                a: 'Yes. Our free plan includes unlimited invoices for up to 3 clients. No credit card required, no time limits.',
-              },
-              {
-                q: 'How does AI invoice generation work?',
-                a: 'Simply describe your work in plain language. Our AI parses the description, creates line items, calculates totals, and generates a professional invoice instantly.',
-              },
-              {
-                q: 'What payment methods do you support?',
-                a: 'We support Stripe (cards, Apple Pay, Google Pay), Razorpay (UPI, wallets, net banking), and direct bank transfers.',
-              },
-              {
-                q: 'Is my financial data secure?',
-                a: 'Absolutely. SOC 2 Type II compliant, end-to-end encrypted, and we never store payment card data directly.',
-              },
-              {
-                q: 'Can I import existing clients?',
-                a: 'Yes. Import clients via CSV or manually add them. We support tax IDs and custom fields.',
-              },
+              { q: 'Is SmartInvoice really free?', a: 'Yes. Our free plan includes unlimited invoices for up to 3 clients. No credit card required, no time limits.' },
+              { q: 'How does AI invoice generation work?', a: 'Simply describe your work in plain language. Our AI parses the description, creates line items, calculates totals, and generates a professional invoice instantly.' },
+              { q: 'What payment methods do you support?', a: 'We support Stripe (cards, Apple Pay, Google Pay), Razorpay (UPI, wallets, net banking), and direct bank transfers.' },
+              { q: 'Is my financial data secure?', a: 'Absolutely. SOC 2 Type II compliant, end-to-end encrypted, and we never store payment card data directly.' },
+              { q: 'Can I import existing clients?', a: 'Yes. Import clients via CSV or manually add them. We support tax IDs and custom fields.' },
             ].map((item, i) => (
               <FaqItem key={i} q={item.q} a={item.a} />
             ))}
@@ -720,73 +975,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ FINAL CTA (Inverted Dark Feature Surface) ═══ */}
-      <section className="py-16 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <div
-            className="rounded-[36px] p-10 sm:p-16 relative overflow-hidden"
-            style={{
-              background: awesomic.obsidian,
-              border: '1.5px solid #27272a',
-              color: '#ffffff',
-            }}
-          >
+      {/* ═══ CTA ═══ */}
+      <section className="py-16 px-6" style={{ background: spotify.darkSurface }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <Card className="p-10 sm:p-12">
             <div className="flex justify-center mb-6">
-              <LogoMarkOnly size={56} theme="dark" />
+              <LogoMarkOnly size={64} />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
               Ready to transform your billing?
             </h2>
-            <p
-              className="text-base mb-8 max-w-md mx-auto font-normal"
-              style={{ color: awesomic.ash }}
-            >
+            <p className="text-sm mb-8 max-w-md mx-auto" style={{ color: spotify.textMuted }}>
               Join 10,000+ professionals getting paid faster with SmartInvoice.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <ActionButton
-                href="/dashboard/create"
-                variant="ghost"
-                size="lg"
-                pill
-              >
-                <span>Create Free Invoice Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </ActionButton>
+              <PillButton href="/dashboard/create" variant="green" size="lg" className="w-full sm:w-[310px] relative justify-center whitespace-nowrap">
+                <span className="text-center mx-auto">Create Free Invoice Now</span>
+                <ArrowRight className="w-4 h-4 absolute right-5 flex-shrink-0" />
+              </PillButton>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
-              <span className="flex items-center gap-2 text-xs" style={{ color: awesomic.ash }}>
-                <Check className="w-4 h-4" style={{ color: awesomic.ember }} /> Free forever
+            <div className="flex flex-wrap items-center justify-center gap-5 mt-6">
+              <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
+                <Check className="w-4 h-4" style={{ color: spotify.green }} /> Free forever
               </span>
-              <span className="flex items-center gap-2 text-xs" style={{ color: awesomic.ash }}>
-                <Lock className="w-4 h-4" style={{ color: awesomic.ember }} /> No card required
+              <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
+                <Lock className="w-4 h-4" style={{ color: spotify.green }} /> No card required
               </span>
-              <span className="flex items-center gap-2 text-xs" style={{ color: awesomic.ash }}>
-                <Shield className="w-4 h-4" style={{ color: awesomic.ember }} /> GDPR compliant
+              <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
+                <Shield className="w-4 h-4" style={{ color: spotify.green }} /> GDPR compliant
               </span>
             </div>
-          </div>
+          </Card>
         </div>
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer
-        className="py-14 px-6"
-        style={{
-          borderTop: `1px solid ${awesomic.cloud}`,
-          background: awesomic.paper,
-        }}
-      >
+      <footer className="py-10 px-6" style={{ borderTop: `1px solid ${spotify.borderGray}` }}>
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 sm:col-span-1">
-              <Link href="/" className="mb-3 inline-block">
-                <Logo variant="full" size="sm" theme="light" />
+              <Link href="/" className="mb-4 inline-block">
+                <Logo variant="full" size="sm" />
               </Link>
-              <p
-                className="text-xs leading-relaxed"
-                style={{ color: awesomic.steel }}
-              >
+              <p className="text-xs" style={{ color: spotify.textMuted }}>
                 Premium invoicing for modern professionals.
               </p>
             </div>
@@ -796,24 +1027,11 @@ export default function LandingPage() {
               { title: 'Company', links: ['About', 'Privacy', 'Terms'] },
             ].map(({ title, links }) => (
               <div key={title}>
-                <h4
-                  className="text-xs font-semibold uppercase tracking-wider mb-4"
-                  style={{ color: awesomic.obsidian }}
-                >
-                  {title}
-                </h4>
-                <ul className="space-y-2.5">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-white">{title}</h4>
+                <ul className="space-y-2">
                   {links.map(link => (
                     <li key={link}>
-                      <a
-                        href="#"
-                        className="text-sm transition-colors font-normal"
-                        style={{ color: awesomic.steel }}
-                        onMouseEnter={e => (e.currentTarget.style.color = awesomic.obsidian)}
-                        onMouseLeave={e => (e.currentTarget.style.color = awesomic.steel)}
-                      >
-                        {link}
-                      </a>
+                      <a href="#" className="text-xs transition-colors hover:text-white" style={{ color: spotify.textMuted }}>{link}</a>
                     </li>
                   ))}
                 </ul>
@@ -822,20 +1040,13 @@ export default function LandingPage() {
           </div>
 
           <div
-            className="flex flex-col sm:flex-row items-center justify-between pt-8 gap-4"
-            style={{ borderTop: `1px solid ${awesomic.cloud}` }}
+            className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4"
+            style={{ borderTop: `1px solid ${spotify.borderGray}` }}
           >
-            <p className="text-xs" style={{ color: awesomic.steel }}>
-              © 2025 SmartInvoice. All rights reserved.
-            </p>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ background: '#22c55e' }}
-              />
-              <span className="text-xs font-medium" style={{ color: awesomic.steel }}>
-                All systems operational
-              </span>
+            <p className="text-xs" style={{ color: spotify.textMuted }}>© 2025 SmartInvoice. All rights reserved.</p>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: spotify.green }} />
+              <span className="text-xs" style={{ color: spotify.textMuted }}>All systems operational</span>
             </div>
           </div>
         </div>

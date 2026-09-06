@@ -719,19 +719,19 @@ body {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: #1ed760;
   color: #000000;
   border: none;
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .mobile-fab:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(34, 197, 94, 0.6);
+  transform: scale(1.05);
+  background: #1fdf64;
 }
 
 @media (min-width: 1024px) {

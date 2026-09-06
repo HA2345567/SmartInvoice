@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:turbo": "next dev --turbo",
     "build": "npx rimraf .next node_modules/.cache && next build",
     "start": "next start",
     "lint": "next lint",

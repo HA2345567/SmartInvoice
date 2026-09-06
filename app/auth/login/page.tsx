@@ -107,25 +107,19 @@ function LoginContent() {
     <div className="min-h-screen lg:h-screen w-full grid lg:grid-cols-2 lg:overflow-hidden" style={{ background: '#121212' }}>
       {/* Left Column - Form */}
       <div className="flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-10 xl:px-16 py-4 sm:py-6 h-full max-h-screen overflow-y-auto relative">
-        {/* Background elements */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-          <div className="absolute -top-[20%] -right-[20%] w-96 h-96 rounded-full blur-[100px]" style={{ background: 'rgba(30,215,96,0.05)' }} />
-          <div className="absolute -bottom-[20%] -left-[20%] w-96 h-96 rounded-full blur-[100px]" style={{ background: 'rgba(30,215,96,0.05)' }} />
-        </div>
-
-        <div className="w-full max-w-sm mx-auto space-y-4 my-auto">
+        <div className="w-full max-w-[420px] mx-auto space-y-4 my-auto">
           {/* Back button & Logo */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="inline-flex items-center">
-                <Logo variant="full" size="md" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <Link href="/" className="inline-flex items-center shrink-0">
+                <Logo variant="full" size="sm" />
               </Link>
               <Link 
                 href="/dashboard/create" 
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
               >
-                <ArrowLeft className="w-3 h-3" />
-                <span>Create Invoice (Guest)</span>
+                <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+                <span className="whitespace-nowrap">Create Invoice (Guest)</span>
               </Link>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white pt-1">

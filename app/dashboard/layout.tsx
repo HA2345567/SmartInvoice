@@ -162,10 +162,9 @@ export default function DashboardLayout({
         style={{ background: spotify.darkSurface, borderRight: `1px solid ${spotify.borderGray}` }}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-4 flex-shrink-0" style={{ borderBottom: `1px solid ${spotify.borderGray}` }}>
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Logo variant="mark" size="sm" />
-            <span className="text-sm font-bold text-white">SmartInvoice</span>
+        <div className="flex items-center justify-between h-16 px-4 sm:px-5 flex-shrink-0" style={{ borderBottom: `1px solid ${spotify.borderGray}` }}>
+          <Link href="/dashboard" className="flex items-center">
+            <Logo variant="full" size="md" />
           </Link>
           <button
             className="lg:hidden p-2 rounded-full hover:bg-white/5"

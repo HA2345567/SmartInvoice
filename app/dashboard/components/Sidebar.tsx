@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/Logo';
 import {
     FileText, Home, Plus, Users, Settings, LogOut, X,
     BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt
@@ -34,12 +35,9 @@ export const Sidebar = React.memo(({
     return (
         <div className={`sidebar-responsive sidebar-dark ${sidebarOpen ? 'open' : ''}`}>
             {/* Sidebar Header */}
-            <div className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-white/10 flex-shrink-0">
-                <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center dark-glow">
-                        <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-black" />
-                    </div>
-                    <span className="text-2xl sm:text-3xl font-bold text-dark-primary font-cookie">SmartInvoice</span>
+            <div className="flex items-center justify-between h-16 px-4 sm:px-5 border-b border-white/10 flex-shrink-0">
+                <Link href="/dashboard" className="flex items-center">
+                    <Logo variant="full" size="md" />
                 </Link>
                 <Button
                     variant="ghost"

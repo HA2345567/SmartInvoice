@@ -302,7 +302,7 @@ export default function ClientsPage() {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => openDialog()} className="bg-[#1ed760] text-black font-extrabold hover:bg-[#1fdf64] rounded-full px-5 py-2.5 shadow-lg shadow-[#1ed760]/20 uppercase tracking-wider text-xs border-none transition-all hover:scale-[1.02]">
+              <Button onClick={() => openDialog()} className="bg-[#1ed760] text-black font-extrabold hover:bg-[#1fdf64] rounded-full px-5 py-2.5 uppercase tracking-wider text-xs border-none transition-all hover:scale-[1.02]">
                 <Plus className="w-4 h-4 mr-1.5 stroke-[3]" />
                 Add Client
               </Button>
