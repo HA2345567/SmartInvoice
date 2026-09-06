@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
-import { DatabaseService } from './database';
+import { prisma } from './prisma';
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET || 'smartinvoice-jwt-secret-key-neon-db-2026';
@@ -25,6 +25,22 @@ export interface User {
 export interface AuthResult {
   user: User;
   userId: string;
+}
+
+function formatPrismaUser(user: any): User {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    company: user.company || undefined,
+    companyAddress: user.address || undefined,
+    companyGST: user.gstNumber || undefined,
+    companyPhone: user.phone || undefined,
+    companyWebsite: user.companyWebsite || undefined,
+    avatar: user.avatar || undefined,
+    createdAt: user.createdAt || new Date().toISOString(),
+    updatedAt: user.updatedAt || new Date().toISOString(),
+  };
 }
 
 export class AuthService {
@@ -55,39 +71,130 @@ export class AuthService {
     password?: string;
     name: string;
     company?: string;
+    avatar?: string;
   }): Promise<{ user: User; exists: boolean }> {
-    let hashedPassword = '';
-    if (userData.password) {
-      hashedPassword = await this.hashPassword(userData.password);
+    try {
+      const existing = await prisma.user.findUnique({
+        where: { email: userData.email.toLowerCase() },
+      });
+
+      if (existing) {
+        return { user: formatPrismaUser(existing), exists: true };
+      }
+
+      let hashedPassword = '';
+      if (userData.password) {
+        hashedPassword = await this.hashPassword(userData.password);
+      }
+
+      const now = new Date().toISOString();
+      const created = await prisma.user.create({
+        data: {
+          email: userData.email.toLowerCase(),
+          password: hashedPassword,
+          name: userData.name,
+          company: userData.company || null,
+          avatar: userData.avatar || null,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+
+      return { user: formatPrismaUser(created), exists: false };
+    } catch (error) {
+      console.error('Error creating user via Prisma:', error);
+      throw error;
     }
-
-    const result = await DatabaseService.createUser({
-      ...userData,
-      password: hashedPassword,
-    });
-
-    return result;
   }
 
   static async authenticateUser(email: string, password?: string): Promise<User | null> {
-    const user = await DatabaseService.getUserByEmail(email);
-    if (!user) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+      if (!user) return null;
+
+      if (password && user.password) {
+        const isValidPassword = await this.comparePassword(password, user.password);
+        if (!isValidPassword) {
+          return null;
+        }
+      }
+
+      return formatPrismaUser(user);
+    } catch (error) {
+      console.error('Error authenticating user via Prisma:', error);
       return null;
     }
-
-    if (password && user.password) {
-      const isValidPassword = await this.comparePassword(password, user.password);
-      if (!isValidPassword) {
-        return null;
-      }
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
   }
 
   static async getUserById(id: string): Promise<User | null> {
-    return await DatabaseService.getUserById(id);
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+      });
+      if (!user) return null;
+      return formatPrismaUser(user);
+    } catch (error) {
+      console.error('Error getting user by id via Prisma:', error);
+      return null;
+    }
+  }
+
+  static async userExists(email: string): Promise<boolean> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        select: { id: true },
+      });
+      return !!user;
+    } catch (error) {
+      console.error('Error checking user existence via Prisma:', error);
+      return false;
+    }
+  }
+
+  static async upsertGoogleUser(data: {
+    email: string;
+    name: string;
+    avatar?: string;
+  }): Promise<User> {
+    try {
+      const email = data.email.toLowerCase();
+      const existing = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      const now = new Date().toISOString();
+
+      if (existing) {
+        const updated = await prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            name: existing.name || data.name,
+            avatar: existing.avatar || data.avatar || null,
+            updatedAt: now,
+          },
+        });
+        return formatPrismaUser(updated);
+      }
+
+      const created = await prisma.user.create({
+        data: {
+          email,
+          name: data.name || email.split('@')[0],
+          password: '',
+          avatar: data.avatar || null,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+
+      return formatPrismaUser(created);
+    } catch (error) {
+      console.error('Error upserting Google user via Prisma:', error);
+      throw error;
+    }
   }
 
   static async getUserFromRequest(request: NextRequest): Promise<User | null> {
@@ -108,23 +215,11 @@ export class AuthService {
       if (!decoded || !decoded.userId) return null;
 
       const user = await this.getUserById(decoded.userId);
-      if (!user) return null;
-
-      if ('password' in user) {
-        const { password, ...userWithoutPassword } = user as any;
-        return userWithoutPassword;
-      }
-
       return user;
     } catch (error) {
       console.error('Error in getUserFromRequest:', error);
       return null;
     }
-  }
-
-  static async userExists(email: string): Promise<boolean> {
-    const user = await DatabaseService.getUserByEmail(email);
-    return !!user;
   }
 }
 
@@ -133,6 +228,6 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult | nul
   if (!user) return null;
   return {
     user,
-    userId: user.id
+    userId: user.id,
   };
 }

@@ -22,6 +22,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithToken: (token: string, targetRedirect?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -47,7 +48,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getStoredToken = (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth-token');
+    const stored = localStorage.getItem('auth-token');
+    if (stored) return stored;
+    // Fallback: check document.cookie
+    const match = document.cookie.match(/(?:^|;\s*)auth-token=([^;]+)/);
+    if (match && match[1]) {
+      const cookieToken = decodeURIComponent(match[1]);
+      localStorage.setItem('auth-token', cookieToken);
+      return cookieToken;
+    }
+    return null;
   };
 
   // Check auth status on mount
@@ -140,6 +150,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
+  const loginWithToken = useCallback(async (token: string, targetRedirect = '/dashboard') => {
+    try {
+      setLoading(true);
+      setAuthToken(token);
+      const res = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          setSession({ access_token: token, user: data.user });
+          router.push(targetRedirect);
+          return { success: true };
+        }
+      }
+      setAuthToken(null);
+      return { success: false, error: 'Failed to verify session' };
+    } catch (err: any) {
+      console.error('Login with token error:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
   const signOut = useCallback(async () => {
     setAuthToken(null);
     setUser(null);
@@ -172,9 +208,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signUp,
     signIn,
+    loginWithToken,
     signOut,
     refreshUser,
-  }), [user, session, loading, signUp, signIn, signOut, refreshUser]);
+  }), [user, session, loading, signUp, signIn, loginWithToken, signOut, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -570,21 +570,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ BRANDS ═══ */}
-      <section className="py-12 px-6" style={{ background: spotify.darkSurface }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-center text-[10px] font-bold uppercase tracking-widest mb-6" style={{ color: spotify.textMuted }}>
-            Trusted by teams at
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4">
-            {['Acme Corp', 'TechFlow', 'DesignHub', 'BuildCo', 'NovaSoft', 'CreativeX'].map(name => (
-              <span key={name} className="text-sm font-bold transition-colors" style={{ color: spotify.textMuted }}>
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ═══ DASHBOARD PREVIEW ═══ */}
       <section id="demo" className="py-16 px-6">
@@ -726,8 +711,8 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { val: '$2.4B+', label: 'Invoices processed', icon: DollarSign },
-              { val: '10,000+', label: 'Active users', icon: Users },
+              { val: '1,000+', label: 'Invoices processed', icon: FileText },
+              { val: '200+', label: 'Active users', icon: Users },
               { val: '40%', label: 'Faster payments', icon: TrendingUp },
               { val: '99.99%', label: 'Uptime SLA', icon: Activity },
             ].map(({ val, label, icon: Icon }) => (
@@ -742,49 +727,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ═══ TESTIMONIALS ═══ */}
-      <section className="py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>Testimonials</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
-              Loved by <span style={{ color: spotify.green }}>10,000+</span> professionals
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { quote: 'SmartInvoice transformed my billing. What took hours now takes seconds.', author: 'Sarah Chen', role: 'Freelance Designer', initials: 'SC' },
-              { quote: 'The AI invoice generation is incredible. Describe your work and everything fills itself.', author: 'Michael Park', role: 'Agency Founder', initials: 'MP' },
-              { quote: 'Best invoicing tool I\'ve used. The templates are stunning and UX is flawless.', author: 'Emma Wilson', role: 'Tech Consultant', initials: 'EW' },
-            ].map(({ quote, author, role, initials }) => (
-              <Card key={author} className="p-5">
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5" fill={spotify.warning} style={{ color: spotify.warning }} />
-                  ))}
-                </div>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: spotify.textNearWhite }}>"{quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: spotify.green, color: '#000' }}
-                  >
-                    {initials}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">{author}</div>
-                    <div className="text-[10px]" style={{ color: spotify.textMuted }}>{role}</div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
 
       {/* ═══ FAQ ═══ */}
       <section id="faq" className="py-16 px-6">

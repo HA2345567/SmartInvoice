@@ -51,7 +51,7 @@ export async function getAuthUser(request: NextRequest): Promise<{
     const payload = AuthService.verifyToken(token);
     if (!payload || !payload.userId) return null;
 
-    const user = await DatabaseService.getUserById(payload.userId);
+    const user = await AuthService.getUserById(payload.userId);
     if (!user) return null;
 
     return {
@@ -59,9 +59,9 @@ export async function getAuthUser(request: NextRequest): Promise<{
       email: user.email || '',
       name: user.name,
       company: user.company,
-      companyAddress: user.companyAddress || user.address,
-      companyGST: user.companyGST || user.gstNumber,
-      companyPhone: user.companyPhone || user.phone,
+      companyAddress: user.companyAddress,
+      companyGST: user.companyGST,
+      companyPhone: user.companyPhone,
       companyWebsite: user.companyWebsite,
     };
   } catch (error) {

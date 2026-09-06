@@ -14,6 +14,7 @@ import Logo, { LogoMarkOnly } from '@/components/Logo';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import GoogleIcon from '@/components/icons/GoogleIcon';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -25,6 +26,24 @@ function LoginContent() {
   const redirectTarget = searchParams.get('redirect') || '/dashboard';
   const { toast } = useToast();
   const { signIn, user, loading } = useAuth();
+
+  // Check for OAuth errors
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err) {
+      const messages: Record<string, string> = {
+        google_not_configured: 'Google OAuth is not configured yet. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.local.',
+        invalid_state: 'Security check failed. Please try signing in again.',
+        token_exchange_failed: 'Failed to verify with Google. Please try again.',
+        oauth_cancelled: 'Google sign-in was cancelled.',
+      };
+      toast({
+        title: 'Authentication notice',
+        description: messages[err] || `Authentication error: ${err}`,
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast]);
 
   // Auto-redirect if already logged in
   useEffect(() => {
@@ -85,42 +104,64 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen w-full grid lg:grid-cols-2" style={{ background: '#121212' }}>
+    <div className="min-h-screen lg:h-screen w-full grid lg:grid-cols-2 lg:overflow-hidden" style={{ background: '#121212' }}>
       {/* Left Column - Form */}
-      <div className="flex flex-col justify-center px-4 sm:px-12 md:px-20 lg:px-24 xl:px-32 py-12 relative">
+      <div className="flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-10 xl:px-16 py-4 sm:py-6 h-full max-h-screen overflow-y-auto relative">
         {/* Background elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
           <div className="absolute -top-[20%] -right-[20%] w-96 h-96 rounded-full blur-[100px]" style={{ background: 'rgba(30,215,96,0.05)' }} />
           <div className="absolute -bottom-[20%] -left-[20%] w-96 h-96 rounded-full blur-[100px]" style={{ background: 'rgba(30,215,96,0.05)' }} />
         </div>
 
-        <div className="w-full max-w-md mx-auto space-y-8">
+        <div className="w-full max-w-sm mx-auto space-y-4 my-auto">
           {/* Back button & Logo */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Link href="/" className="inline-flex items-center">
                 <Logo variant="full" size="md" />
               </Link>
               <Link 
                 href="/dashboard/create" 
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-3 h-3" />
                 <span>Create Invoice (Guest)</span>
               </Link>
             </div>
-            <h1 className="text-3xl font-bold text-white pt-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white pt-1">
               Welcome back
             </h1>
-            <p className="text-base" style={{ color: '#b3b3b3' }}>
+            <p className="text-xs sm:text-sm" style={{ color: '#b3b3b3' }}>
               Sign in to access your cloud invoices & tools.
             </p>
           </div>
 
-          <div className="space-y-6">
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Email</Label>
+          <div className="space-y-3.5">
+            <a
+              href={`/api/auth/google?redirect=${encodeURIComponent(redirectTarget)}`}
+              className="w-full h-10 sm:h-11 flex items-center justify-center gap-2.5 px-4 font-bold text-xs sm:text-sm text-white transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              style={{
+                background: '#1f1f1f',
+                border: '1px solid #4d4d4d',
+                borderRadius: '9999px',
+              }}
+            >
+              <GoogleIcon className="w-4 h-4" />
+              <span>Continue with Google</span>
+            </a>
+
+            <div className="relative flex items-center justify-center my-1.5">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#333333]" />
+              </div>
+              <div className="relative px-3 text-[10px] sm:text-xs uppercase tracking-widest font-semibold text-[#888888]" style={{ background: '#121212' }}>
+                or continue with email
+              </div>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-bold" style={{ color: '#b3b3b3' }}>Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -128,13 +169,13 @@ function LoginContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-12 text-white"
+                  className="h-10 text-xs sm:text-sm text-white"
                   style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Password</Label>
+                  <Label htmlFor="password" className="text-xs font-bold" style={{ color: '#b3b3b3' }}>Password</Label>
                 </div>
                 <div className="relative">
                   <Input
@@ -144,7 +185,7 @@ function LoginContent() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-12 pr-12 text-white"
+                    className="h-10 pr-10 text-xs sm:text-sm text-white"
                     style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}
                   />
                   <button
@@ -153,20 +194,20 @@ function LoginContent() {
                     onClick={() => setShowPassword(!showPassword)}
                     style={{ color: '#b3b3b3' }}
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 font-bold text-sm"
-                style={{ background: '#1ed760', color: '#000', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '1.4px' }}
+                className="w-full h-10 sm:h-11 font-bold text-xs sm:text-sm mt-1"
+                style={{ background: '#1ed760', color: '#000', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '1.2px' }}
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Signing in...
                   </>
                 ) : (
@@ -175,7 +216,7 @@ function LoginContent() {
               </Button>
             </form>
 
-            <p className="text-center text-sm" style={{ color: '#b3b3b3' }}>
+            <p className="text-center text-xs sm:text-sm pt-1" style={{ color: '#b3b3b3' }}>
               Don't have an account?{' '}
               <Link href="/auth/signup" className="font-bold" style={{ color: '#1ed760' }}>
                 Sign up
@@ -186,53 +227,53 @@ function LoginContent() {
       </div>
 
       {/* Right Column - Visual */}
-      <div className="hidden lg:flex flex-col sticky top-0 h-screen p-12 overflow-hidden justify-center items-center" style={{ background: '#181818', borderLeft: '1px solid #4d4d4d' }}>
+      <div className="hidden lg:flex flex-col h-full p-6 xl:p-10 overflow-hidden justify-center items-center relative" style={{ background: '#181818', borderLeft: '1px solid #4d4d4d' }}>
         {/* Decorative Gradients */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" style={{ background: 'rgba(30,215,96,0.1)' }} />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" style={{ background: 'rgba(30,215,96,0.08)' }} />
 
         {/* Content Container */}
-        <div className="relative z-10 max-w-lg w-full">
+        <div className="relative z-10 max-w-sm w-full">
           {/* Visual Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-12">
-            <div className="space-y-4 pt-8">
-              <div className="p-5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
-                <Wallet className="w-8 h-8 mb-3" style={{ color: '#1ed760' }} />
-                <h3 className="text-white font-bold text-sm mb-1">Track Revenue</h3>
-                <p className="text-xs" style={{ color: '#b3b3b3' }}>Monitor your income with analytics</p>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="space-y-3 pt-3">
+              <div className="p-3.5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
+                <Wallet className="w-6 h-6 mb-2" style={{ color: '#1ed760' }} />
+                <h3 className="text-white font-bold text-xs sm:text-sm mb-0.5">Track Revenue</h3>
+                <p className="text-[11px]" style={{ color: '#b3b3b3' }}>Monitor income with analytics</p>
               </div>
-              <div className="p-5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
-                <Shield className="w-8 h-8 mb-3" style={{ color: '#1ed760' }} />
-                <h3 className="text-white font-bold text-sm mb-1">Secure Data</h3>
-                <p className="text-xs" style={{ color: '#b3b3b3' }}>Enterprise-grade security</p>
+              <div className="p-3.5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
+                <Shield className="w-6 h-6 mb-2" style={{ color: '#1ed760' }} />
+                <h3 className="text-white font-bold text-xs sm:text-sm mb-0.5">Secure Data</h3>
+                <p className="text-[11px]" style={{ color: '#b3b3b3' }}>Enterprise-grade security</p>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="p-5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
-                <PieChart className="w-8 h-8 mb-3" style={{ color: '#1ed760' }} />
-                <h3 className="text-white font-bold text-sm mb-1">Smart Reports</h3>
-                <p className="text-xs" style={{ color: '#b3b3b3' }}>Automated insights</p>
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: '#1f1f1f' }}>
+                <PieChart className="w-6 h-6 mb-2" style={{ color: '#1ed760' }} />
+                <h3 className="text-white font-bold text-xs sm:text-sm mb-0.5">Smart Reports</h3>
+                <p className="text-[11px]" style={{ color: '#b3b3b3' }}>Automated insights</p>
               </div>
-              <div className="p-5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: 'rgba(30,215,96,0.1)', border: '1px solid rgba(30,215,96,0.2)' }}>
-                <Building2 className="w-8 h-8 mb-3" style={{ color: '#1ed760' }} />
-                <h3 className="text-white font-bold text-sm mb-1">Client Mgmt</h3>
-                <p className="text-xs" style={{ color: '#b3b3b3' }}>Organize efficiently</p>
+              <div className="p-3.5 rounded-lg transition-transform hover:scale-[1.02]" style={{ background: 'rgba(30,215,96,0.1)', border: '1px solid rgba(30,215,96,0.2)' }}>
+                <Building2 className="w-6 h-6 mb-2" style={{ color: '#1ed760' }} />
+                <h3 className="text-white font-bold text-xs sm:text-sm mb-0.5">Client Mgmt</h3>
+                <p className="text-[11px]" style={{ color: '#b3b3b3' }}>Organize efficiently</p>
               </div>
             </div>
           </div>
 
-          <div className="text-center lg:text-left">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="text-left">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
               Empower Your Business
             </h2>
-            <p className="text-base mb-8" style={{ color: '#b3b3b3' }}>
+            <p className="text-xs sm:text-sm mb-4" style={{ color: '#b3b3b3' }}>
               Join thousands of professionals who trust SmartInvoice.
             </p>
 
-            <div className="flex items-center space-x-4 text-sm" style={{ color: '#b3b3b3' }}>
+            <div className="flex items-center space-x-3 text-xs" style={{ color: '#b3b3b3' }}>
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#1f1f1f', border: '2px solid #121212' }}>
-                    <User className="w-4 h-4" style={{ color: '#b3b3b3' }} />
+                  <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#1f1f1f', border: '2px solid #121212' }}>
+                    <User className="w-3 h-3" style={{ color: '#b3b3b3' }} />
                   </div>
                 ))}
               </div>

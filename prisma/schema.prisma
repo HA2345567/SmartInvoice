@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String     @id @default(uuid())
+  email               String     @unique
+  password            String     @default("")
+  name                String
+  company             String?
+  address             String?
+  phone               String?
+  gstNumber           String?    @map("gstnumber")
+  currency            String?    @default("USD")
+  invoicePrefix       String?    @default("INV") @map("invoiceprefix")
+  defaultTerms        String?    @default("Payment due within 30 days") @map("defaultterms")
+  defaultNotes        String?    @default("Thank you for your business!") @map("defaultnotes")
+  defaultGstRate      Decimal?   @default(18) @map("defaultgstrate")
+  defaultTaxRate      Decimal?   @default(0) @map("defaulttaxrate")
+  emailNotifications  Boolean?   @default(true) @map("emailnotifications")
+  reminderEmails      Boolean?   @default(true) @map("reminderemails")
+  reminderDays        Int?       @default(7) @map("reminderdays")
+  autoGenerateNumbers Boolean?   @default(true) @map("autogeneratenumbers")
+  aiProvider          String?    @default("gemini") @map("aiprovider")
+  aiApiKey            String?    @map("aiapikey")
+  aiModel             String?    @default("gemini-2.0-flash") @map("aimodel")
+  aiBaseUrl           String?    @map("aibaseurl")
+  avatar              String?
+  createdAt           String?    @map("createdat")
+  updatedAt           String?    @map("updatedat")
+
+  clients             Client[]
+  invoices            Invoice[]
+  expenses            Expense[]
+  proposals           Proposal[]
+
+  @@map("users")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  userId    String   @map("userid")
+  name      String
+  email     String
+  company   String?
+  address   String?
+  gstNumber String?  @map("gstnumber")
+  currency  String?  @default("USD")
+  isActive  Boolean? @default(true) @map("isactive")
+  createdAt String?  @map("createdat")
+  updatedAt String?  @map("updatedat")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices  Invoice[]
+
+  @@map("clients")
+}
+
+model Invoice {
+  id               String   @id @default(uuid())
+  userId           String   @map("userid")
+  invoiceNumber    String   @map("invoicenumber")
+  clientId         String?  @map("clientid")
+  clientName       String   @map("clientname")
+  clientEmail      String   @map("clientemail")
+  clientCompany    String?  @map("clientcompany")
+  clientAddress    String?  @map("clientaddress")
+  clientGST        String?  @map("clientgst")
+  clientCurrency   String?  @default("USD") @map("clientcurrency")
+  amount           Decimal? @default(0)
+  subtotal         Decimal? @default(0)
+  taxAmount        Decimal? @default(0) @map("taxamount")
+  discountAmount   Decimal? @default(0) @map("discountamount")
+  status           String?  @default("draft")
+  date             String?
+  dueDate          String?  @map("duedate")
+  paidDate         String?  @map("paiddate")
+  paymentMethod    String?  @map("paymentmethod")
+  paymentNotes     String?  @map("paymentnotes")
+  items            Json?
+  notes            String?
+  terms            String?
+  taxRate          Decimal? @default(0) @map("taxrate")
+  discountRate     Decimal? @default(0) @map("discountrate")
+  paymentLink      String?  @map("paymentlink")
+  emailSent        Boolean? @default(false) @map("emailsent")
+  remindersSent    Int?     @default(0) @map("reminderssent")
+  lastReminderSent String?  @map("lastremindersent")
+  theme            String?  @default("ultra-luxury")
+  invoiceType      String?  @default("sales") @map("invoicetype")
+  customColors     String?  @map("customcolors")
+  createdAt        String?  @map("createdat")
+  updatedAt        String?  @map("updatedat")
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client           Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@map("invoices")
+}
+
+model Expense {
+  id                 String   @id @default(uuid())
+  userId             String   @map("userid")
+  description        String
+  amount             Decimal  @default(0)
+  date               String?
+  category           String?
+  subcategory        String?
+  vendor             String?
+  paymentMethod      String?  @map("paymentmethod")
+  receiptUrl         String?  @map("receipturl")
+  notes              String?
+  isRecurring        Boolean? @default(false) @map("isrecurring")
+  recurringFrequency String?  @map("recurringfrequency")
+  aiCategorized      Boolean? @default(false) @map("aicategorized")
+  currency           String?  @default("USD")
+  createdAt          String?  @map("createdat")
+  updatedAt          String?  @map("updatedat")
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model Proposal {
+  id              String   @id @default(uuid())
+  userId          String   @map("userid")
+  proposalNumber  String   @map("proposalnumber")
+  title           String
+  clientName      String   @map("clientname")
+  clientEmail     String   @map("clientemail")
+  clientCompany   String?  @map("clientcompany")
+  clientAddress   String?  @map("clientaddress")
+  amount          Decimal? @default(0)
+  status          String?  @default("draft")
+  date            String?
+  validUntilDays  Int?     @default(30) @map("validuntildays")
+  items           Json?
+  scope           String?
+  terms           String?
+  aiSummary       String?  @map("aisummary")
+  aiSuggestions   Json?    @map("aisuggestions")
+  createdAt       String?  @map("createdat")
+  updatedAt       String?  @map("updatedat")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("proposals")
+}
+
+model Feedback {
+  id          String  @id @default(uuid())
+  type        String?
+  rating      Int?
+  title       String?
+  description String?
+  email       String?
+  category    String?
+  createdAt   String? @map("created_at")
+
+  @@map("feedback")
+}
