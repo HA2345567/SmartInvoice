@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
+import Grainient from '@/components/Grainient';
 import { FileText, ArrowRight, Sparkles, Zap, Shield, ChartBar as BarChart3, Star, TrendingUp, DollarSign, Users, Clock, Globe, ChevronDown, ChevronRight, Play, Check, X, Menu, Lock, Repeat, Send, Download, Activity, Building, Twitter, Linkedin, Github, Headphones } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -395,7 +396,7 @@ export default function LandingPage() {
               className={`group flex items-center transition-all duration-500 origin-left ${scrollY > 20 ? 'scale-95' : 'scale-100'
                 }`}
             >
-              <Logo variant="full" size="sm" className="transition-opacity" />
+              <Logo variant="full" size="md" className="transition-opacity" />
             </Link>
 
             {/* Desktop Nav */}
@@ -514,10 +515,37 @@ export default function LandingPage() {
 
       {/* ═══ HERO ═══ */}
       <section
-        className="relative pt-36 sm:pt-40 pb-24 px-6 overflow-hidden transition-all duration-500"
+        className="relative min-h-screen pt-36 sm:pt-40 pb-24 px-6 overflow-hidden transition-all duration-500"
       >
+        <div className="absolute inset-0" aria-hidden="true">
+          <Grainient
+            color1="#125b2b"
+            color2="#063a19"
+            color3="#023214"
+            timeSpeed={0.25}
+            colorBalance={0}
+            warpStrength={1}
+            warpFrequency={5}
+            warpSpeed={2}
+            warpAmplitude={50}
+            blendAngle={0}
+            blendSoftness={0.05}
+            rotationAmount={500}
+            noiseScale={2}
+            grainAmount={0.1}
+            grainScale={2}
+            grainAnimated={false}
+            contrast={1.5}
+            gamma={1}
+            saturation={1}
+            centerX={0}
+            centerY={0}
+            zoom={0.9}
+            className="grainient-container"
+          />
+        </div>
         {/* Ambient Gradient Overlay for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#121212]/60 via-[#121212]/30 to-[#121212] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/35 via-[#050806]/10 to-[#050806]/55 pointer-events-none" />
         <div className="relative max-w-4xl mx-auto text-center z-10">
 
           {/* Headline - 24px Section Title weight */}
