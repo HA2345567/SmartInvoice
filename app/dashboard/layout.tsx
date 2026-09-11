@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { FileText, Chrome as Home, Plus, Users, Settings, LogOut, Menu, X, ChartBar as BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt, Calculator } from 'lucide-react';
+import { FileText, Chrome as Home, Plus, Users, Settings, LogOut, Menu, X, ChartBar as BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt, Calculator, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -124,8 +124,8 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: spotify.nearBlack }}>
         <div className="text-center">
-          <LogoMarkOnly size={64} className="mx-auto mb-4" />
-          <p className="text-sm" style={{ color: spotify.textMuted }}>Loading...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p className="text-sm" style={{ color: '#b3b3b3' }}>Loading...</p>
         </div>
       </div>
     );
@@ -136,8 +136,8 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: spotify.nearBlack }}>
         <div className="text-center">
-          <LogoMarkOnly size={64} className="mx-auto mb-4" />
-          <p className="text-sm" style={{ color: spotify.textMuted }}>Redirecting to sign in...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p className="text-sm" style={{ color: '#b3b3b3' }}>Redirecting to sign in...</p>
         </div>
       </div>
     );
@@ -156,9 +156,8 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 lg:transform-none flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 lg:transform-none flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
         style={{ background: spotify.darkSurface, borderRight: `1px solid ${spotify.borderGray}` }}
       >
         {/* Sidebar Header */}

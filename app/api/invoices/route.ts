@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser, getAuthUserOrGuest } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
@@ -18,7 +21,11 @@ export async function GET(request: NextRequest) {
       invoices = invoices.filter((inv: any) => inv.clientId === clientId);
     }
 
-    return NextResponse.json(invoices);
+    return NextResponse.json(invoices, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Get invoices error:', error);
     return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });

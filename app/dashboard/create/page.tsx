@@ -40,9 +40,16 @@ export default function CreateInvoice() {
   const { toast } = useToast();
   const router = useRouter();
   const { session, user } = useAuth();
-  const accessToken = session?.access_token;
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token') || localStorage.getItem('token') || '';
+    }
+    return '';
+  }, [session?.access_token]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientSearch, setClientSearch] = useState('');
   const [itemSuggestions, setItemSuggestions] = useState<any[]>([]);
@@ -156,6 +163,55 @@ export default function CreateInvoice() {
     return { subtotal, discountAmount, taxAmount, total };
   }, [invoiceData.items, invoiceData.discountRate, invoiceData.taxRate]);
 
+  const fetchClients = useCallback(async () => {
+    try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = { 'Cache-Control': 'no-cache' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch('/api/clients', {
+        headers,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setClients(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
+  }, [getEffectiveToken]);
+
+  const generateInvoiceNumber = useCallback(async () => {
+    try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = { 'Cache-Control': 'no-cache' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch('/api/invoices/generate-number', {
+        headers,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const { invoiceNumber } = await response.json();
+        if (invoiceNumber) {
+          setInvoiceData(prev => ({ ...prev, invoiceNumber }));
+          return;
+        }
+      }
+      setInvoiceData(prev => ({
+        ...prev,
+        invoiceNumber: prev.invoiceNumber || `INV-${Date.now().toString().slice(-6)}`
+      }));
+    } catch (error) {
+      console.error('Error generating invoice number:', error);
+      setInvoiceData(prev => ({
+        ...prev,
+        invoiceNumber: prev.invoiceNumber || `INV-${Date.now().toString().slice(-6)}`
+      }));
+    }
+  }, [getEffectiveToken]);
+
   useEffect(() => {
     fetchClients();
     generateInvoiceNumber();
@@ -164,7 +220,7 @@ export default function CreateInvoice() {
     if (savedType) {
       setInvoiceData(prev => ({ ...prev, invoiceType: savedType as any }));
     }
-  }, [accessToken]);
+  }, [fetchClients, generateInvoiceNumber]);
 
   useEffect(() => {
     if (invoiceData.date && !invoiceData.dueDate) {
@@ -177,48 +233,23 @@ export default function CreateInvoice() {
     }
   }, [invoiceData.date]);
 
-  const fetchClients = async () => {
-    if (!accessToken) return;
-    try {
-      const response = await fetch('/api/clients', {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setClients(data);
-      }
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
-
-  const generateInvoiceNumber = async () => {
-    if (!accessToken) return;
-    try {
-      const response = await fetch('/api/invoices/generate-number', {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-      });
-      if (response.ok) {
-        const { invoiceNumber } = await response.json();
-        setInvoiceData(prev => ({ ...prev, invoiceNumber }));
-      }
-    } catch (error) {
-      console.error('Error generating invoice number:', error);
-    }
-  };
-
   const fetchItemSuggestions = async (query: string) => {
-    if (query.length < 2 || !accessToken) {
+    if (query.length < 2) {
       setItemSuggestions([]);
       return;
     }
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`/api/suggestions/items?q=${encodeURIComponent(query)}`, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+        headers,
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
-        setItemSuggestions(data.slice(0, 5));
+        setItemSuggestions(Array.isArray(data) ? data.slice(0, 5) : []);
       }
     } catch (error) {
       console.error('Error fetching item suggestions:', error);
@@ -322,9 +353,14 @@ export default function CreateInvoice() {
 
     setLoading(true);
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch('/api/invoices', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({
           ...invoiceData,
           subtotal: totals.subtotal,
@@ -367,9 +403,14 @@ export default function CreateInvoice() {
         amount: totals.total,
       };
 
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch('/api/invoices/preview', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(tempInvoiceData),
       });
 
@@ -525,7 +566,7 @@ export default function CreateInvoice() {
 
           <ProfessionalFeatures
             user={user}
-            token={accessToken || ''}
+            token={getEffectiveToken()}
             invoiceData={invoiceData}
             setInvoiceData={setInvoiceData}
             loading={loading}

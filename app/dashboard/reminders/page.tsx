@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TriangleAlert as AlertTriangle, Clock, Send, Phone, Scale, Trash2, Mail, DollarSign, Calendar, TrendingUp, Users, Zap, CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Clock, Send, Phone, Scale, Trash2, Mail, DollarSign, Calendar, TrendingUp, Users, Zap, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Loader2, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,31 +67,45 @@ export default function RemindersPage() {
   const [escalations, setEscalations] = useState<EscalationRecommendation[]>([]);
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [sendingReminders, setSendingReminders] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
-  const accessToken = session?.access_token;
 
-  useEffect(() => {
-    if (accessToken) {
-      fetchOverdueData();
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token') || localStorage.getItem('token') || '';
     }
-  }, [accessToken]);
+    return '';
+  }, [session?.access_token]);
 
-  const fetchOverdueData = async () => {
+  const fetchOverdueData = useCallback(async (isRefresh: boolean = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Cache-Control': 'no-cache',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/reminders/overdue', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
         const data = await response.json();
-        setOverdueInvoices(data.overdueInvoices);
-        setNeedingReminders(data.needingReminders);
-        setStats(data.stats);
-        setEscalations(data.escalations);
+        setOverdueInvoices(data.overdueInvoices || []);
+        setNeedingReminders(data.needingReminders || []);
+        setStats(data.stats || null);
+        setEscalations(data.escalations || []);
       } else {
         throw new Error('Failed to fetch overdue data');
       }
@@ -103,8 +117,13 @@ export default function RemindersPage() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [getEffectiveToken, toast]);
+
+  useEffect(() => {
+    fetchOverdueData();
+  }, [fetchOverdueData]);
 
   const handleSelectInvoice = (invoiceId: string, checked: boolean) => {
     if (checked) {
@@ -134,12 +153,18 @@ export default function RemindersPage() {
 
     setSendingReminders(true);
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/reminders/send', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({
           invoiceIds: selectedInvoices,
           sendEmail: true
@@ -155,7 +180,7 @@ export default function RemindersPage() {
         });
         
         setSelectedInvoices([]);
-        fetchOverdueData(); // Refresh data
+        fetchOverdueData(true); // Refresh data
       } else {
         throw new Error(result.error || 'Failed to send reminders');
       }
@@ -184,8 +209,8 @@ export default function RemindersPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="spinner-green w-12 h-12 mx-auto mb-4"></div>
-          <p className="text-green-muted">Loading reminder data...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Loading reminder data...</p>
         </div>
       </div>
     );
@@ -194,12 +219,21 @@ export default function RemindersPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-white">Smart Reminders</h1>
-          <p className="text-green-muted text-lg">AI-powered overdue invoice management and automated reminders</p>
+          <h1 className="text-4xl font-bold text-white tracking-tight">Smart Reminders</h1>
+          <p className="text-green-muted text-lg mt-1">AI-powered overdue invoice management and automated reminders</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex items-center space-x-3">
+          <Button
+            onClick={() => fetchOverdueData(true)}
+            disabled={refreshing || loading}
+            variant="outline"
+            className="border-white/10 bg-[#181818] hover:bg-[#282828] text-white hover:text-[#1ed760] transition-colors"
+          >
+            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
           <Button
             onClick={handleSendReminders}
             disabled={selectedInvoices.length === 0 || sendingReminders}

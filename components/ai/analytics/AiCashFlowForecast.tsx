@@ -77,17 +77,17 @@ export function AiCashFlowForecast({ monthlyData = [] }: AiCashFlowForecastProps
     // EMPTY STATE if no data
     if (!monthlyData || monthlyData.length === 0) {
         return (
-            <Card className="card-green-mist overflow-hidden relative min-h-[300px] flex items-center justify-center">
+            <Card className="bg-[#181818] border-white/10 rounded-2xl overflow-hidden relative min-h-[260px] flex items-center justify-center">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Sparkles className="w-24 h-24 text-green-500" />
+                    <Sparkles className="w-24 h-24 text-[#1ed760]" />
                 </div>
                 <div className="text-center z-10 p-6">
-                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
-                        <TrendingUp className="w-8 h-8 text-green-400 opacity-50" />
+                    <div className="w-14 h-14 bg-[#1ed760]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1ed760]/20">
+                        <TrendingUp className="w-7 h-7 text-[#1ed760] opacity-60" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Not Enough Data</h3>
-                    <p className="text-green-muted max-w-sm mx-auto">
-                        The AI needs at least one month of invoice history to generate cash flow predictions. Create some paid invoices to see the magic!
+                    <h3 className="text-lg font-bold text-white mb-1">Awaiting Invoice Activity</h3>
+                    <p className="text-xs text-[#b3b3b3] max-w-sm mx-auto">
+                        The AI engine requires settled invoices to project cash flow trajectory.
                     </p>
                 </div>
             </Card>
@@ -95,25 +95,25 @@ export function AiCashFlowForecast({ monthlyData = [] }: AiCashFlowForecastProps
     }
 
     return (
-        <Card className="card-green-mist overflow-hidden relative">
+        <Card className="bg-[#181818] border-white/10 rounded-2xl overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Sparkles className="w-24 h-24 text-green-500" />
+                <Sparkles className="w-24 h-24 text-[#1ed760]" />
             </div>
 
-            <CardHeader>
+            <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle className="text-white flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-green-400" />
+                        <CardTitle className="text-white flex items-center gap-2 text-lg">
+                            <TrendingUp className="w-5 h-5 text-[#1ed760]" />
                             AI Cash Flow Predictor
                         </CardTitle>
-                        <CardDescription className="text-green-muted/70">
-                            Forecast based on payment history trends
+                        <CardDescription className="text-xs text-[#b3b3b3]">
+                            Neural projection based on settlement velocity & rolling historical trends
                         </CardDescription>
                     </div>
-                    <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span className="text-xs font-medium text-green-400">High Confidence</span>
+                    <div className="px-3 py-1 bg-[#1ed760]/10 border border-[#1ed760]/20 rounded-full flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#1ed760] rounded-full animate-pulse" />
+                        <span className="text-xs font-semibold text-[#1ed760]">High Confidence</span>
                     </div>
                 </div>
             </CardHeader>

@@ -18,6 +18,10 @@ export interface User {
   companyPhone?: string;
   companyWebsite?: string;
   avatar?: string;
+  aiProvider?: string;
+  aiApiKey?: string;
+  aiModel?: string;
+  aiBaseUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +42,10 @@ function formatPrismaUser(user: any): User {
     companyPhone: user.phone || undefined,
     companyWebsite: user.companyWebsite || undefined,
     avatar: user.avatar || undefined,
+    aiProvider: user.aiProvider || user.aiprovider || 'gemini',
+    aiApiKey: user.aiApiKey || user.aiapikey || undefined,
+    aiModel: user.aiModel || user.aimodel || undefined,
+    aiBaseUrl: user.aiBaseUrl || user.aibaseurl || undefined,
     createdAt: user.createdAt || new Date().toISOString(),
     updatedAt: user.updatedAt || new Date().toISOString(),
   };
@@ -203,10 +211,17 @@ export class AuthService {
       let token: string | null = null;
 
       if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      } else {
+        const candidate = authHeader.substring(7).trim();
+        if (candidate && candidate !== 'null' && candidate !== 'undefined') {
+          token = candidate;
+        }
+      }
+
+      if (!token) {
         const cookieStore = request.cookies;
-        token = cookieStore.get('auth-token')?.value || cookieStore.get('token')?.value || null;
+        token = cookieStore.get('auth-token')?.value || 
+                cookieStore.get('token')?.value || 
+                cookieStore.get('sb-access-token')?.value || null;
       }
 
       if (!token) return null;

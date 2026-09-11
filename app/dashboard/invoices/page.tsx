@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Eye, Download, Send, Trash2, Search, Filter, Plus, CircleCheck as CheckCircle, Clock, TriangleAlert as AlertTriangle, CreditCard as Edit, Calendar, DollarSign, CreditCard, FileDown, Sparkles, TrendingUp, Users, Zap, CircleAlert as AlertCircle, ChartBar as BarChart3 } from 'lucide-react';
+import { FileText, Eye, Download, Send, Trash2, Search, Filter, Plus, CircleCheck as CheckCircle, Clock, TriangleAlert as AlertTriangle, CreditCard as Edit, Calendar, DollarSign, CreditCard, FileDown, Sparkles, TrendingUp, Users, Zap, CircleAlert as AlertCircle, ChartBar as BarChart3, Loader2, RotateCw } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -127,37 +127,51 @@ export default function InvoicesPage() {
   });
   const { toast } = useToast();
   const { session, loading: authLoading } = useAuth();
-  const accessToken = session?.access_token;
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    // Only fetch invoices if authentication is complete and we have a token.
-    if (!authLoading && accessToken) {
-      fetchInvoices();
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token') || localStorage.getItem('token') || '';
     }
-    // If auth is not loading and there's no token, we can stop the page's loading state.
-    if (!authLoading && !accessToken) {
-      setLoading(false);
+    return '';
+  }, [session?.access_token]);
+
+  const fetchInvoices = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
     }
-  }, [accessToken, authLoading]);
 
-  useEffect(() => {
-    filterInvoices();
-  }, [invoices, searchTerm, statusFilter]);
-
-  const fetchInvoices = async () => {
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Cache-Control': 'no-cache',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/invoices', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
+
       if (response.ok) {
         const data = await response.json();
-        setInvoices(data);
+        setInvoices(Array.isArray(data) ? data : []);
+        if (isRefresh) {
+          toast({
+            title: 'Invoices Synced',
+            description: 'Latest invoices loaded from database.',
+          });
+        }
       } else {
         throw new Error('Failed to fetch invoices');
       }
     } catch (error) {
+      console.error('Fetch invoices error:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch invoices',
@@ -165,8 +179,15 @@ export default function InvoicesPage() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [getEffectiveToken, toast]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchInvoices();
+    }
+  }, [authLoading, fetchInvoices]);
 
   const filterInvoices = () => {
     let filtered = invoices;
@@ -190,10 +211,15 @@ export default function InvoicesPage() {
 
   const handleDownloadPDF = async (invoiceId: string, invoiceNumber: string) => {
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/invoices/${invoiceId}/pdf`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
       if (response.ok) {
         const blob = await response.blob();
@@ -225,10 +251,15 @@ export default function InvoicesPage() {
   const handleExportCSV = async () => {
     setIsExporting(true);
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/export/invoices', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -303,11 +334,16 @@ export default function InvoicesPage() {
 
   const handleSendInvoice = async (invoiceId: string) => {
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/invoices/${invoiceId}/send`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       const result = await response.json();
@@ -367,12 +403,18 @@ export default function InvoicesPage() {
     }
 
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/invoices/${selectedInvoice.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({
           status: 'paid',
           paidDate: paymentData.paidDate,
@@ -416,12 +458,18 @@ export default function InvoicesPage() {
         updateData.paymentNotes = null;
       }
 
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/invoices/${selectedInvoice.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(updateData),
       });
 
@@ -451,11 +499,16 @@ export default function InvoicesPage() {
     if (!confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) return;
 
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/invoices/${invoiceId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -562,8 +615,8 @@ export default function InvoicesPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="spinner-green w-12 h-12 mx-auto mb-4"></div>
-          <p className="text-green-muted">Authenticating...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Authenticating...</p>
         </div>
       </div>
     );
@@ -573,8 +626,8 @@ export default function InvoicesPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="spinner-green w-12 h-12 mx-auto mb-4"></div>
-          <p className="text-green-muted">Loading invoices...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Loading invoices...</p>
         </div>
       </div>
     );
@@ -588,7 +641,17 @@ export default function InvoicesPage() {
           <h1 className="text-4xl font-bold text-white">Invoices</h1>
           <p className="text-green-muted text-lg">Track and manage all your invoices</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchInvoices(true)}
+            disabled={refreshing}
+            className="border-white/10 hover:bg-white/5 text-white"
+            style={{ borderRadius: '9999px' }}
+          >
+            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
+            {refreshing ? 'Syncing...' : 'Sync'}
+          </Button>
           <Button
             variant="outline"
             onClick={handleExportCSV}

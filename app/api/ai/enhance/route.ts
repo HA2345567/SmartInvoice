@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/lib/auth';
-import { enhanceText } from '@/lib/gemini';
+import { DatabaseService } from '@/lib/database';
+import { enhanceText, resolveEffectiveModel, resolveEffectiveBaseUrl } from '@/lib/gemini';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,19 +12,27 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json();
+        const body = await request.json().catch(() => ({}));
         const { text, mode, provider, apiKey, model, baseUrl } = body || {};
 
+        // Fallback to database user profile if not on user object directly
+        const dbProfile = (!user.aiApiKey && user.id) ? await DatabaseService.getUserById(user.id) : null;
+
+        const effectiveProvider = provider || user.aiProvider || dbProfile?.aiProvider || 'gemini';
+        const effectiveKey = apiKey || user.aiApiKey || dbProfile?.aiApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY || process.env.ANTHROPIC_API_KEY || '';
+        const rawModel = model || user.aiModel || dbProfile?.aiModel || '';
+        const rawBaseUrl = baseUrl || user.aiBaseUrl || dbProfile?.aiBaseUrl || '';
+
         const aiConfig = {
-            provider: provider || (user as any).aiProvider || 'gemini',
-            apiKey: apiKey || (user as any).aiApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY,
-            model: model || (user as any).aiModel || 'gemini-2.0-flash',
-            baseUrl: baseUrl || (user as any).aiBaseUrl
+            provider: effectiveProvider,
+            apiKey: effectiveKey,
+            model: resolveEffectiveModel(effectiveProvider, rawModel),
+            baseUrl: resolveEffectiveBaseUrl(effectiveProvider, rawBaseUrl)
         };
 
         if (!aiConfig.apiKey) {
             return NextResponse.json({
-                error: 'AI API Key is required. Please enter your API Key.'
+                error: 'AI API Key is required. Please configure your API key in Settings > AI (BYOK).'
             }, { status: 400 });
         }
 

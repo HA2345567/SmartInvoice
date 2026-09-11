@@ -96,12 +96,16 @@ export default function SettingsPage() {
   }, [session]);
 
   const fetchSettings = async () => {
-    if (!session?.access_token) return;
+    const token = session?.access_token || (typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null);
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/user/settings', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -138,7 +142,15 @@ export default function SettingsPage() {
   };
 
   const handleSave = async () => {
-    if (!session?.access_token) return;
+    const token = session?.access_token || (typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null);
+    if (!token) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to save your settings.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setSaving(true);
     try {
@@ -146,7 +158,7 @@ export default function SettingsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(settings),
       });
@@ -239,12 +251,17 @@ export default function SettingsPage() {
 
     setTestingAi(true);
     try {
+      const token = session?.access_token || localStorage.getItem('auth-token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/ai/enhance', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        headers,
         body: JSON.stringify({
           text: 'Thank you for your business!',
           mode: 'formal',
@@ -280,8 +297,8 @@ export default function SettingsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#1ed760]" />
-          <p className="text-dark-muted">Loading settings...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Loading settings...</p>
         </div>
       </div>
     );

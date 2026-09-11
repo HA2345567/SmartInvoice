@@ -1,10 +1,10 @@
 // Dashboard Main Page
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Clock, TrendingUp, Plus, Users, Zap, Calendar } from 'lucide-react';
+import { DollarSign, Clock, TrendingUp, Plus, Users, Zap, Calendar, Loader2, RotateCw } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -73,28 +73,37 @@ export default function Dashboard() {
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [pendingInvoices, setPendingInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
   const { user, session } = useAuth();
 
-  useEffect(() => {
-    if (session) {
-      fetchDashboardData();
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token') || localStorage.getItem('token') || '';
     }
-  }, [session]);
+    return '';
+  }, [session?.access_token]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
-      // Get the current access token from the session
-      const accessToken = session?.access_token;
-
-      const headers: Record<string, string> = {};
+      const accessToken = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Cache-Control': 'no-cache',
+      };
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
       }
 
       const [analyticsResponse, invoicesResponse] = await Promise.all([
-        fetch('/api/analytics', { headers }),
-        fetch('/api/invoices', { headers }),
+        fetch('/api/analytics', { headers, credentials: 'include' }),
+        fetch('/api/invoices', { headers, credentials: 'include' }),
       ]);
 
       if (analyticsResponse.ok) {
@@ -104,12 +113,20 @@ export default function Dashboard() {
 
       if (invoicesResponse.ok) {
         const invoicesData = await invoicesResponse.json();
-        setRecentInvoices(invoicesData.slice(0, 5));
+        const invoiceList = Array.isArray(invoicesData) ? invoicesData : [];
+        setRecentInvoices(invoiceList.slice(0, 5));
 
-        const pending = invoicesData.filter((inv: Invoice) =>
+        const pending = invoiceList.filter((inv: Invoice) =>
           inv.status === 'sent' || inv.status === 'overdue'
         ).slice(0, 10);
         setPendingInvoices(pending);
+      }
+
+      if (isRefresh) {
+        toast({
+          title: 'Dashboard Synced',
+          description: 'Latest metrics and invoices loaded from database.',
+        });
       }
     } catch (error) {
       console.error('Dashboard fetch error:', error);
@@ -120,8 +137,13 @@ export default function Dashboard() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [getEffectiveToken, toast]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const now = new Date();
   const currentMonth = `${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear().toString().slice(-2)}`;
@@ -187,7 +209,7 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#1ed760', borderTopColor: 'transparent' }} />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
           <p style={{ color: '#b3b3b3' }}>Loading dashboard...</p>
         </div>
       </div>
@@ -204,7 +226,17 @@ export default function Dashboard() {
             Welcome back, {user?.name || 'User'}! Here's your business overview.
           </p>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => fetchDashboardData(true)}
+            disabled={refreshing}
+            className="border-white/10 hover:bg-white/5 text-white"
+            style={{ borderRadius: '9999px' }}
+          >
+            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
+            {refreshing ? 'Syncing...' : 'Sync'}
+          </Button>
           <Link href="/dashboard/create/select-type">
             <Button
               className="font-bold text-sm"

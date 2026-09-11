@@ -57,8 +57,12 @@ export class EmailService {
 
   async sendEmail(emailData: EmailData): Promise<boolean> {
     try {
+      const fromAddress = process.env.EMAIL_FROM 
+        ? (process.env.EMAIL_FROM.includes('<') ? process.env.EMAIL_FROM : `SmartInvoice <${process.env.EMAIL_FROM}>`)
+        : (process.env.EMAIL_USER ? `SmartInvoice <${process.env.EMAIL_USER}>` : 'noreply@smartinvoice.com');
+
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+        from: fromAddress,
         to: emailData.to,
         subject: emailData.subject,
         html: emailData.html,
@@ -82,6 +86,16 @@ export class EmailService {
     } catch (error) {
       console.error('[EmailService] SMTP configuration test failed:', error);
       return false;
+    }
+  }
+
+  async verifyConnection(): Promise<{ success: boolean; error?: string }> {
+    try {
+      await this.transporter.verify();
+      return { success: true };
+    } catch (error: any) {
+      console.error('[EmailService] SMTP configuration test failed:', error);
+      return { success: false, error: error?.message || 'SMTP Verification Failed' };
     }
   }
 

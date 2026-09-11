@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
+import { resolveEffectiveModel, resolveEffectiveBaseUrl } from '@/lib/gemini';
 import axios from 'axios';
 
 export const dynamic = 'force-dynamic';
@@ -16,18 +17,26 @@ export async function POST(request: NextRequest) {
 
         // Fetch user data via Neon DB DatabaseService
         const userProfile = await DatabaseService.getUserById(user.id);
-        const apiKey = userProfile?.aiApiKey || userProfile?.googleApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+        const provider = (userProfile?.aiProvider || user.aiProvider || 'gemini').toLowerCase();
+        const apiKey = userProfile?.aiApiKey || 
+                       user.aiApiKey || 
+                       userProfile?.googleApiKey || 
+                       process.env.GEMINI_API_KEY || 
+                       process.env.GOOGLE_AI_API_KEY || 
+                       process.env.OPENAI_API_KEY || 
+                       process.env.GROQ_API_KEY || 
+                       process.env.ANTHROPIC_API_KEY;
 
         if (!apiKey) {
             return NextResponse.json(
-                { error: 'AI features are disabled. Please configure your AI API Key in Settings.' },
+                { error: 'AI features are disabled. Please configure your AI API Key in Settings > AI (BYOK).' },
                 { status: 400 }
             );
         }
 
         const { messages } = await request.json();
 
-        if (!messages || !Array.isArray(messages)) {
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return NextResponse.json(
                 { error: 'Invalid message format' },
                 { status: 400 }
@@ -46,8 +55,6 @@ export async function POST(request: NextRequest) {
             defaultgstrate: 18,
             defaulttaxrate: 0
         };
-
-        const genAI = new GoogleGenerativeAI(apiKey);
 
         const systemInstruction = `
 You are the SmartInvoice AI Assistant, embedded in the SmartInvoice platform. You help freelancers, agencies, and businesses create invoices, manage clients, track payments, and understand their revenue quickly and accurately.
@@ -92,7 +99,7 @@ You are the SmartInvoice AI Assistant, embedded in the SmartInvoice platform. Yo
    - Do not provide guidance on evading taxes or falsifying invoices.
 
 ## Output Format Specification
-You MUST ALWAYS respond with a JSON object containing exactly two keys: "content" (string) and "invoiceDraft" (object or null).
+You MUST ALWAYS respond with a valid JSON object containing exactly two keys: "content" (string) and "invoiceDraft" (object or null).
 
 Schema of "invoiceDraft" when generating/drafting an invoice:
 {
@@ -119,11 +126,15 @@ If no invoice draft is being generated, set "invoiceDraft" to null.
 `;
 
         let text = '';
-        const provider = userProfile?.aiProvider || 'gemini';
+        const rawModel = userProfile?.aiModel || user.aiModel || '';
+        const rawBaseUrl = userProfile?.aiBaseUrl || user.aiBaseUrl || '';
+        const activeModel = resolveEffectiveModel(provider, rawModel);
+        const activeBaseUrl = resolveEffectiveBaseUrl(provider, rawBaseUrl);
 
         if (provider === 'gemini') {
+            const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({
-                model: userProfile?.aiModel || 'gemini-2.0-flash',
+                model: activeModel,
                 systemInstruction: systemInstruction,
             });
 
@@ -138,15 +149,38 @@ If no invoice draft is being generated, set "invoiceDraft" to null.
             const chat = model.startChat({
                 history: history,
                 generationConfig: {
-                    maxOutputTokens: 1200,
+                    maxOutputTokens: 1500,
                     responseMimeType: 'application/json',
                 },
             });
 
-            const result = await chat.sendMessage(lastMessage);
+            const result = await chat.sendMessage(typeof lastMessage === 'string' ? lastMessage : JSON.stringify(lastMessage));
             const response = await result.response;
             text = response.text();
+        } else if (provider === 'claude' && (!rawBaseUrl || rawBaseUrl.includes('anthropic.com'))) {
+            // Anthropic Messages API
+            const claudeUrl = `${activeBaseUrl}/messages`;
+            const messagesToSend = messages.map((msg: any) => ({
+                role: msg.role === 'assistant' ? 'assistant' : 'user',
+                content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+            }));
+
+            const response = await axios.post(claudeUrl, {
+                model: activeModel,
+                max_tokens: 2048,
+                system: systemInstruction,
+                messages: messagesToSend
+            }, {
+                headers: {
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json'
+                }
+            });
+
+            text = response.data?.content?.[0]?.text || '';
         } else {
+            // OpenAI, Groq, OpenRouter, DeepSeek, or Custom OpenAI-Compatible
             const messagesToSend: any[] = [
                 { role: 'system', content: systemInstruction }
             ];
@@ -158,42 +192,51 @@ If no invoice draft is being generated, set "invoiceDraft" to null.
                 });
             });
 
-            const defaultBaseUrl = 'https://api.openai.com/v1';
-            const activeBaseUrl = userProfile?.aiBaseUrl || defaultBaseUrl;
-            const activeModel = userProfile?.aiModel || 'gpt-4o-mini';
             const url = `${activeBaseUrl}/chat/completions`;
+            const headers: Record<string, string> = {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            };
 
-            const response = await axios.post(url, {
+            if (provider === 'openrouter') {
+                headers['HTTP-Referer'] = 'http://localhost:3000';
+                headers['X-Title'] = 'SmartInvoice';
+            }
+
+            const payload: any = {
                 model: activeModel,
-                messages: messagesToSend,
-                response_format: { type: "json_object" }
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+                messages: messagesToSend
+            };
 
+            if (provider === 'openai') {
+                payload.response_format = { type: "json_object" };
+            }
+
+            const response = await axios.post(url, payload, { headers });
             text = response.data?.choices?.[0]?.message?.content || '';
         }
 
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const cleanJson = jsonMatch ? jsonMatch[0] : text;
+
         try {
-            const parsed = JSON.parse(text);
+            const parsed = JSON.parse(cleanJson);
             return NextResponse.json({
                 content: parsed.content || text,
                 invoiceDraft: parsed.invoiceDraft || null,
             });
         } catch (e) {
-            console.error('Failed to parse AI JSON output:', text);
+            console.warn('AI response was not standard JSON, returning raw text:', text);
             return NextResponse.json({
                 content: text,
                 invoiceDraft: null,
             });
         }
     } catch (error: any) {
-        console.error('AI API Error:', error);
+        console.error('AI API Error:', error?.response?.data || error);
+        const details = error?.response?.data?.error?.message || error.message || 'Failed to process AI request';
         return NextResponse.json(
-            { error: error.message || 'Failed to process AI request' },
+            { error: details },
             { status: 500 }
         );
     }

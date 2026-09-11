@@ -71,14 +71,15 @@ class Config {
     isConfigured: boolean;
   } {
     const config = this.loadConfig();
+    const cleanPass = config.EMAIL_PASS ? config.EMAIL_PASS.replace(/\s+/g, '') : undefined;
     return {
-      host: config.EMAIL_HOST,
+      host: config.EMAIL_HOST || 'smtp.gmail.com',
       port: parseInt(config.EMAIL_PORT || '587'),
-      secure: config.EMAIL_SECURE === 'true',
+      secure: config.EMAIL_SECURE === 'true' || parseInt(config.EMAIL_PORT || '587') === 465,
       user: config.EMAIL_USER,
-      pass: config.EMAIL_PASS,
-      from: config.EMAIL_FROM || 'noreply@smartinvoice.com',
-      isConfigured: !!(config.EMAIL_HOST && config.EMAIL_USER && config.EMAIL_PASS),
+      pass: cleanPass,
+      from: config.EMAIL_FROM || config.EMAIL_USER || 'noreply@smartinvoice.com',
+      isConfigured: !!(config.EMAIL_HOST && config.EMAIL_USER && cleanPass),
     };
   }
 

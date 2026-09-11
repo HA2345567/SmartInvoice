@@ -11,7 +11,10 @@ import { DatabaseService } from './database';
 export function getAuthToken(request: NextRequest): string | null {
   const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
   if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.substring(7);
+    const candidate = authHeader.substring(7).trim();
+    if (candidate && candidate !== 'null' && candidate !== 'undefined') {
+      return candidate;
+    }
   }
 
   const cookieStore = request.cookies;
@@ -43,6 +46,10 @@ export async function getAuthUser(request: NextRequest): Promise<{
   companyGST?: string;
   companyPhone?: string;
   companyWebsite?: string;
+  aiProvider?: string;
+  aiApiKey?: string;
+  aiModel?: string;
+  aiBaseUrl?: string;
 } | null> {
   try {
     const token = getAuthToken(request);
@@ -51,7 +58,11 @@ export async function getAuthUser(request: NextRequest): Promise<{
     const payload = AuthService.verifyToken(token);
     if (!payload || !payload.userId) return null;
 
-    const user = await AuthService.getUserById(payload.userId);
+    const rawUserId = payload.userId as any;
+    const userId = typeof rawUserId === 'string' ? rawUserId : (rawUserId?.id || rawUserId?.userId);
+    if (!userId) return null;
+
+    const user = await AuthService.getUserById(userId);
     if (!user) return null;
 
     return {
@@ -63,6 +74,10 @@ export async function getAuthUser(request: NextRequest): Promise<{
       companyGST: user.companyGST,
       companyPhone: user.companyPhone,
       companyWebsite: user.companyWebsite,
+      aiProvider: user.aiProvider,
+      aiApiKey: user.aiApiKey,
+      aiModel: user.aiModel,
+      aiBaseUrl: user.aiBaseUrl,
     };
   } catch (error) {
     console.error('Auth error:', error);

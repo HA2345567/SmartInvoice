@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Receipt, Plus, Sparkles, Search, Filter, Calendar, DollarSign, Tag, TrendingUp, TrendingDown, ChartPie as PieChartIcon, CreditCard as Edit, Trash2, Recycle, X, Loader as Loader2, Upload } from 'lucide-react';
+import { Receipt, Plus, Sparkles, Search, Filter, Calendar, DollarSign, Tag, TrendingUp, TrendingDown, ChartPie as PieChartIcon, CreditCard as Edit, Trash2, Recycle, X, Loader as Loader2, Upload, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -70,6 +70,7 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [summary, setSummary] = useState<ExpenseSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -79,8 +80,27 @@ export default function ExpensesPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedExpenses, setScannedExpenses] = useState<ExpenseItem[]>([]);
 
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('auth-token') || localStorage.getItem('token');
+      if (stored && stored !== 'null' && stored !== 'undefined') {
+        return stored;
+      }
+    }
+    return null;
+  }, [session]);
+
   const handleFilesSelected = async (files: File[]) => {
-    if (!session?.access_token) return;
+    const token = getEffectiveToken();
+    if (!token) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to scan receipts.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsScanning(true);
     
     const newScanned: ExpenseItem[] = [];
@@ -93,7 +113,7 @@ export default function ExpensesPage() {
         const response = await fetch('/api/expenses/scan', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         });
@@ -129,6 +149,16 @@ export default function ExpensesPage() {
     const expense = scannedExpenses.find(e => e.id === id);
     if (!expense) return;
 
+    const token = getEffectiveToken();
+    if (!token) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to approve expenses.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const dataToSave = {
       ...expense,
       ...correctedData
@@ -139,7 +169,7 @@ export default function ExpensesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           description: dataToSave.merchant,
@@ -193,47 +223,73 @@ export default function ExpensesPage() {
     recurringFrequency: '',
   });
 
-  useEffect(() => {
-    if (session?.access_token) {
-      fetchExpenses();
+  const fetchExpenses = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
     }
-  }, [session, selectedCategory]);
 
-  const fetchExpenses = async () => {
-    if (!session?.access_token) return;
-
-    setLoading(true);
     try {
+      const token = getEffectiveToken();
       let url = '/api/expenses';
       if (selectedCategory && selectedCategory !== 'all') {
         url += `?category=${selectedCategory}`;
       }
 
+      const headers: Record<string, string> = {
+        'Cache-Control': 'no-cache',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
         const data = await response.json();
         setExpenses(data.expenses || []);
         setSummary(data.summary || null);
+        if (isRefresh) {
+          toast({
+            title: 'Expenses Refreshed',
+            description: 'Latest expenses loaded from database.',
+          });
+        }
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to fetch expenses');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching expenses:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to fetch expenses',
+        title: 'Data Notice',
+        description: error.message || 'Failed to fetch expenses',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [getEffectiveToken, selectedCategory, toast]);
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   const handleAddExpense = async () => {
-    if (!session?.access_token) return;
+    const token = getEffectiveToken();
+    if (!token) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to add expenses.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (!formData.description || !formData.amount || !formData.date) {
       toast({
@@ -250,7 +306,7 @@ export default function ExpensesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -279,7 +335,8 @@ export default function ExpensesPage() {
   };
 
   const handleEditExpense = async () => {
-    if (!session?.access_token || !editingExpense) return;
+    const token = getEffectiveToken();
+    if (!token || !editingExpense) return;
 
     setSaving(true);
     try {
@@ -287,7 +344,7 @@ export default function ExpensesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           id: editingExpense.id,
@@ -319,7 +376,8 @@ export default function ExpensesPage() {
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!session?.access_token) return;
+    const token = getEffectiveToken();
+    if (!token) return;
 
     if (!confirm('Are you sure you want to delete this expense?')) return;
 
@@ -327,7 +385,7 @@ export default function ExpensesPage() {
       const response = await fetch(`/api/expenses?id=${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -440,21 +498,34 @@ export default function ExpensesPage() {
             Track and categorize your business expenses with AI assistance
           </p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="font-bold text-sm"
-              style={{ background: '#1ed760', color: '#000', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '1.4px' }}
-              onClick={() => resetForm()}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Expense
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md" style={{ background: '#181818', border: '1px solid #4d4d4d' }}>
-            <DialogHeader>
-              <DialogTitle className="text-white">Add Expense</DialogTitle>
-              <DialogDescription style={{ color: '#b3b3b3' }}>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => fetchExpenses(true)}
+            disabled={refreshing}
+            className="border-white/10 hover:bg-white/5 text-white"
+            style={{ borderRadius: '9999px' }}
+          >
+            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
+            {refreshing ? 'Syncing...' : 'Sync'}
+          </Button>
+
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="font-bold text-sm"
+                style={{ background: '#1ed760', color: '#000', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '1.4px' }}
+                onClick={() => resetForm()}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md" style={{ background: '#181818', border: '1px solid #4d4d4d' }}>
+              <DialogHeader>
+                <DialogTitle className="text-white">Add Expense</DialogTitle>
+                <DialogDescription style={{ color: '#b3b3b3' }}>
                 Enter expense details. AI will auto-categorize if no category is selected.
               </DialogDescription>
             </DialogHeader>
@@ -555,6 +626,7 @@ export default function ExpensesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* AI Receipt Scanning Area */}

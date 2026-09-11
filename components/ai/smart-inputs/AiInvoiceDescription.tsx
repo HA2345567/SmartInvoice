@@ -30,13 +30,17 @@ export function AiInvoiceDescription({ value, onChange, placeholder, className }
         setIsEnhancing(true);
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('auth-token') || localStorage.getItem('token') || localStorage.getItem('auth_token');
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json'
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch('/api/ai/enhance', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers,
                 body: JSON.stringify({ text: value, mode })
             });
 

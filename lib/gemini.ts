@@ -7,20 +7,90 @@ export interface AIConfig {
     baseUrl?: string;
 }
 
-async function callAI(config: AIConfig, prompt: string, systemInstruction?: string, base64Image?: string, mimeType?: string): Promise<string> {
+export function getProviderDefaults(provider: string) {
+    const p = (provider || 'gemini').toLowerCase();
+    switch (p) {
+        case 'openai':
+            return {
+                defaultBaseUrl: 'https://api.openai.com/v1',
+                defaultModel: 'gpt-4o-mini',
+            };
+        case 'claude':
+            return {
+                defaultBaseUrl: 'https://api.anthropic.com/v1',
+                defaultModel: 'claude-3-5-sonnet-20241022',
+            };
+        case 'groq':
+            return {
+                defaultBaseUrl: 'https://api.groq.com/openai/v1',
+                defaultModel: 'llama-3.3-70b-versatile',
+            };
+        case 'openrouter':
+            return {
+                defaultBaseUrl: 'https://openrouter.ai/api/v1',
+                defaultModel: 'google/gemini-2.5-flash',
+            };
+        case 'deepseek':
+            return {
+                defaultBaseUrl: 'https://api.deepseek.com/v1',
+                defaultModel: 'deepseek-chat',
+            };
+        case 'custom':
+            return {
+                defaultBaseUrl: 'http://localhost:11434/v1',
+                defaultModel: 'llama3',
+            };
+        case 'gemini':
+        default:
+            return {
+                defaultBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+                defaultModel: 'gemini-2.0-flash',
+            };
+    }
+}
+
+export function resolveEffectiveModel(provider: string, model?: string): string {
+    const p = (provider || 'gemini').toLowerCase();
+    const defaults = getProviderDefaults(p);
+    const trimmed = model?.trim();
+    if (!trimmed) return defaults.defaultModel;
+
+    // Sanity check: if model clearly belongs to Gemini but provider is not Gemini or OpenRouter
+    if (trimmed.startsWith('gemini-') && p !== 'gemini' && p !== 'openrouter') {
+        return defaults.defaultModel;
+    }
+    // If model is Claude-specific but provider is not Claude or OpenRouter
+    if (trimmed.startsWith('claude-') && p !== 'claude' && p !== 'openrouter') {
+        return defaults.defaultModel;
+    }
+    // If model is GPT-specific but provider is Claude or Gemini
+    if (trimmed.startsWith('gpt-') && p !== 'openai' && p !== 'openrouter' && p !== 'custom') {
+        return defaults.defaultModel;
+    }
+
+    return trimmed;
+}
+
+export function resolveEffectiveBaseUrl(provider: string, baseUrl?: string): string {
+    const p = (provider || 'gemini').toLowerCase();
+    const trimmed = baseUrl?.trim();
+    if (trimmed) return trimmed;
+    return getProviderDefaults(p).defaultBaseUrl;
+}
+
+export async function callAI(config: AIConfig, prompt: string, systemInstruction?: string, base64Image?: string, mimeType?: string): Promise<string> {
     const provider = (config.provider || 'gemini').toLowerCase();
-    const apiKey = config.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.OPENAI_API_KEY || '';
-    const model = config.model;
-    const baseUrl = config.baseUrl;
+    const apiKey = config.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY || process.env.ANTHROPIC_API_KEY || '';
+    const model = resolveEffectiveModel(provider, config.model);
+    const baseUrl = resolveEffectiveBaseUrl(provider, config.baseUrl);
 
     if (!apiKey) {
         throw new Error('AI API key is missing. Please configure it in Settings.');
     }
 
     if (provider === 'gemini') {
-        const defaultBaseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-        const activeBaseUrl = baseUrl || defaultBaseUrl;
-        const activeModel = model || 'gemini-2.0-flash';
+        const activeBaseUrl = baseUrl;
+        const activeModel = model;
         const url = `${activeBaseUrl}/${activeModel}:generateContent?key=${apiKey}`;
 
         const parts: any[] = [];
@@ -53,8 +123,8 @@ async function callAI(config: AIConfig, prompt: string, systemInstruction?: stri
         return text;
     } else if (provider === 'claude' && (!baseUrl || baseUrl.includes('anthropic.com'))) {
         // Native Anthropic Messages API
-        const activeBaseUrl = baseUrl || 'https://api.anthropic.com/v1';
-        const activeModel = model || 'claude-3-5-sonnet-20241022';
+        const activeBaseUrl = baseUrl;
+        const activeModel = model;
         const url = `${activeBaseUrl}/messages`;
 
         const content: any[] = [];
@@ -95,22 +165,8 @@ async function callAI(config: AIConfig, prompt: string, systemInstruction?: stri
         return text;
     } else {
         // OpenAI, Groq, OpenRouter, DeepSeek, or Custom OpenAI-Compatible
-        let defaultBaseUrl = 'https://api.openai.com/v1';
-        let defaultModel = 'gpt-4o-mini';
-
-        if (provider === 'groq') {
-            defaultBaseUrl = 'https://api.groq.com/openai/v1';
-            defaultModel = 'llama-3.3-70b-versatile';
-        } else if (provider === 'openrouter') {
-            defaultBaseUrl = 'https://openrouter.ai/api/v1';
-            defaultModel = 'google/gemini-2.5-flash';
-        } else if (provider === 'deepseek') {
-            defaultBaseUrl = 'https://api.deepseek.com/v1';
-            defaultModel = 'deepseek-chat';
-        }
-
-        const activeBaseUrl = baseUrl || defaultBaseUrl;
-        const activeModel = model || defaultModel;
+        const activeBaseUrl = baseUrl;
+        const activeModel = model;
         const url = `${activeBaseUrl}/chat/completions`;
 
         const messages: any[] = [];

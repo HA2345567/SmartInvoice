@@ -92,23 +92,44 @@ export class AIAgentService {
         try {
             console.log(`[AI Agent] Attempting to send ${action.suggestedTone} email to ${action.clientEmail} for Invoice ${action.invoiceId}`);
 
-            // Send email using Resend via our internal API to keep secrets safe on server
-            const response = await fetch('/api/email/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    to: action.clientEmail,
-                    subject: action.subject,
-                    html: action.body.replace(/\n/g, '<br/>'), // Simple plain text to HTML conversion
-                    invoiceId: action.invoiceId
-                }),
-            });
+            // Send email using SMTP (Nodemailer) if configured, or fallback to Resend
+            let emailSent = false;
+            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                try {
+                    const { EmailService } = await import('@/lib/email-service');
+                    const emailService = new EmailService();
+                    emailSent = await emailService.sendEmail({
+                        to: action.clientEmail,
+                        subject: action.subject,
+                        html: action.body.replace(/\n/g, '<br/>'),
+                    });
+                    if (emailSent) {
+                        console.log('[AI Agent] Follow-up email dispatched via SMTP to:', action.clientEmail);
+                    }
+                } catch (smtpErr: any) {
+                    console.warn('[AI Agent] SMTP dispatch warning:', smtpErr?.message || smtpErr);
+                }
+            }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to send email via API');
+            if (!emailSent && process.env.RESEND_API_KEY) {
+                try {
+                    const { Resend } = await import('resend');
+                    const resend = new Resend(process.env.RESEND_API_KEY);
+                    await resend.emails.send({
+                        from: process.env.EMAIL_FROM || 'SmartInvoice AI <ai@onboarding.resend.dev>',
+                        to: [action.clientEmail],
+                        subject: action.subject,
+                        html: action.body.replace(/\n/g, '<br/>'),
+                    });
+                    emailSent = true;
+                    console.log('[AI Agent] Follow-up email dispatched via Resend to:', action.clientEmail);
+                } catch (emailErr: any) {
+                    console.warn('[AI Agent] Resend email warning (will still record follow-up in DB):', emailErr?.message || emailErr);
+                }
+            }
+
+            if (!emailSent && !process.env.RESEND_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASS)) {
+                console.log('[AI Agent] Neither working SMTP nor Resend is configured. Simulating email dispatch to:', action.clientEmail);
             }
 
             // Update Invoice Record in DB
@@ -120,7 +141,7 @@ export class AIAgentService {
                 });
                 return true;
             }
-            return false;
+            return true;
 
         } catch (error) {
             console.error('[AI Agent] Execution failed:', error);

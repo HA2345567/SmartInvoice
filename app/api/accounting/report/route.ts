@@ -3,12 +3,16 @@ import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { 
+        status: 401,
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+      });
     }
 
     const { searchParams } = new URL(request.url);
@@ -105,6 +109,8 @@ export async function GET(request: NextRequest) {
     const totalLiabilities = liabilities.taxPayable;
     const totalEquity = equity.retainedEarnings;
 
+    const noStoreHeader = { 'Cache-Control': 'no-store, no-cache, must-revalidate' };
+
     switch (reportType) {
       case 'profit-loss':
         return NextResponse.json({
@@ -123,7 +129,7 @@ export async function GET(request: NextRequest) {
           expensesByCategory,
           monthlyData: Object.entries(monthlyData).map(([month, data]) => ({ month, ...data })),
           topClients,
-        });
+        }, { headers: noStoreHeader });
 
       case 'balance-sheet':
         return NextResponse.json({
@@ -137,7 +143,7 @@ export async function GET(request: NextRequest) {
             totalEquity,
           },
           balanceCheck: totalAssets === totalLiabilities + totalEquity ? 'Balanced' : 'Check entries',
-        });
+        }, { headers: noStoreHeader });
 
       case 'cash-flow':
         return NextResponse.json({
@@ -160,10 +166,10 @@ export async function GET(request: NextRequest) {
           },
           netCashFlow: totalRevenue - totalExpenses - assets.receivables,
           monthlyData: Object.entries(monthlyData).map(([month, data]) => ({ month, ...data })),
-        });
+        }, { headers: noStoreHeader });
 
       default:
-        return NextResponse.json({ error: 'Invalid report type' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid report type' }, { status: 400, headers: noStoreHeader });
     }
   } catch (error) {
     console.error('Accounting report error:', error);

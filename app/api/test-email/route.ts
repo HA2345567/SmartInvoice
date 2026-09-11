@@ -56,13 +56,21 @@ export async function POST(request: NextRequest) {
       });
 
       // Test connection first
-      const connectionTest = await emailService.testConnection();
+      const verifyResult = await emailService.verifyConnection();
       
-      if (!connectionTest) {
+      if (!verifyResult.success) {
         return NextResponse.json({
           success: false,
           error: 'Email connection failed',
-          message: 'Could not connect to email server. Please check your email configuration.'
+          message: verifyResult.error || 'Could not connect to email server. Please verify your email host, user, and app password.',
+          details: {
+            host: emailConfig.host,
+            port: emailConfig.port,
+            user: emailConfig.user,
+            hint: (verifyResult.error || '').includes('BadCredentials')
+              ? 'Gmail requires a 16-character App Password (with 2-Step Verification enabled). Visit https://myaccount.google.com/apppasswords to create one.'
+              : undefined
+          }
         });
       }
 

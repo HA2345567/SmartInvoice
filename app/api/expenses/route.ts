@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth-helpers';
 import { getNeonSql } from '@/lib/database-config';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function categorizeExpense(description: string, vendor?: string, amount?: number): { category: string; subcategory?: string } {
   const text = `${description} ${vendor || ''}`.toLowerCase();
 
@@ -79,6 +82,10 @@ export async function GET(request: NextRequest) {
         count,
         categoryBreakdown
       }
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
     });
   } catch (error) {
     console.error('Get expenses error:', error);
@@ -88,6 +95,10 @@ export async function GET(request: NextRequest) {
         total: 0,
         count: 0,
         categoryBreakdown: {}
+      }
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
       }
     });
   }

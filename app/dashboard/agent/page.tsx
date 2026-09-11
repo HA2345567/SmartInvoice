@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Mail, CheckCircle, AlertCircle, RefreshCw, Send, Sparkles, Zap, Shield, ChevronRight } from 'lucide-react';
+import { Bot, Mail, CheckCircle, AlertCircle, RefreshCw, Send, Sparkles, Zap, Shield, ChevronRight, Loader2 } from 'lucide-react';
 import type { FollowUpAction } from '@/lib/ai-agent';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,23 +21,30 @@ export default function AgentPage() {
     const [executedCount, setExecutedCount] = useState(0);
 
     useEffect(() => {
-        if (accessToken) {
-            loadActions();
+        const token = session?.access_token || (typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null);
+        if (token) {
+            loadActions(token);
+        } else {
+            setLoading(false);
         }
-    }, [accessToken]);
+    }, [session]);
 
-    const loadActions = async () => {
-        if (!accessToken) return;
+    const loadActions = async (tokenOverride?: string) => {
+        const token = tokenOverride || session?.access_token || (typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null);
+        if (!token) {
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
             const response = await fetch('/api/agent/scan', {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
                 const foundActions = await response.json();
-                setActions(foundActions);
+                setActions(Array.isArray(foundActions) ? foundActions : []);
             } else {
                 throw new Error('Failed to retrieve follow-up actions');
             }
@@ -54,7 +61,8 @@ export default function AgentPage() {
     };
 
     const executeAll = async () => {
-        if (!accessToken) return;
+        const token = session?.access_token || (typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null);
+        if (!token) return;
         setProcessing(true);
         let count = 0;
         try {
@@ -63,7 +71,7 @@ export default function AgentPage() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(action)
                 });
@@ -114,7 +122,7 @@ export default function AgentPage() {
                 <div className="flex gap-3">
                     <Button
                         variant="outline"
-                        onClick={loadActions}
+                        onClick={() => loadActions()}
                         disabled={loading || processing}
                         className="btn-green-secondary border-green-500/30"
                     >
@@ -224,14 +232,11 @@ export default function AgentPage() {
                     </div>
 
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                            <div className="relative">
-                                <div className="w-16 h-16 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin"></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <Bot className="w-6 h-6 text-green-500/50" />
-                                </div>
+                        <div className="flex items-center justify-center min-h-[300px]">
+                            <div className="text-center">
+                                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+                                <p style={{ color: '#b3b3b3' }}>Analyzing payment patterns...</p>
                             </div>
-                            <p className="text-green-500/80 animate-pulse text-sm font-medium">Analyzing Payment Patterns...</p>
                         </div>
                     ) : actions.length === 0 ? (
                         <motion.div

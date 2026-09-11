@@ -3,12 +3,16 @@ import { getAuthUser } from '@/lib/auth-helpers';
 import { DatabaseService } from '@/lib/database';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { 
+        status: 401,
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+      });
     }
 
     const { searchParams } = new URL(request.url);
@@ -95,6 +99,10 @@ export async function GET(request: NextRequest) {
         ...data,
       })),
       invoices: invoiceTaxDetails,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
     });
   } catch (error) {
     console.error('Tax report error:', error);

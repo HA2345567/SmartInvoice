@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,45 +16,68 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { FileText, Plus, Sparkles, Search, DollarSign, TrendingUp, Clock, CircleCheck as CheckCircle, Circle as XCircle, Eye, CreditCard as Edit, Trash2, Send, Copy, Loader as Loader2, Calendar, ArrowRight, CircleAlert as AlertCircle } from 'lucide-react';
+import {
+  FileText,
+  Plus,
+  Sparkles,
+  Search,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Trash2,
+  Send,
+  RotateCw,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import Link from 'next/link';
+
+interface ProposalItem {
+  id?: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount?: number;
+}
 
 interface Proposal {
   id: string;
   proposalNum: string;
+  proposalNumber?: string;
   clientId?: string;
   clientName: string;
   clientEmail: string;
   clientCompany?: string;
+  clientAddress?: string;
   title: string;
   description?: string;
-  items: Array<{
-    id: string;
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-  }>;
-  subtotal: number;
-  discountAmount: number;
-  taxAmount: number;
+  items: ProposalItem[];
+  subtotal?: number;
+  discountAmount?: number;
+  taxAmount?: number;
   amount: number;
-  taxRate: number;
-  discountRate: number;
-  currency: string;
+  taxRate?: number;
+  discountRate?: number;
+  currency?: string;
   status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'declined' | 'expired';
   date: string;
   validUntil: string;
+  validUntilDays?: number;
+  validDays?: number;
+  scope?: string;
   terms?: string;
   notes?: string;
   aiSummary?: string;
   aiSuggestions?: string[];
   acceptedAt?: string;
   viewedAt?: string;
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ProposalSummary {
@@ -71,6 +94,7 @@ export default function ProposalsPage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [summary, setSummary] = useState<ProposalSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -92,32 +116,64 @@ export default function ProposalsPage() {
     generateAI: true,
   });
 
-  useEffect(() => {
-    if (session?.access_token) {
-      fetchProposals();
+  const getEffectiveToken = useCallback(() => {
+    if (session?.access_token) return session.access_token;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token') || localStorage.getItem('token') || '';
     }
-  }, [session, selectedStatus]);
+    return '';
+  }, [session?.access_token]);
 
-  const fetchProposals = async () => {
-    if (!session?.access_token) return;
+  const fetchProposals = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
-    setLoading(true);
     try {
+      const token = getEffectiveToken();
       let url = '/api/proposals';
       if (selectedStatus && selectedStatus !== 'all') {
         url += `?status=${selectedStatus}`;
       }
 
+      const headers: Record<string, string> = {
+        'Cache-Control': 'no-cache',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
         const data = await response.json();
-        setProposals(data.proposals || []);
-        setSummary(data.summary || null);
+        const proposalList: Proposal[] = Array.isArray(data) ? data : (data.proposals || []);
+        setProposals(proposalList);
+
+        if (data.summary) {
+          setSummary(data.summary);
+        } else {
+          const total = proposalList.reduce((sum, p) => sum + (p.amount || 0), 0);
+          const count = proposalList.length;
+          const accepted = proposalList.filter(p => p.status === 'accepted').length;
+          const pending = proposalList.filter(p => ['draft', 'sent', 'viewed'].includes(p.status)).length;
+          const winRate = count > 0 ? Math.round((accepted / count) * 100).toString() : '0';
+          setSummary({ total, count, accepted, pending, winRate });
+        }
+
+        if (isRefresh) {
+          toast({
+            title: 'Proposals Synced',
+            description: 'Latest proposals loaded from database.',
+          });
+        }
+      } else {
+        throw new Error('Failed to fetch proposals');
       }
     } catch (error) {
       console.error('Error fetching proposals:', error);
@@ -128,12 +184,15 @@ export default function ProposalsPage() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [getEffectiveToken, selectedStatus, toast]);
+
+  useEffect(() => {
+    fetchProposals();
+  }, [fetchProposals]);
 
   const handleAddProposal = async () => {
-    if (!session?.access_token) return;
-
     if (!formData.clientName || !formData.clientEmail || !formData.title) {
       toast({
         title: 'Validation Error',
@@ -154,12 +213,18 @@ export default function ProposalsPage() {
 
     setSaving(true);
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/proposals', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
@@ -172,12 +237,13 @@ export default function ProposalsPage() {
         resetForm();
         fetchProposals();
       } else {
-        throw new Error('Failed to create proposal');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to create proposal');
       }
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to create proposal',
+        description: error instanceof Error ? error.message : 'Failed to create proposal',
         variant: 'destructive',
       });
     } finally {
@@ -186,15 +252,19 @@ export default function ProposalsPage() {
   };
 
   const handleStatusChange = async (id: string, status: string) => {
-    if (!session?.access_token) return;
-
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/proposals', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({ id, status }),
       });
 
@@ -204,6 +274,8 @@ export default function ProposalsPage() {
           description: `Proposal marked as ${status}`,
         });
         fetchProposals();
+      } else {
+        throw new Error('Failed to update proposal');
       }
     } catch (error) {
       toast({
@@ -215,16 +287,19 @@ export default function ProposalsPage() {
   };
 
   const handleDeleteProposal = async (id: string) => {
-    if (!session?.access_token) return;
-
-    if (!confirm('Are you sure you want to delete this proposal?')) return;
+    if (!confirm('Are you sure you want to delete this proposal? This action cannot be undone.')) return;
 
     try {
+      const token = getEffectiveToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/proposals?id=${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -233,6 +308,8 @@ export default function ProposalsPage() {
           description: 'Proposal deleted',
         });
         fetchProposals();
+      } else {
+        throw new Error('Failed to delete proposal');
       }
     } catch (error) {
       toast({
@@ -311,17 +388,29 @@ export default function ProposalsPage() {
     }
   };
 
-  const filteredProposals = proposals.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.proposalNum.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProposals = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return proposals;
+    return proposals.filter(p => {
+      const num = p.proposalNum || p.proposalNumber || '';
+      const title = p.title || '';
+      const client = p.clientName || '';
+      return title.toLowerCase().includes(query) ||
+        client.toLowerCase().includes(query) ||
+        num.toLowerCase().includes(query);
+    });
+  }, [proposals, searchQuery]);
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(amount);
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `${currency} ${amount.toLocaleString()}`;
+    }
   };
 
   if (loading) {
@@ -352,182 +441,244 @@ export default function ProposalsPage() {
             </Badge>
           </h1>
           <p className="text-base" style={{ color: '#b3b3b3' }}>
-            Create and send professional proposals with AI assistance
+            Create, track, and win client business with AI-assisted proposals
           </p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="font-bold text-sm"
-              style={{ background: '#1ed760', color: '#000', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '1.4px' }}
-              onClick={() => resetForm()}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Proposal
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#181818', border: '1px solid #4d4d4d' }}>
-            <DialogHeader>
-              <DialogTitle className="text-white">Create Proposal</DialogTitle>
-              <DialogDescription style={{ color: '#b3b3b3' }}>
-                Fill in the details. AI will generate a summary and suggestions.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Client Name *</Label>
-                  <Input
-                    value={formData.clientName}
-                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                    className="h-12 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                    placeholder="Client name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Client Email *</Label>
-                  <Input
-                    type="email"
-                    value={formData.clientEmail}
-                    onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
-                    className="h-12 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                    placeholder="client@example.com"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Proposal Title *</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="h-12 text-white"
-                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                  placeholder="e.g., Website Redesign Project"
-                />
-              </div>
 
-              {/* Line Items */}
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-white">Line Items</Label>
-                {formData.items.map((item, index) => (
-                  <div key={index} className="flex gap-2 items-start">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => fetchProposals(true)}
+            disabled={refreshing}
+            className="border-white/10 hover:bg-white/5 text-white"
+            style={{ borderRadius: '9999px' }}
+          >
+            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
+            {refreshing ? 'Syncing...' : 'Sync'}
+          </Button>
+
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="font-bold text-sm"
+                style={{
+                  background: '#1ed760',
+                  color: '#000',
+                  borderRadius: '9999px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.4px',
+                }}
+                onClick={() => resetForm()}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Proposal
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#181818', border: '1px solid #4d4d4d' }}>
+              <DialogHeader>
+                <DialogTitle className="text-white">Create Proposal</DialogTitle>
+                <DialogDescription style={{ color: '#b3b3b3' }}>
+                  Fill in client and scope details. AI will automatically generate summary and recommendations.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Client Name *</Label>
                     <Input
-                      value={item.description}
-                      onChange={(e) => updateItem(index, 'description', e.target.value)}
-                      className="flex-1 h-10 text-white"
+                      value={formData.clientName}
+                      onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                      className="h-12 text-white"
                       style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                      placeholder="Description"
+                      placeholder="Client name"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Client Email *</Label>
                     <Input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                      className="w-20 h-10 text-white"
+                      type="email"
+                      value={formData.clientEmail}
+                      onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+                      className="h-12 text-white"
                       style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                      placeholder="Qty"
+                      placeholder="client@example.com"
                     />
-                    <Input
-                      type="number"
-                      value={item.rate}
-                      onChange={(e) => updateItem(index, 'rate', parseFloat(e.target.value) || 0)}
-                      className="w-28 h-10 text-white"
-                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                      placeholder="Rate"
-                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Proposal Title *</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="h-12 text-white"
+                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    placeholder="e.g., Website Redesign Project"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Client Company</Label>
+                  <Input
+                    value={formData.clientCompany}
+                    onChange={(e) => setFormData({ ...formData, clientCompany: e.target.value })}
+                    className="h-12 text-white"
+                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    placeholder="e.g., Acme Corp"
+                  />
+                </div>
+
+                {/* Items */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Deliverables / Line Items *</Label>
                     <Button
+                      type="button"
                       variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(index)}
-                      className="h-10 w-10"
-                      style={{ color: '#ef4444' }}
-                      disabled={formData.items.length === 1}
+                      size="sm"
+                      onClick={addItem}
+                      className="text-xs"
+                      style={{ color: '#1ed760' }}
                     >
-                      <XCircle className="w-4 h-4" />
+                      <Plus className="w-3 h-3 mr-1" /> Add Item
                     </Button>
                   </div>
-                ))}
+                  {formData.items.map((item, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-6">
+                        <Input
+                          placeholder="Item description"
+                          value={item.description}
+                          onChange={(e) => updateItem(index, 'description', e.target.value)}
+                          className="h-10 text-white"
+                          style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Qty"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
+                          className="h-10 text-white"
+                          style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <Input
+                          type="number"
+                          placeholder="Rate"
+                          value={item.rate}
+                          onChange={(e) => updateItem(index, 'rate', parseFloat(e.target.value) || 0)}
+                          className="h-10 text-white"
+                          style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                        />
+                      </div>
+                      <div className="col-span-1 flex justify-center">
+                        {formData.items.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeItem(index)}
+                            className="text-red-400 hover:text-red-300 p-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Validity (Days)</Label>
+                    <Input
+                      type="number"
+                      value={formData.validDays}
+                      onChange={(e) => setFormData({ ...formData, validDays: parseInt(e.target.value) || 30 })}
+                      className="h-12 text-white"
+                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Tax Rate (%)</Label>
+                    <Input
+                      type="number"
+                      value={formData.taxRate}
+                      onChange={(e) => setFormData({ ...formData, taxRate: parseFloat(e.target.value) || 0 })}
+                      className="h-12 text-white"
+                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Discount (%)</Label>
+                    <Input
+                      type="number"
+                      value={formData.discountRate}
+                      onChange={(e) => setFormData({ ...formData, discountRate: parseFloat(e.target.value) || 0 })}
+                      className="h-12 text-white"
+                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Total Preview */}
+                <div className="p-3 rounded-lg flex justify-between items-center" style={{ background: '#1f1f1f', border: '1px solid #4d4d4d' }}>
+                  <span className="text-sm font-bold text-white">Estimated Total:</span>
+                  <span className="text-lg font-bold" style={{ color: '#1ed760' }}>
+                    {formatCurrency(calculateTotal(), formData.currency)}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Terms & Conditions</Label>
+                  <Textarea
+                    value={formData.terms}
+                    onChange={(e) => setFormData({ ...formData, terms: e.target.value })}
+                    className="text-white"
+                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    rows={2}
+                    placeholder="Payment terms, revisions policy, milestones..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Notes</Label>
+                  <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="text-white"
+                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    rows={2}
+                    placeholder="Internal notes or special instructions..."
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
                 <Button
-                  variant="outline"
-                  onClick={addItem}
-                  className="w-full h-10"
-                  style={{ border: '1px dashed #4d4d4d', color: '#b3b3b3' }}
+                  variant="ghost"
+                  onClick={() => setIsAddDialogOpen(false)}
+                  style={{ color: '#b3b3b3' }}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Item
+                  Cancel
                 </Button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Tax Rate (%)</Label>
-                  <Input
-                    type="number"
-                    value={formData.taxRate}
-                    onChange={(e) => setFormData({ ...formData, taxRate: parseFloat(e.target.value) || 0 })}
-                    className="h-12 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Discount (%)</Label>
-                  <Input
-                    type="number"
-                    value={formData.discountRate}
-                    onChange={(e) => setFormData({ ...formData, discountRate: parseFloat(e.target.value) || 0 })}
-                    className="h-12 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Valid For (Days)</Label>
-                  <Input
-                    type="number"
-                    value={formData.validDays}
-                    onChange={(e) => setFormData({ ...formData, validDays: parseInt(e.target.value) || 30 })}
-                    className="h-12 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Total */}
-              <div className="p-4 rounded-lg text-right" style={{ background: '#1f1f1f' }}>
-                <span className="text-sm" style={{ color: '#b3b3b3' }}>Total: </span>
-                <span className="text-2xl font-bold text-white">{formatCurrency(calculateTotal(), formData.currency)}</span>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-bold" style={{ color: '#b3b3b3' }}>Notes</Label>
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="text-white"
-                  style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-                  rows={2}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="ghost"
-                onClick={() => setIsAddDialogOpen(false)}
-                style={{ color: '#b3b3b3' }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddProposal}
-                disabled={saving}
-                className="font-bold text-sm"
-                style={{ background: '#1ed760', color: '#000', borderRadius: '9999px' }}
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Proposal'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                <Button
+                  onClick={handleAddProposal}
+                  disabled={saving}
+                  className="font-bold text-sm"
+                  style={{ background: '#1ed760', color: '#000', borderRadius: '9999px' }}
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Proposal'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -537,12 +688,12 @@ export default function ProposalsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center text-sm font-bold">
                 <DollarSign className="w-4 h-4 mr-2" style={{ color: '#1ed760' }} />
-                Total Value
+                Total Pipeline Value
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">{formatCurrency(summary.total)}</div>
-              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>{summary.count} proposals</p>
+              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>{summary.count} proposals total</p>
             </CardContent>
           </Card>
 
@@ -550,7 +701,7 @@ export default function ProposalsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center text-sm font-bold">
                 <CheckCircle className="w-4 h-4 mr-2" style={{ color: '#1ed760' }} />
-                Accepted
+                Accepted Deals
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -563,12 +714,12 @@ export default function ProposalsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center text-sm font-bold">
                 <Clock className="w-4 h-4 mr-2" style={{ color: '#f59e0b' }} />
-                Pending
+                Pending Review
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">{summary.pending}</div>
-              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Awaiting response</p>
+              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Awaiting decision</p>
             </CardContent>
           </Card>
 
@@ -576,12 +727,12 @@ export default function ProposalsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center text-sm font-bold">
                 <TrendingUp className="w-4 h-4 mr-2" style={{ color: '#3b82f6' }} />
-                Win Rate
+                Conversion Rate
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">{summary.winRate}%</div>
-              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Acceptance rate</p>
+              <p className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Close velocity</p>
             </CardContent>
           </Card>
         </div>
@@ -596,7 +747,7 @@ export default function ProposalsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-12 pl-10 text-white"
             style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-            placeholder="Search proposals..."
+            placeholder="Search proposals by title, client, or number..."
           />
         </div>
         <select
@@ -621,9 +772,11 @@ export default function ProposalsPage() {
           {filteredProposals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="w-12 h-12 mb-4" style={{ color: '#4d4d4d' }} />
-              <p className="text-lg font-bold text-white">No proposals yet</p>
+              <p className="text-lg font-bold text-white">No proposals found</p>
               <p className="text-sm" style={{ color: '#b3b3b3' }}>
-                Create your first proposal to start winning more business
+                {searchQuery || selectedStatus !== 'all'
+                  ? 'No proposals match your current filters.'
+                  : 'Create your first proposal to start winning more business.'}
               </p>
             </div>
           ) : (
@@ -631,7 +784,18 @@ export default function ProposalsPage() {
               {filteredProposals.map((proposal) => {
                 const StatusIcon = getStatusIcon(proposal.status);
                 const statusColor = getStatusColor(proposal.status);
-                const isExpired = new Date(proposal.validUntil) < new Date() && proposal.status === 'sent';
+                const isExpired = proposal.validUntil && new Date(proposal.validUntil) < new Date() && proposal.status === 'sent';
+
+                const validUntilLabel = (() => {
+                  try {
+                    if (!proposal.validUntil) return null;
+                    const d = new Date(proposal.validUntil);
+                    if (isNaN(d.getTime())) return null;
+                    return `Valid until ${format(d, 'MMM dd')}`;
+                  } catch {
+                    return null;
+                  }
+                })();
 
                 return (
                   <div
@@ -673,7 +837,7 @@ export default function ProposalsPage() {
                               {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
                             </Badge>
                             <span className="text-xs" style={{ color: '#b3b3b3' }}>
-                              {proposal.proposalNum}
+                              {proposal.proposalNum || proposal.proposalNumber || 'PROP'}
                             </span>
                             <span className="text-xs" style={{ color: '#b3b3b3' }}>
                               for {proposal.clientName}
@@ -691,12 +855,15 @@ export default function ProposalsPage() {
                           </div>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p className="text-lg font-bold text-white">{formatCurrency(proposal.amount, proposal.currency)}</p>
-                          <p className="text-xs" style={{ color: '#b3b3b3' }}>
-                            Valid until {format(new Date(proposal.validUntil), 'MMM dd')}
-                          </p>
+                          {validUntilLabel && (
+                            <p className="text-xs" style={{ color: '#b3b3b3' }}>
+                              {validUntilLabel}
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-1">
                           {proposal.status === 'draft' && (

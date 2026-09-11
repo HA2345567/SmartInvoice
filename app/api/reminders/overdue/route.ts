@@ -3,6 +3,7 @@ import { DatabaseService } from '@/lib/database-enhanced';
 import { AuthService } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { ReminderService } from '@/lib/reminder-service';
 
 export async function GET(request: NextRequest) {
@@ -40,6 +41,10 @@ export async function GET(request: NextRequest) {
       needingReminders,
       stats,
       escalations
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+      }
     });
   } catch (error) {
     console.error('Overdue reminders error:', error);

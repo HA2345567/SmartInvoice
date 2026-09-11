@@ -6,13 +6,24 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(emailConfig: EmailConfig) {
-    this.transporter = nodemailer.createTransport(emailConfig);
+    const passClean = (emailConfig.auth?.pass || '').replace(/\s+/g, '');
+    this.transporter = nodemailer.createTransport({
+      ...emailConfig,
+      auth: {
+        ...emailConfig.auth,
+        pass: passClean,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 
   async sendEmail(emailData: EmailData): Promise<boolean> {
     try {
+      const fromAddress = appConfig.email.from || (emailData as any).from;
       const info = await this.transporter.sendMail({
-        from: appConfig.email.from,
+        from: fromAddress,
         to: emailData.to,
         subject: emailData.subject,
         html: emailData.html,
@@ -52,6 +63,16 @@ export class EmailService {
         console.error('Email connection test failed:', error.message);
       }
       return false;
+    }
+  }
+
+  async verifyConnection(): Promise<{ success: boolean; error?: string }> {
+    try {
+      await this.transporter.verify();
+      return { success: true };
+    } catch (error: any) {
+      console.error('[EmailService] SMTP verification failed:', error);
+      return { success: false, error: error?.message || 'SMTP verification failed' };
     }
   }
 

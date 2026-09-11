@@ -4,6 +4,7 @@ import { DatabaseService } from '@/lib/database';
 import { getNeonSql } from '@/lib/database-config';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function ensureUserColumnsExist(sql: any) {
   try {
@@ -74,7 +75,11 @@ export async function GET(request: NextRequest) {
       updatedAt: profile.updatedAt,
     };
 
-    return NextResponse.json(settings);
+    return NextResponse.json(settings, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Get settings error:', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
