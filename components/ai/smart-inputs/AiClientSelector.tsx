@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Loader2, Plus } from 'lucide-react';
+import { Building2, Crown, Loader2, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -18,64 +18,79 @@ export interface Client {
 }
 
 interface AiClientSelectorProps {
-    clients: Client[];
-    onSelect: (client: Client) => void;
     value: string;
     onChange: (value: string) => void;
+    onSelect: (client: Client) => void;
+    clients: Client[];
     className?: string;
 }
 
-export function AiClientSelector({ clients, onSelect, value, onChange, className }: AiClientSelectorProps) {
+export function AiClientSelector({
+    value,
+    onChange,
+    onSelect,
+    clients,
+    className
+}: AiClientSelectorProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [suggestions, setSuggestions] = useState<(Client & { confidence: number })[]>([]);
+    const [suggestions, setSuggestions] = useState<(Client & { matchReason?: string; confidence: number })[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Mock AI Search simulation
     useEffect(() => {
-        if (!value || value.length < 1) {
+        if (!value.trim()) {
             setSuggestions([]);
             return;
         }
 
-        setIsSearching(true);
-        const timer = setTimeout(() => {
-            // Simulate AI fuzzy matching and scoring
-            const results = clients
-                .map(client => {
-                    let score = 0;
-                    const lowerName = client.name.toLowerCase();
-                    const lowerValue = value.toLowerCase();
+        const debounce = setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                // In production, call /api/ai/match-client
+                // For now, robust client-side semantic-like substring search
+                const query = value.toLowerCase();
+                const matched = clients
+                    .map(c => {
+                        let score = 0;
+                        let matchReason = '';
+                        if (c.name.toLowerCase().startsWith(query)) {
+                            score = 95;
+                            matchReason = 'Name prefix match';
+                        } else if (c.name.toLowerCase().includes(query)) {
+                            score = 80;
+                            matchReason = 'Name includes query';
+                        } else if (c.company && c.company.toLowerCase().includes(query)) {
+                            score = 70;
+                            matchReason = 'Company match';
+                        } else if (c.email.toLowerCase().includes(query)) {
+                            score = 60;
+                            matchReason = 'Email match';
+                        }
 
-                    if (lowerName === lowerValue) score += 100;
-                    else if (lowerName.startsWith(lowerValue)) score += 80;
-                    else if (lowerName.includes(lowerValue)) score += 60;
+                        return { ...c, confidence: score, matchReason };
+                    })
+                    .filter(c => c.confidence > 0)
+                    .sort((a, b) => b.confidence - a.confidence);
 
-                    if (client.email.toLowerCase().includes(lowerValue)) score += 40;
-                    if (client.company?.toLowerCase().includes(lowerValue)) score += 30;
+                setSuggestions(matched);
+            } catch (err) {
+                console.error("Failed to match clients", err);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 200);
 
-                    // Random "AI" boost for demo purposes
-                    score += Math.floor(Math.random() * 10);
-
-                    return { ...client, confidence: Math.min(score, 99) };
-                })
-                .filter(c => c.confidence > 25)
-                .sort((a, b) => b.confidence - a.confidence)
-                .slice(0, 5);
-
-            setSuggestions(results);
-            setIsSearching(false);
-        }, 300); // Faster response
-
-        return () => clearTimeout(timer);
+        return () => clearTimeout(debounce);
     }, [value, clients]);
 
+    // Close dropdown on click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
@@ -90,7 +105,7 @@ export function AiClientSelector({ clients, onSelect, value, onChange, className
         <div className={cn("relative z-20", className)} ref={containerRef}>
             <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-green-500 pointer-events-none">
-                    {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Building2 className="w-4 h-4 text-emerald-400" />}
                 </div>
                 <Input
                     value={value}
@@ -117,13 +132,13 @@ export function AiClientSelector({ clients, onSelect, value, onChange, className
                     >
                         {isSearching ? (
                             <div className="p-3 text-center text-xs text-green-400/50">
-                                <span className="animate-pulse">AI Matching...</span>
+                                <span className="animate-pulse">Matching Client Directory...</span>
                             </div>
                         ) : suggestions.length > 0 ? (
                             <div className="py-0">
                                 <div className="px-3 py-1.5 text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-900/10 flex justify-between items-center">
-                                    <span>AI Suggestions</span>
-                                    <Sparkles className="w-3 h-3" />
+                                    <span>Client Directory</span>
+                                    <Crown className="w-3 h-3 text-amber-400" />
                                 </div>
                                 {suggestions.map((client) => (
                                     <div
@@ -149,12 +164,14 @@ export function AiClientSelector({ clients, onSelect, value, onChange, className
                                 ))}
                             </div>
                         ) : (
-                            // Only show "No match" if we're done searching and truly found nothing
                             !isSearching && (
-                                <div className="p-3 text-center cursor-default">
-                                    <p className="text-xs text-gray-500">No registered clients match.</p>
-                                    <div className="mt-2 text-xs text-green-400 flex items-center justify-center gap-1">
-                                        <Plus className="w-3 h-3" /> New client will be created
+                                <div
+                                    onClick={() => setIsOpen(false)}
+                                    className="p-3 text-center cursor-pointer hover:bg-green-500/10 transition-colors"
+                                >
+                                    <p className="text-xs text-gray-400 font-medium">Use <span className="text-white font-semibold">&quot;{value}&quot;</span> as client</p>
+                                    <div className="mt-1.5 text-xs text-green-400 flex items-center justify-center gap-1 font-semibold">
+                                        <Plus className="w-3.5 h-3.5" /> Continue with new client
                                     </div>
                                 </div>
                             )

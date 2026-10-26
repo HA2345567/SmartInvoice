@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 function SyncContent() {
     const router = useRouter();
@@ -24,12 +24,8 @@ function SyncContent() {
             console.error('Auth sync error:', error);
             router.push(`/auth/login?error=${encodeURIComponent(error)}`);
         } else {
-            // Fallback: Check if we happen to have a hash fragment (implicit flow fallback)
-            // But since we are using route handler exchange, this shouldn't happen unless direct nav.
             const hash = window.location.hash;
             if (hash && hash.includes('access_token')) {
-                // Manual parse if needed, but unlikely given our architecture change.
-                // Just redirect to login.
                 router.push('/auth/login');
             } else {
                 router.push('/auth/login');
@@ -38,21 +34,22 @@ function SyncContent() {
     }, [searchParams, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-black">
-            <div className="flex flex-col items-center space-y-4">
-                <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
-                <p className="text-gray-400">Finalizing login...</p>
-            </div>
-        </div>
+        <LuxuryLoader 
+            label="Finalizing secure session..." 
+            sublabel="SmartInvoice Studio" 
+            fullScreen={true} 
+        />
     );
 }
 
 export default function AuthSyncPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-black">
-                <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
-            </div>
+            <LuxuryLoader 
+                label="Synchronizing credentials..." 
+                sublabel="SmartInvoice Studio" 
+                fullScreen={true} 
+            />
         }>
             <SyncContent />
         </Suspense>

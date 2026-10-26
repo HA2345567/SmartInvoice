@@ -14,7 +14,7 @@ export function AltchaWidget({ onStateChange }: AltchaWidgetProps) {
 
     // Create the ALTCHA widget element
     const widget = document.createElement('altcha-widget');
-    widget.setAttribute('challengeurl', '/api/altcha-challenge');
+    widget.setAttribute('challengeurl', '/api/auth/altcha-challenge');
     widget.setAttribute('name', 'altcha');
     widget.setAttribute('hidelogo', 'true');
     widget.setAttribute('hideload', 'true');

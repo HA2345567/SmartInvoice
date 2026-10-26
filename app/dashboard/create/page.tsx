@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Trash2, Save, Eye, Send, CircleAlert as AlertCircle, User, FileText, Download, Sparkles, LayoutGrid as Layout } from 'lucide-react';
+import { Plus, Trash2, Save, Eye, Send, CircleAlert as AlertCircle, User, FileText, Download, Crown, LayoutGrid as Layout } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,14 +57,23 @@ export default function CreateInvoice() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
 
-  // Theme configuration
+  // Theme configuration (9 Modular Templates)
   const themeSchemes = useMemo(() => ({
-    'ultra-luxury': { primary: '#000000', secondary: '#333333', accent: '#666666', background: '#ffffff' },
-    'microsoft': { primary: '#0078D4', secondary: '#605E5C', accent: '#F3F2F1', background: '#ffffff' },
-    'amazon': { primary: '#FF9900', secondary: '#111111', accent: '#232F3E', background: '#ffffff' },
-    'financial': { primary: '#000000', secondary: '#1A1A1A', accent: '#FFFFFF', background: '#ffffff' },
-    'creative-agency': { primary: '#EC008C', secondary: '#000000', accent: '#F5F5F5', background: '#ffffff' },
-    'professional-services': { primary: '#002147', secondary: '#868E96', accent: '#F8F9FA', background: '#ffffff' }
+    'luxury': { primary: '#111111', secondary: '#777777', accent: '#B89B5E', background: '#FFFFFF' },
+    'minimal': { primary: '#000000', secondary: '#71717A', accent: '#18181B', background: '#FFFFFF' },
+    'apple': { primary: '#1D1D1F', secondary: '#86868B', accent: '#0071E3', background: '#FFFFFF' },
+    'stripe': { primary: '#635BFF', secondary: '#0A2540', accent: '#00D4B2', background: '#FFFFFF' },
+    'amazon': { primary: '#FF9900', secondary: '#111111', accent: '#232F3E', background: '#FFFFFF' },
+    'microsoft': { primary: '#0078D4', secondary: '#605E5C', accent: '#F3F2F1', background: '#FFFFFF' },
+    'google': { primary: '#1A73E8', secondary: '#34A853', accent: '#FBBC05', background: '#FFFFFF' },
+    'shopify': { primary: '#008060', secondary: '#202223', accent: '#5C6AC4', background: '#FFFFFF' },
+    'custom': { primary: '#4F46E5', secondary: '#06B6D4', accent: '#10B981', background: '#FFFFFF' },
+
+    // Backward compatibility aliases
+    'ultra-luxury': { primary: '#1D1D1F', secondary: '#86868B', accent: '#0071E3', background: '#FFFFFF' },
+    'financial': { primary: '#0A2540', secondary: '#635BFF', accent: '#00D4B2', background: '#FFFFFF' },
+    'creative-agency': { primary: '#EC008C', secondary: '#000000', accent: '#F5F5F5', background: '#FFFFFF' },
+    'professional-services': { primary: '#0078D4', secondary: '#605E5C', accent: '#F3F2F1', background: '#FFFFFF' }
   }), []);
 
   const [invoiceData, setInvoiceData] = useState({
@@ -85,8 +94,8 @@ export default function CreateInvoice() {
     taxRate: 0,
     discountRate: 0,
     paymentLink: '',
-    theme: 'ultra-luxury' as any,
-    customColors: themeSchemes['ultra-luxury'],
+    theme: 'apple' as any,
+    customColors: { primary: '#1D1D1F', secondary: '#86868B', accent: '#0071E3', background: '#FFFFFF' },
     companyLogo: '',
     whiteLabelMode: false,
     invoiceType: 'sales' as any,
@@ -217,10 +226,33 @@ export default function CreateInvoice() {
     generateInvoiceNumber();
 
     const savedType = sessionStorage.getItem('invoiceType');
+    const shouldPrefill = sessionStorage.getItem('prefillSampleData');
     if (savedType) {
       setInvoiceData(prev => ({ ...prev, invoiceType: savedType as any }));
     }
-  }, [fetchClients, generateInvoiceNumber]);
+    if (shouldPrefill === 'true') {
+      sessionStorage.removeItem('prefillSampleData');
+      setInvoiceData(prev => ({
+        ...prev,
+        clientName: prev.clientName || 'NexaCorp Solutions Inc.',
+        clientEmail: prev.clientEmail || 'billing@nexacorp.com',
+        clientCompany: prev.clientCompany || 'NexaCorp Solutions',
+        clientAddress: prev.clientAddress || '100 Silicon Way, Suite 500, San Francisco, CA',
+        items: [
+          { id: '1', description: 'Enterprise Full-Stack Application Development', quantity: 40, rate: 125, amount: 5000 },
+          { id: '2', description: 'Cloud Infrastructure & Automated CI/CD Pipeline', quantity: 1, rate: 1850, amount: 1850 }
+        ],
+        taxRate: 10
+      }));
+    }
+
+    const savedLogo = typeof window !== 'undefined' ? localStorage.getItem('savedCompanyLogo') : null;
+    if (savedLogo) {
+      setInvoiceData(prev => ({ ...prev, companyLogo: prev.companyLogo || savedLogo }));
+    } else if (user?.avatar) {
+      setInvoiceData(prev => ({ ...prev, companyLogo: prev.companyLogo || user.avatar || '' }));
+    }
+  }, [fetchClients, generateInvoiceNumber, user]);
 
   useEffect(() => {
     if (invoiceData.date && !invoiceData.dueDate) {
@@ -335,14 +367,76 @@ export default function CreateInvoice() {
     return null;
   }, [invoiceData]);
 
+  const previewData = useMemo(() => {
+    const items = (invoiceData.items || []).map((item, idx) => {
+      const qty = Number(item.quantity) || 1;
+      const rate = Number(item.rate) || 0;
+      const amt = item.amount !== undefined && item.amount !== null && !isNaN(Number(item.amount))
+        ? Number(item.amount)
+        : qty * rate;
+      const desc = item.description && item.description.trim().length > 0
+        ? item.description.trim()
+        : (rate > 0 || qty > 1 ? `Service / Item ${idx + 1}` : 'Item');
+
+      return {
+        ...item,
+        id: item.id || `item-${idx}`,
+        description: desc,
+        quantity: qty,
+        rate: rate,
+        amount: amt,
+      };
+    });
+
+    const resolvedClientName = (invoiceData.clientName && invoiceData.clientName.trim())
+      || (invoiceData.clientCompany && invoiceData.clientCompany.trim())
+      || (clientSearch && clientSearch.trim())
+      || '';
+
+    return {
+      ...invoiceData,
+      items: items.length > 0 ? items : [{ id: '1', description: 'Item', quantity: 1, rate: 0, amount: 0 }],
+      invoiceNumber: invoiceData.invoiceNumber || 'INV-0001',
+      date: invoiceData.date || new Date().toISOString().split('T')[0],
+      dueDate: invoiceData.dueDate || '',
+      clientName: resolvedClientName,
+      clientEmail: invoiceData.clientEmail || '',
+      clientAddress: invoiceData.clientAddress || '',
+      clientCompany: invoiceData.clientCompany || '',
+      clientGST: invoiceData.clientGST || '',
+      clientCurrency: invoiceData.clientCurrency || '$',
+      subtotal: totals.subtotal,
+      discountAmount: totals.discountAmount || 0,
+      taxAmount: totals.taxAmount || 0,
+      amount: totals.total,
+      notes: invoiceData.notes || '',
+      terms: invoiceData.terms || '',
+      paymentLink: invoiceData.paymentLink || '',
+      companyName: (invoiceData as any).companyName || user?.company || (user as any)?.businessName || (user as any)?.name || 'SmartInvoice',
+      companyEmail: (invoiceData as any).companyEmail || user?.email || '',
+      companyAddress: (invoiceData as any).companyAddress || (user as any)?.companyAddress || (user as any)?.address || '',
+      companyPhone: (invoiceData as any).companyPhone || (user as any)?.companyPhone || (user as any)?.phone || '',
+      companyGST: (invoiceData as any).companyGST || (user as any)?.companyGST || (user as any)?.gstNumber || '',
+      companyWebsite: (invoiceData as any).companyWebsite || (user as any)?.companyWebsite || (user as any)?.website || '',
+      companyLogo: invoiceData.companyLogo || (user as any)?.logoUrl || '',
+      theme: invoiceData.theme || 'luxury',
+      invoiceType: invoiceData.invoiceType || 'sales',
+      customColors: invoiceData.customColors || (themeSchemes as any)[invoiceData.theme],
+    };
+  }, [invoiceData, clientSearch, totals, user, themeSchemes]);
+
+  const handleQuickThemeChange = useCallback((newTheme: string) => {
+    const colors = themeSchemes[newTheme as keyof typeof themeSchemes] || invoiceData.customColors;
+    setInvoiceData(prev => ({
+      ...prev,
+      theme: newTheme as any,
+      customColors: colors,
+    }));
+  }, [themeSchemes, invoiceData.customColors]);
+
   const handlePreviewInModal = useCallback(() => {
-    const error = validateForm();
-    if (error) {
-      toast({ title: 'Validation Error', description: error, variant: 'destructive' });
-      return;
-    }
     setShowPreviewDialog(true);
-  }, [validateForm, toast]);
+  }, []);
 
   const handleSave = async (status: 'draft' | 'sent' = 'draft') => {
     const error = validateForm();
@@ -464,9 +558,9 @@ export default function CreateInvoice() {
         taxRate: invoiceData.taxRate,
         discountRate: invoiceData.discountRate,
         paymentLink: invoiceData.paymentLink,
-        companyName: user?.company || 'SmartInvoice',
-        companyAddress: (user as any)?.companyAddress || '',
-        companyGST: (user as any)?.companyGST || '',
+        companyName: user?.company || (user as any)?.name || 'SmartInvoice',
+        companyAddress: (user as any)?.companyAddress || (user as any)?.address || '',
+        companyGST: (user as any)?.companyGST || (user as any)?.gstNumber || '',
         companyEmail: user?.email || '',
         companyLogo: invoiceData.companyLogo || undefined,
         whiteLabelMode: invoiceData.whiteLabelMode || false,
@@ -492,7 +586,7 @@ export default function CreateInvoice() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
+    <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-8">
       <InvoiceFormHeader
         setShowTemplateDialog={setShowTemplateDialog}
         handleSimplePDF={handleSimplePDF}
@@ -510,15 +604,15 @@ export default function CreateInvoice() {
             setInvoiceData={setInvoiceData}
           />
 
-          <Card className="card-green-mist animate-slide-in border-green-500/30" style={{ animationDelay: '0.03s' }}>
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
+            <CardContent className="p-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400">
-                    <FileText className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-white/60">
+                    <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-xs text-green-muted font-bold">Document / Invoice Format</p>
+                    <p className="text-[11px] uppercase tracking-wider text-white/40 font-mono">Document Format</p>
                     <Select
                       value={invoiceData.invoiceType}
                       onValueChange={(val: any) => {
@@ -526,10 +620,10 @@ export default function CreateInvoice() {
                         setInvoiceData(prev => ({ ...prev, invoiceType: val }));
                       }}
                     >
-                      <SelectTrigger className="h-7 text-xs bg-transparent border-0 p-0 text-white font-extrabold capitalize focus:ring-0">
+                      <SelectTrigger className="h-6 text-sm bg-transparent border-0 p-0 text-white font-medium capitalize focus:ring-0">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                      <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                         <SelectItem value="sales">Sales Invoice</SelectItem>
                         <SelectItem value="proforma">Proforma Invoice</SelectItem>
                         <SelectItem value="interim">Interim Invoice</SelectItem>
@@ -550,7 +644,7 @@ export default function CreateInvoice() {
                   variant="outline"
                   size="sm"
                   onClick={() => router.push('/dashboard/create/select-type')}
-                  className="btn-green-secondary text-xs h-8 px-3"
+                  className="rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white text-xs h-8 px-3"
                 >
                   Visual Selector
                 </Button>
@@ -612,10 +706,12 @@ export default function CreateInvoice() {
         setShowPreviewDialog={setShowPreviewDialog}
         showTemplateDialog={showTemplateDialog}
         setShowTemplateDialog={setShowTemplateDialog}
-        invoiceData={invoiceData}
+        invoiceData={previewData}
         handleTemplateSelect={handleTemplateSelect}
         handlePreview={handlePreview}
         previewLoading={previewLoading}
+        onThemeChange={handleQuickThemeChange}
+        themeSchemes={themeSchemes}
       />
     </div>
   );

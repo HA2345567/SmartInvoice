@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileText, Info, Layers, MessageSquare, ReceiptText } from 'lucide-react';
 import { InvoiceData } from '../../types';
 
 interface ProformaInvoiceProps {
@@ -26,7 +27,7 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <span>&#128203;</span>
+            <FileText className="w-5 h-5 text-amber-600" />
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Proforma Invoice</p>
@@ -54,7 +55,7 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
 
           <div className={styleClass.calloutBlock}>
             <div className={styleClass.calloutIcon}>
-              <span>&#9888;</span>
+              <Info className="w-5 h-5 text-amber-600" />
             </div>
             <div className={styleClass.calloutContent}>
               <h3>Not for Payment</h3>
@@ -84,7 +85,7 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <span className={styleClass.tableTitleIcon}>&#128203;</span>
+              <Layers className="w-4 h-4 text-slate-500 inline mr-1" />
               Estimated Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -134,7 +135,7 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
           {data.notes && (
             <div className={getClasses('toggleSection', 'notes')}>
               <div className={styleClass.toggleHeader}>
-                <span className={styleClass.toggleIcon}>&#128172;</span>
+                <MessageSquare className="w-4 h-4 text-slate-500 inline mr-1" />
                 <span className={styleClass.toggleText}>Notes</span>
               </div>
               <div className={styleClass.toggleContent}>{data.notes}</div>
@@ -143,7 +144,7 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <span className={styleClass.commentsIcon}>&#128483;</span>
+              <MessageSquare className="w-4 h-4 text-slate-400 inline mr-1" />
               <span>Comments (0)</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -168,8 +169,8 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
             <div className={styleClass.invoiceMeta}>
               <h3 className={styleClass.title}>Proforma Invoice</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
-              <div className={styleClass.orderTag}>
-                <span>&#128203;</span>
+              <div className={styleClass.orderTag} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <FileText className="w-3.5 h-3.5" />
                 Estimate #{data.invoiceNumber.split('-').pop()}
               </div>
             </div>
@@ -185,8 +186,8 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
             <div className={styleClass.customerBlock}>
               <h3>Valid Until</h3>
               <div className={styleClass.name}>{data.proforma?.validUntil || data.dueDate}</div>
-              <div className={styleClass.statusPill} style={{ background: '#fff3cd', color: '#856404' }}>
-                <span>&#9888;</span> Estimate
+              <div className={styleClass.statusPill} style={{ background: '#fff3cd', color: '#856404', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Info className="w-3.5 h-3.5" /> Estimate
               </div>
             </div>
           </div>
@@ -243,14 +244,14 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
 
           <div className={styleClass.paymentSection}>
             <div className={styleClass.paymentInfo}>
-              <div className={styleClass.paymentIcon}>&#9888;</div>
+              <div className={styleClass.paymentIcon}><Info className="w-5 h-5 text-amber-600" /></div>
               <div className={styleClass.paymentDetails}>
                 <h4>Proforma Notice</h4>
                 <span>This is an estimate, not a demand for payment</span>
               </div>
             </div>
-            <button className={styleClass.payNowBtn} style={{ background: '#856404' }}>
-              <span>&#128203;</span> Convert to Invoice
+            <button className={styleClass.payNowBtn} style={{ background: '#856404', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <ReceiptText className="w-4 h-4" /> Convert to Invoice
             </button>
           </div>
 
@@ -384,9 +385,16 @@ const ProformaInvoice: React.FC<ProformaInvoiceProps> = ({ data, styleClass }) =
 
   return (
     <div className={styleClass.container}>
-      <header className={styleClass.header}>
-        <div className={styleClass.title}>{data.from.name}</div>
-        <div className={getClasses('subtitle', 'subHeader')} style={{ color: '#e67e22' }}>PROFORMA INVOICE</div>
+      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
+        <div>
+          <div className={styleClass.title}>{data.from.name}</div>
+          <div className={getClasses('subtitle', 'subHeader')} style={{ color: '#e67e22' }}>PROFORMA INVOICE</div>
+        </div>
+        {data?.from?.logoUrl ? (
+          <div className="flex justify-end items-center">
+            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
+          </div>
+        ) : null}
       </header>
 
       <div style={{

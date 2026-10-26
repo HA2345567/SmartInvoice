@@ -1,4 +1,5 @@
 import React from 'react';
+import { RotateCcw, Layers } from 'lucide-react';
 import { InvoiceData } from '../../types';
 
 interface CreditNoteProps {
@@ -33,7 +34,7 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <span>&#128312;</span>
+            <RotateCcw className="w-5 h-5 text-rose-600" />
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Credit Note</p>
@@ -63,7 +64,7 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.calloutBlock} style={{ background: 'rgba(220, 38, 38, 0.05)' }}>
             <div className={styleClass.calloutIcon}>
-              <span>&#128312;</span>
+              <RotateCcw className="w-5 h-5 text-rose-600" />
             </div>
             <div className={styleClass.calloutContent}>
               <h3>Credit Issued</h3>
@@ -89,7 +90,7 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <span className={styleClass.tableTitleIcon}>&#128203;</span>
+              <Layers className="w-4 h-4 text-slate-500 inline mr-1" />
               Credit Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -138,7 +139,7 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <span className={styleClass.commentsIcon}>&#128312;</span>
+              <RotateCcw className="w-3.5 h-3.5 text-rose-600 inline mr-1" />
               <span>Credited to account</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -163,15 +164,17 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
             <div className={styleClass.invoiceMeta}>
               <h3 className={styleClass.title}>Credit Note</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
-              <div className={styleClass.orderTag} style={{ background: '#fee2e2', color: '#991b1b' }}>
-                <span>&#128312;</span> Ref: #{referencedInvoice}
+              <div className={styleClass.orderTag} style={{ background: '#fee2e2', color: '#991b1b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <RotateCcw className="w-3 h-3" /> Ref: #{referencedInvoice}
               </div>
             </div>
           </div>
 
           <div style={{ padding: '16px', borderBottom: '1px solid #e1e3e5', background: '#fef2f2' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', background: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '18px' }}>&#128312;</div>
+              <div style={{ width: '40px', height: '40px', background: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <RotateCcw className="w-5 h-5" />
+              </div>
               <div>
                 <div style={{ fontWeight: '600', color: '#991b1b' }}>Credit Issued</div>
                 <div style={{ fontSize: '12px', color: '#b91c1c' }}>This credit has been applied to your account</div>
@@ -278,7 +281,9 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
 
           <div style={{ padding: '24px', background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', borderRadius: '12px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', background: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '22px' }}>&#128312;</div>
+              <div style={{ width: '48px', height: '48px', background: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <RotateCcw className="w-6 h-6 text-white" />
+              </div>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '18px', color: '#991b1b' }}>Credit Issued</div>
                 <div style={{ color: '#b91c1c', fontSize: '14px' }}>This credit has been applied to your account and will be reflected in future invoices.</div>
@@ -376,9 +381,16 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
 
   return (
     <div className={styleClass.container}>
-      <header className={styleClass.header}>
-        <div className={styleClass.title}>{data.from.name}</div>
-        <div className={getClasses('subtitle', 'subHeader')} style={{ color: '#e74c3c' }}>CREDIT NOTE</div>
+      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
+        <div>
+          <div className={styleClass.title}>{data.from.name}</div>
+          <div className={getClasses('subtitle', 'subHeader')} style={{ color: '#e74c3c' }}>CREDIT NOTE</div>
+        </div>
+        {data?.from?.logoUrl ? (
+          <div className="flex justify-end items-center">
+            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
+          </div>
+        ) : null}
       </header>
 
       <div style={{
@@ -392,7 +404,7 @@ const CreditNote: React.FC<CreditNoteProps> = ({ data, styleClass }) => {
         alignItems: 'center',
         gap: '12px'
       }}>
-        <span style={{ fontSize: '20px' }}>&#128312;</span>
+        <RotateCcw className="w-5 h-5 text-rose-600 flex-shrink-0" />
         <span style={{ fontWeight: '500' }}>Credit note issued for invoice #{referencedInvoice}</span>
       </div>
 

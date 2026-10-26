@@ -1,5 +1,6 @@
 import React from 'react';
 import { InvoiceData } from '../../types';
+import { ClockAlert, Layers, MessageSquare, CreditCard } from 'lucide-react';
 
 interface PastDueInvoiceProps {
   data: InvoiceData;
@@ -35,7 +36,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <span style={{ filter: 'grayscale(100%)' }}>&#128680;</span>
+            <ClockAlert className="w-5 h-5 text-red-500" />
           </div>
           <h1 className={styleClass.title} style={{ color: overdueColor }}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle} style={{ color: overdueColor }}>PAST DUE INVOICE</p>
@@ -65,7 +66,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.calloutBlock} style={{ background: overdueBg, border: `1px solid ${overdueBorder}` }}>
             <div className={styleClass.calloutIcon}>
-              <span>&#128680;</span>
+              <ClockAlert className="w-4 h-4 text-red-500" />
             </div>
             <div className={styleClass.calloutContent}>
               <h3 style={{ color: overdueColor }}>Immediate Payment Required</h3>
@@ -91,7 +92,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <span className={styleClass.tableTitleIcon}>&#128203;</span>
+              <Layers className="w-4 h-4 inline-block mr-1.5 text-red-500" />
               Overdue Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -141,7 +142,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
           {data.notes && (
             <div className={getClasses('toggleSection', 'notes')}>
               <div className={styleClass.toggleHeader} style={{ background: overdueBg }}>
-                <span className={styleClass.toggleIcon}>&#128172;</span>
+                <MessageSquare className="w-3.5 h-3.5 inline-block mr-1 text-red-500" />
                 <span className={styleClass.toggleText} style={{ color: overdueColor }}>Important Notice</span>
               </div>
               <div className={styleClass.toggleContent} style={{ background: overdueBg, border: `1px solid ${overdueBorder}` }}>{data.notes}</div>
@@ -150,7 +151,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <span className={styleClass.commentsIcon}>&#128680;</span>
+              <ClockAlert className="w-3.5 h-3.5 inline-block mr-1 text-red-500" />
               <span style={{ color: overdueColor, fontWeight: '600' }}>PAYMENT OVERDUE</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -180,7 +181,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div style={{ padding: '20px', background: overdueBg, borderBottom: `1px solid ${overdueBorder}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', background: overdueColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '22px' }}>&#128680;</div>
+              <div style={{ width: '48px', height: '48px', background: overdueColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><ClockAlert className="w-5 h-5" /></div>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '18px', color: overdueColor }}>OVERDUE: PLEASE PAY IMMEDIATELY</div>
                 <div style={{ fontSize: '14px', color: '#991b1b', marginTop: '4px' }}>This invoice was due on {data.dueDate}. Late fees may apply.</div>
@@ -253,14 +254,14 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.paymentSection}>
             <div className={styleClass.paymentInfo}>
-              <div className={styleClass.paymentIcon} style={{ color: overdueColor }}>&#128680;</div>
+              <div className={styleClass.paymentIcon} style={{ color: overdueColor }}><ClockAlert className="w-4 h-4" /></div>
               <div className={styleClass.paymentDetails}>
                 <h4 style={{ color: overdueColor }}>Immediate Payment Required</h4>
                 <span>Due date was {data.dueDate}</span>
               </div>
             </div>
             <button className={styleClass.payNowBtn} style={{ background: overdueColor }}>
-              <span>&#128179;</span> Pay Now
+              <CreditCard className="w-3.5 h-3.5 mr-1.5 inline-block" /> Pay Now
             </button>
           </div>
 
@@ -300,7 +301,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
           <div style={{ padding: '24px', background: `linear-gradient(135deg, ${overdueBg} 0%, #fee2e2 100%)`, borderRadius: '12px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', background: overdueColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '22px' }}>&#128680;</div>
+              <div style={{ width: '48px', height: '48px', background: overdueColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><ClockAlert className="w-5 h-5" /></div>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '18px', color: overdueColor }}>OVERDUE: PLEASE PAY IMMEDIATELY</div>
                 <div style={{ color: '#991b1b', fontSize: '14px' }}>This invoice was due on {data.dueDate}. Late payment fees may now apply. Please remit payment as soon as possible.</div>
@@ -405,9 +406,16 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
 
   return (
     <div className={styleClass.container} style={{ border: `4px solid ${overdueColor}` }}>
-      <header className={styleClass.header} style={{ borderBottom: `2px solid ${overdueColor}` }}>
-        <div className={styleClass.title} style={{ color: overdueColor }}>{data.from.name}</div>
-        <div className={getClasses('subtitle', 'subHeader')} style={{ color: overdueColor, fontWeight: '700' }}>PAST DUE INVOICE</div>
+      <header className={`${styleClass.header || ''} flex justify-between items-start`} style={{ borderBottom: `2px solid ${overdueColor}` }}>
+        <div>
+          <div className={styleClass.title} style={{ color: overdueColor }}>{data.from.name}</div>
+          <div className={getClasses('subtitle', 'subHeader')} style={{ color: overdueColor, fontWeight: '700' }}>PAST DUE INVOICE</div>
+        </div>
+        {data?.from?.logoUrl ? (
+          <div className="flex justify-end items-center">
+            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
+          </div>
+        ) : null}
       </header>
 
       <div style={{
@@ -423,7 +431,7 @@ const PastDueInvoice: React.FC<PastDueInvoiceProps> = ({ data, styleClass }) => 
         justifyContent: 'center',
         gap: '12px'
       }}>
-        <span style={{ fontSize: '24px' }}>&#128680;</span>
+        <ClockAlert className="w-5 h-5 inline-block" />
         OVERDUE: PLEASE PAY IMMEDIATELY
       </div>
 

@@ -223,7 +223,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
           <p className="text-base" style={{ color: '#b3b3b3' }}>
-            Welcome back, {user?.name || 'User'}! Here's your business overview.
+            Welcome back, {user?.name || 'User'}! Here&apos;s your business overview.
           </p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">

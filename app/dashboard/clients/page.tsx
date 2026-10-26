@@ -39,6 +39,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Client } from '@/lib/types';
+import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 const currencies = [
   { value: 'USD', label: 'USD - US Dollar ($)' },
@@ -360,109 +361,91 @@ export default function ClientsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-          <p style={{ color: '#b3b3b3' }}>Loading client directory...</p>
-        </div>
-      </div>
-    );
+    return <LuxuryLoader label="Loading client directory..." sublabel="Relationship Roster" />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Editorial Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-4 pb-2 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Clients</h1>
+            <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-white">Client Directory</h1>
             <Badge
               variant="outline"
-              className="text-xs"
-              style={{ background: 'rgba(30,215,96,0.15)', color: '#1ed760', border: '1px solid rgba(30,215,96,0.3)' }}
+              className="text-[11px] font-mono border-white/10 bg-white/[0.03] text-white/60 rounded-full px-2.5 py-0.5"
             >
-              {clients.length} {clients.length === 1 ? 'Client' : 'Clients'}
+              {clients.length} {clients.length === 1 ? 'client' : 'clients'}
             </Badge>
           </div>
-          <p className="text-base mt-1" style={{ color: '#b3b3b3' }}>
-            Manage client profiles, billing information, and track invoiced totals
+          <p className="text-xs text-white/40 mt-1">
+            Maintain relationship records, default currencies, and client billing telemetry
           </p>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => fetchClients(true)}
             disabled={refreshing}
-            className="border-white/10 hover:bg-white/5 text-white"
-            style={{ borderRadius: '9999px' }}
+            className="rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white/80 text-xs h-9 px-3.5 inline-flex items-center gap-1.5"
           >
-            <RotateCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin text-[#1ed760]' : ''}`} />
-            {refreshing ? 'Syncing...' : 'Sync'}
+            <RotateCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#1ed760]' : 'text-white/40'}`} />
+            <span>{refreshing ? 'Syncing...' : 'Sync'}</span>
           </Button>
 
           <Button
             variant="outline"
+            size="sm"
             onClick={handleExportClients}
-            className="border-white/10 hover:bg-white/5 text-white"
-            style={{ borderRadius: '9999px' }}
+            className="rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white/80 text-xs h-9 px-3.5 inline-flex items-center gap-1.5"
           >
-            <Download className="w-4 h-4 mr-2" />
-            Export
+            <Download className="w-3.5 h-3.5 text-white/40" />
+            <span>Export CSV</span>
           </Button>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
+                size="sm"
                 onClick={() => openDialog()}
-                className="font-bold text-sm"
-                style={{
-                  background: '#1ed760',
-                  color: '#000',
-                  borderRadius: '9999px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1.4px',
-                }}
+                className="rounded-full bg-[#1ed760] text-black hover:bg-[#1fdf64] text-xs font-medium h-9 px-4 inline-flex items-center gap-1.5 shadow-sm transition-transform active:scale-[0.98]"
               >
-                <Plus className="w-4 h-4 mr-2 stroke-[3]" />
-                Add Client
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Client</span>
               </Button>
             </DialogTrigger>
 
-            <DialogContent
-              className="sm:max-w-[500px]"
-              style={{ background: '#181818', border: '1px solid #4d4d4d' }}
-            >
-              <DialogHeader>
-                <DialogTitle className="text-white">
-                  {editingClient ? 'Edit Client' : 'Add New Client'}
+            <DialogContent className="sm:max-w-[520px] rounded-2xl bg-[#181818] border border-white/10 p-6 shadow-2xl">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-lg font-normal tracking-tight text-white">
+                  {editingClient ? 'Edit Client Profile' : 'Add New Client'}
                 </DialogTitle>
-                <DialogDescription style={{ color: '#b3b3b3' }}>
-                  {editingClient ? 'Update client contact and billing profile' : 'Add a new client to your invoicing database'}
+                <DialogDescription className="text-xs text-white/40 mt-0.5">
+                  {editingClient ? 'Update client contact information and invoicing defaults' : 'Register a new client entity in your directory'}
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
-                      Name *
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-xs font-normal text-white/60">
+                      Client Name *
                     </Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="e.g. Acme Corp / Jane Doe"
-                      className="h-11 text-white"
-                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                      placeholder="Jane Doe or Acme Corp"
+                      className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
-                      Email *
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs font-normal text-white/60">
+                      Email Address *
                     </Label>
                     <Input
                       id="email"
@@ -470,96 +453,92 @@ export default function ClientsPage() {
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="billing@client.com"
-                      className="h-11 text-white"
-                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                      className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="company" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
-                    Company
+                <div className="space-y-1.5">
+                  <Label htmlFor="company" className="text-xs font-normal text-white/60">
+                    Company / Organization
                   </Label>
                   <Input
                     id="company"
                     value={formData.company}
                     onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                    placeholder="Legal entity or brand name"
-                    className="h-11 text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    placeholder="Legal company or trade name"
+                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="address" className="text-xs font-normal text-white/60">
                     Billing Address
                   </Label>
                   <Textarea
                     id="address"
                     value={formData.address}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    placeholder="Street, City, Postal Code, Country"
+                    placeholder="Street, suite, city, state, postal code, country"
                     rows={2}
-                    className="text-white"
-                    style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                    className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="gstNumber" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
-                      GST / Tax ID
+                  <div className="space-y-1.5">
+                    <Label htmlFor="gstNumber" className="text-xs font-normal text-white/60">
+                      Tax ID / GST / VAT
                     </Label>
                     <Input
                       id="gstNumber"
                       value={formData.gstNumber}
                       onChange={(e) => setFormData(prev => ({ ...prev, gstNumber: e.target.value }))}
-                      placeholder="Tax ID (optional)"
-                      className="h-11 text-white"
-                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                      placeholder="Optional tax number"
+                      className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="currency" className="text-sm font-bold" style={{ color: '#b3b3b3' }}>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="currency" className="text-xs font-normal text-white/60">
                       Default Currency
                     </Label>
                     <select
                       id="currency"
                       value={formData.currency}
                       onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                      className="w-full h-11 px-3 text-white"
-                      style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
+                      className="w-full h-9 px-3 text-xs rounded-lg border border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 outline-none"
                     >
                       {currencies.map(c => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
+                        <option key={c.value} value={c.value} className="bg-[#181818] text-white">{c.label}</option>
                       ))}
                     </select>
                   </div>
                 </div>
 
-                <DialogFooter className="pt-3">
+                <DialogFooter className="pt-4 border-t border-white/[0.06] flex items-center justify-end gap-2">
                   <Button
                     type="button"
                     variant="ghost"
+                    size="sm"
                     onClick={closeDialog}
-                    style={{ color: '#b3b3b3' }}
+                    className="text-xs text-white/50 hover:text-white rounded-full h-8 px-4"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
+                    size="sm"
                     disabled={formLoading}
-                    className="font-bold text-sm"
-                    style={{ background: '#1ed760', color: '#000', borderRadius: '9999px' }}
+                    className="rounded-full bg-[#1ed760] text-black hover:bg-[#1fdf64] font-medium text-xs h-8 px-4"
                   >
                     {formLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : editingClient ? (
-                      'Update Client'
+                      'Update Profile'
                     ) : (
-                      'Add Client'
+                      'Save Client'
                     )}
                   </Button>
                 </DialogFooter>
@@ -571,140 +550,105 @@ export default function ClientsPage() {
 
       {/* KPI Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }} className="p-4">
+        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818] p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#b3b3b3' }}>
-              Total Clients
-            </span>
-            <Users className="w-4 h-4" style={{ color: '#1ed760' }} />
+            <span className="text-[11px] uppercase tracking-wider text-white/40 font-mono">Total Clients</span>
+            <Users className="w-4 h-4 text-white/30" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{stats.total}</div>
-          <div className="text-xs mt-1" style={{ color: '#b3b3b3' }}>All registered accounts</div>
+          <div className="text-3xl font-light tracking-tight text-white mt-3 font-mono">{stats.total}</div>
+          <div className="text-[11px] text-white/40 mt-1">Registered clients</div>
         </Card>
 
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }} className="p-4">
+        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818] p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#b3b3b3' }}>
-              Active Clients
-            </span>
-            <CheckCircle className="w-4 h-4" style={{ color: '#1ed760' }} />
+            <span className="text-[11px] uppercase tracking-wider text-white/40 font-mono">Active Accounts</span>
+            <CheckCircle className="w-4 h-4 text-white/30" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{stats.active}</div>
-          <div className="text-xs mt-1" style={{ color: '#b3b3b3' }}>In good standing</div>
+          <div className="text-3xl font-light tracking-tight text-white mt-3 font-mono">{stats.active}</div>
+          <div className="text-[11px] text-white/40 mt-1">In good standing</div>
         </Card>
 
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }} className="p-4">
+        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818] p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#b3b3b3' }}>
-              Total Invoices
-            </span>
-            <FileText className="w-4 h-4" style={{ color: '#1ed760' }} />
+            <span className="text-[11px] uppercase tracking-wider text-white/40 font-mono">Invoices Issued</span>
+            <FileText className="w-4 h-4 text-white/30" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{stats.totalInvoices}</div>
-          <div className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Linked invoice records</div>
+          <div className="text-3xl font-light tracking-tight text-white mt-3 font-mono">{stats.totalInvoices}</div>
+          <div className="text-[11px] text-white/40 mt-1">Linked billing documents</div>
         </Card>
 
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }} className="p-4">
+        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818] p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#b3b3b3' }}>
-              Total Billed
-            </span>
-            <TrendingUp className="w-4 h-4" style={{ color: '#1ed760' }} />
+            <span className="text-[11px] uppercase tracking-wider text-white/40 font-mono">Cumulative Billed</span>
+            <TrendingUp className="w-4 h-4 text-[#1ed760]/70" />
           </div>
-          <div className="text-2xl font-bold" style={{ color: '#1ed760' }}>
+          <div className="text-3xl font-light tracking-tight text-white mt-3 font-mono">
             {formatCurrency(stats.totalBilled)}
           </div>
-          <div className="text-xs mt-1" style={{ color: '#b3b3b3' }}>Cumulative revenue</div>
+          <div className="text-[11px] text-white/40 mt-1">Total recognized billings</div>
         </Card>
       </div>
 
-      {/* Search & Filter Bar */}
-      <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}>
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#b3b3b3' }} />
-            <Input
-              placeholder="Search clients by name, email, company, or tax ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-10 text-white h-11"
-              style={{ background: '#1f1f1f', border: '1px solid #4d4d4d', borderRadius: '8px' }}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+        <Input
+          placeholder="Search by client name, email, company, or tax ID..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 pr-10 text-xs text-white h-10 rounded-xl border border-white/[0.08] bg-[#181818] focus:border-[#1ed760]/60 placeholder:text-white/30"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
 
       {/* Clients Grid */}
       {filteredClients.length === 0 ? (
-        <Card style={{ background: '#181818', border: '1px solid #4d4d4d', borderRadius: '8px' }}>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <Users className="w-12 h-12 mx-auto mb-4" style={{ color: '#4d4d4d' }} />
-              <h3 className="text-lg font-bold text-white mb-2">
-                {searchTerm ? 'No clients match your search' : 'No clients yet'}
-              </h3>
-              <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: '#b3b3b3' }}>
-                {searchTerm
-                  ? 'Try searching with a different name, email, or company.'
-                  : 'Add your first client to start generating beautiful invoices and tracking receivables.'}
-              </p>
-              {!searchTerm && (
-                <Button
-                  onClick={() => openDialog()}
-                  className="font-bold text-sm"
-                  style={{
-                    background: '#1ed760',
-                    color: '#000',
-                    borderRadius: '9999px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1.4px',
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Your First Client
-                </Button>
-              )}
-            </div>
-          </CardContent>
+        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818] p-12 text-center">
+          <Users className="w-8 h-8 mx-auto mb-3 text-white/20" />
+          <h3 className="text-sm font-normal text-white mb-1">
+            {searchTerm ? 'No clients match your filter' : 'No clients registered yet'}
+          </h3>
+          <p className="text-xs text-white/40 max-w-sm mx-auto mb-4">
+            {searchTerm
+              ? 'Try modifying your search keywords or clearing the active search.'
+              : 'Add your first client to start creating personalized invoices and tracking receivables.'}
+          </p>
+          {!searchTerm && (
+            <Button
+              size="sm"
+              onClick={() => openDialog()}
+              className="rounded-full bg-[#1ed760] text-black hover:bg-[#1fdf64] text-xs font-medium h-8 px-4"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              Add First Client
+            </Button>
+          )}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredClients.map((client) => (
             <Card
               key={client.id}
-              style={{
-                background: '#181818',
-                border: '1px solid #4d4d4d',
-                borderRadius: '8px',
-              }}
-              className="hover:border-[#1ed760]/50 transition-all p-5 flex flex-col justify-between"
+              className="rounded-2xl border border-white/[0.08] bg-[#181818] hover:border-white/20 transition-colors p-5 flex flex-col justify-between"
             >
               <div>
                 {/* Header & Actions */}
-                <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div
-                      className="w-11 h-11 font-bold rounded-full flex items-center justify-center text-base flex-shrink-0"
-                      style={{
-                        background: 'rgba(30,215,96,0.15)',
-                        border: '1px solid rgba(30,215,96,0.3)',
-                        color: '#1ed760',
-                      }}
-                    >
+                    <div className="w-9 h-9 font-medium rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-white/[0.04] border border-white/10 text-white/80 font-mono">
                       {(client.name || 'C').charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-white font-bold text-base truncate">{client.name}</h3>
-                      <p className="text-xs truncate flex items-center gap-1.5 mt-0.5" style={{ color: '#b3b3b3' }}>
-                        <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                      <h3 className="text-white font-normal text-sm tracking-tight truncate">{client.name}</h3>
+                      <p className="text-[11px] truncate flex items-center gap-1 text-white/40 mt-0.5">
+                        <Mail className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">{client.email}</span>
                       </p>
                     </div>
@@ -715,53 +659,51 @@ export default function ClientsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => openDialog(client)}
-                      className="text-zinc-400 hover:text-white hover:bg-white/5 h-8 w-8 p-0 rounded-lg"
+                      className="text-white/40 hover:text-white hover:bg-white/[0.06] h-7 w-7 p-0 rounded-md transition-colors"
                       title="Edit Client"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(client)}
-                      className="text-zinc-400 hover:text-rose-400 hover:bg-white/5 h-8 w-8 p-0 rounded-lg"
+                      className="text-white/40 hover:text-red-400 hover:bg-red-500/10 h-7 w-7 p-0 rounded-md transition-colors"
                       title="Delete Client"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Info List */}
-                <div className="space-y-2 mb-4">
+                <div className="space-y-1.5 mb-4 text-xs text-white/60">
                   {client.company && (
-                    <div className="flex items-center gap-2 text-xs text-zinc-300">
-                      <Building className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#b3b3b3' }} />
+                    <div className="flex items-center gap-2">
+                      <Building className="w-3 h-3 text-white/30 flex-shrink-0" />
                       <span className="truncate">{client.company}</span>
                     </div>
                   )}
 
                   {client.address && (
-                    <div className="flex items-start gap-2 text-xs text-zinc-300">
-                      <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: '#b3b3b3' }} />
-                      <span className="line-clamp-2">{client.address}</span>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3 h-3 text-white/30 mt-0.5 flex-shrink-0" />
+                      <span className="line-clamp-1 text-white/40">{client.address}</span>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 pt-1 flex-wrap">
+                  <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                     {client.gstNumber && (
                       <Badge
                         variant="outline"
-                        className="text-[11px] px-2 py-0.5 border-white/10"
-                        style={{ background: '#1f1f1f', color: '#b3b3b3' }}
+                        className="text-[10px] font-mono px-2 py-0 border-white/10 bg-white/[0.02] text-white/50 rounded-md"
                       >
-                        Tax ID: {client.gstNumber}
+                        Tax: {client.gstNumber}
                       </Badge>
                     )}
                     <Badge
                       variant="outline"
-                      className="text-[11px] px-2 py-0.5 border-white/10"
-                      style={{ background: '#1f1f1f', color: '#b3b3b3' }}
+                      className="text-[10px] font-mono px-2 py-0 border-white/10 bg-white/[0.02] text-white/50 rounded-md"
                     >
                       {client.currency || 'USD'}
                     </Badge>
@@ -770,29 +712,15 @@ export default function ClientsPage() {
               </div>
 
               {/* Card Footer Metrics */}
-              <div
-                className="grid grid-cols-2 gap-3 pt-3 -mx-5 -mb-5 px-5 py-3.5 mt-2"
-                style={{
-                  borderTop: '1px solid #2e2e2e',
-                  background: '#141414',
-                  borderBottomLeftRadius: '8px',
-                  borderBottomRightRadius: '8px',
-                }}
-              >
-                <div className="text-center pr-2" style={{ borderRight: '1px solid #2e2e2e' }}>
-                  <div className="text-xs flex items-center justify-center gap-1 mb-0.5" style={{ color: '#b3b3b3' }}>
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Invoices</span>
-                  </div>
-                  <p className="text-base font-bold text-white">{client.totalInvoices || 0}</p>
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/[0.06]">
+                <div>
+                  <div className="text-[10px] uppercase font-mono tracking-wider text-white/30 mb-0.5">Invoices</div>
+                  <p className="text-sm font-light text-white font-mono">{client.totalInvoices || 0}</p>
                 </div>
 
-                <div className="text-center pl-2">
-                  <div className="text-xs flex items-center justify-center gap-1 mb-0.5" style={{ color: '#1ed760' }}>
-                    <DollarSign className="w-3.5 h-3.5" />
-                    <span>Total Billed</span>
-                  </div>
-                  <p className="text-base font-bold" style={{ color: '#1ed760' }}>
+                <div className="text-right">
+                  <div className="text-[10px] uppercase font-mono tracking-wider text-white/30 mb-0.5">Total Billed</div>
+                  <p className="text-sm font-light text-white font-mono">
                     {formatCurrency(client.totalAmount || 0, client.currency || 'USD')}
                   </p>
                 </div>

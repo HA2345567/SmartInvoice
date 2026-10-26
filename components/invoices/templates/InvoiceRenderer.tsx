@@ -41,16 +41,20 @@ const INVOICE_TYPES: Record<InvoiceType, any> = {
 };
 
 const STYLE_CLASSES: Record<InvoiceStyle, { readonly [key: string]: string }> = {
+    'luxury': ultraLuxury,
+    'minimal': ultraLuxury,
+    'apple': ultraLuxury,
+    'stripe': stripe,
+    'amazon': amazon,
+    'microsoft': microsoft,
+    'google': google,
+    'shopify': shopify,
+    'custom': creativeAgency,
     'ultra-luxury': ultraLuxury,
     'financial': financial,
-    'microsoft': microsoft,
-    'amazon': amazon,
     'creative-agency': creativeAgency,
     'professional-services': professionalServices,
-    'stripe': stripe,
-    'google': google,
     'salesforce': salesforce,
-    'shopify': shopify,
     'slack': slack,
     'notion': notion,
 };
@@ -85,15 +89,16 @@ const InvoiceRenderer: React.FC<InvoiceRendererProps> = ({ type, style, data }) 
         logoUrl: logoUrl,
     };
 
+    const resolvedClientName = data?.to?.name || (data as any)?.clientName || (data as any)?.clientCompany || 'Client Name';
     const safeTo = data?.to ? {
-        name: data.to.name || (data as any)?.clientName || 'Client Name',
+        name: resolvedClientName,
         email: data.to.email || (data as any)?.clientEmail || '',
         address: data.to.address || (data as any)?.clientAddress || '',
         city: data.to.city || '',
         company: data.to.company || (data as any)?.clientCompany || '',
         gst: data.to.gst || (data as any)?.clientGST || '',
     } : {
-        name: (data as any)?.clientName || 'Client Name',
+        name: resolvedClientName,
         email: (data as any)?.clientEmail || '',
         address: (data as any)?.clientAddress || '',
         city: '',
@@ -109,10 +114,17 @@ const InvoiceRenderer: React.FC<InvoiceRendererProps> = ({ type, style, data }) 
         issuedDate: data?.issuedDate || (data as any)?.date || new Date().toISOString().split('T')[0],
         dueDate: data?.dueDate || '',
         currencySymbol: data?.currencySymbol || (data as any)?.clientCurrency || '$',
-        items: data?.items || [],
-        subtotal: data?.subtotal || 0,
-        tax: data?.tax || 0,
-        discount: data?.discount || 0,
+        items: (data?.items || []).map((it: any) => ({
+            ...it,
+            description: it.description || 'Item',
+            qty: it.qty !== undefined ? it.qty : (it.quantity !== undefined ? it.quantity : 1),
+            quantity: it.quantity !== undefined ? it.quantity : (it.qty !== undefined ? it.qty : 1),
+            rate: Number(it.rate || 0),
+            amount: Number(it.amount !== undefined ? it.amount : (Number(it.quantity || it.qty || 1) * Number(it.rate || 0))),
+        })),
+        subtotal: data?.subtotal || (data as any)?.subtotal || 0,
+        tax: data?.tax || (data as any)?.taxAmount || 0,
+        discount: data?.discount || (data as any)?.discountAmount || 0,
         total: data?.total || (data as any)?.amount || 0,
         whiteLabelMode: (data as any)?.whiteLabelMode || false,
     };

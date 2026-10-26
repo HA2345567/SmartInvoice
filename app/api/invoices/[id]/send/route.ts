@@ -45,9 +45,9 @@ export async function POST(
       taxRate: invoice.taxRate,
       discountRate: invoice.discountRate,
       paymentLink: invoice.paymentLink,
-      companyName: user.company || 'SmartInvoice',
-      companyAddress: 'Your Company Address\nCity, State - PIN',
-      companyGST: 'Your GST Number',
+      companyName: user.company || user.name || 'SmartInvoice',
+      companyAddress: user.companyAddress || (user as any).address || '',
+      companyGST: user.companyGST || (user as any).gstNumber || '',
       companyEmail: user.email,
     });
 
@@ -59,8 +59,8 @@ export async function POST(
       html: EmailService.generateInvoiceEmail(invoice, {
         name: user.company || user.name,
         email: user.email,
-        address: 'Your Company Address\nCity, State - PIN',
-        gst: 'Your GST Number',
+        address: user.companyAddress || (user as any).address || '',
+        gst: user.companyGST || (user as any).gstNumber || '',
       }),
       attachments: [
         {

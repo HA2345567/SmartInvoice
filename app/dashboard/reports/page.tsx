@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -362,12 +363,11 @@ export default function ReportsPage() {
         {/* Profit & Loss Statement */}
         <TabsContent value="profit-loss" className="space-y-6">
           {loading ? (
-            <div className="flex items-center justify-center min-h-[380px]">
-              <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-                <p style={{ color: '#b3b3b3' }}>Calculating Profit & Loss statement...</p>
-              </div>
-            </div>
+            <LuxuryLoader 
+              label="Calculating Profit & Loss statement..." 
+              sublabel="Fiscal Reporting" 
+              minHeight="min-h-[380px]" 
+            />
           ) : profitLoss ? (
             <>
               {/* Summary Cards */}
@@ -549,12 +549,11 @@ export default function ReportsPage() {
         {/* Balance Sheet */}
         <TabsContent value="balance-sheet" className="space-y-6">
           {loading ? (
-            <div className="flex items-center justify-center min-h-[380px]">
-              <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-                <p style={{ color: '#b3b3b3' }}>Balancing assets and liabilities...</p>
-              </div>
-            </div>
+            <LuxuryLoader 
+              label="Balancing assets and liabilities..." 
+              sublabel="Balance Sheet" 
+              minHeight="min-h-[380px]" 
+            />
           ) : balanceSheet ? (
             <Card className="bg-[#181818] border-white/10 rounded-2xl">
               <CardHeader className="border-b border-white/5 pb-4">
@@ -646,12 +645,11 @@ export default function ReportsPage() {
         {/* Cash Flow */}
         <TabsContent value="cash-flow" className="space-y-6">
           {loading ? (
-            <div className="flex items-center justify-center min-h-[380px]">
-              <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-                <p style={{ color: '#b3b3b3' }}>Aggregating operating cash flows...</p>
-              </div>
-            </div>
+            <LuxuryLoader 
+              label="Aggregating operating cash flows..." 
+              sublabel="Cash Flow Statement" 
+              minHeight="min-h-[380px]" 
+            />
           ) : cashFlow ? (
             <Card className="bg-[#181818] border-white/10 rounded-2xl">
               <CardHeader className="border-b border-white/5 pb-4">

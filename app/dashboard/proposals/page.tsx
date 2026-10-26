@@ -36,6 +36,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 interface ProposalItem {
   id?: string;
@@ -414,14 +415,7 @@ export default function ProposalsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-          <p style={{ color: '#b3b3b3' }}>Loading proposals...</p>
-        </div>
-      </div>
-    );
+    return <LuxuryLoader label="Loading proposals..." sublabel="Commercial Bids" />;
   }
 
   return (

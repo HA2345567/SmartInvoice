@@ -87,7 +87,7 @@ export function FeedbackWidget() {
         throw new Error(result.error || 'Failed to submit feedback.');
       }
       toast({
-        title: 'Thank you for your feedback! 🎉',
+        title: 'Thank you for your feedback',
         description: 'Your input helps us make SmartInvoice better for everyone.',
       });
       setFeedback({
@@ -266,7 +266,7 @@ export function FeedbackWidget() {
                 className="input-green"
               />
               <p className="text-xs text-green-muted">
-                Leave your email if you'd like us to follow up on your feedback
+                Leave your email if you&apos;d like us to follow up on your feedback
               </p>
             </div>
 

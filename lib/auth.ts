@@ -2,9 +2,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { prisma } from './prisma';
+import { DatabaseService } from './database';
 
 function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET || 'smartinvoice-jwt-secret-key-neon-db-2026';
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error('JWT_SECRET must be configured with at least 32 characters.');
+  }
   return secret;
 }
 
@@ -82,12 +86,11 @@ export class AuthService {
     avatar?: string;
   }): Promise<{ user: User; exists: boolean }> {
     try {
-      const existing = await prisma.user.findUnique({
-        where: { email: userData.email.toLowerCase() },
-      });
-
+      // Primary: Neon HTTP via DatabaseService
+      const existing = await DatabaseService.getUserByEmail(userData.email);
       if (existing) {
-        return { user: formatPrismaUser(existing), exists: true };
+        const { password: _, ...userWithoutPassword } = existing;
+        return { user: userWithoutPassword, exists: true };
       }
 
       let hashedPassword = '';
@@ -95,31 +98,71 @@ export class AuthService {
         hashedPassword = await this.hashPassword(userData.password);
       }
 
-      const now = new Date().toISOString();
-      const created = await prisma.user.create({
-        data: {
-          email: userData.email.toLowerCase(),
-          password: hashedPassword,
-          name: userData.name,
-          company: userData.company || null,
-          avatar: userData.avatar || null,
-          createdAt: now,
-          updatedAt: now,
-        },
+      const created = await DatabaseService.createUser({
+        email: userData.email.toLowerCase(),
+        password: hashedPassword,
+        name: userData.name,
+        company: userData.company,
       });
 
-      return { user: formatPrismaUser(created), exists: false };
+      return { user: created.user, exists: false };
     } catch (error) {
-      console.error('Error creating user via Prisma:', error);
-      throw error;
+      console.error('DatabaseService createUser error, falling back to Prisma:', error);
+      // Fallback to Prisma
+      try {
+        const existingPrisma = await prisma.user.findUnique({
+          where: { email: userData.email.toLowerCase() },
+        });
+
+        if (existingPrisma) {
+          return { user: formatPrismaUser(existingPrisma), exists: true };
+        }
+
+        let hashedPassword = '';
+        if (userData.password) {
+          hashedPassword = await this.hashPassword(userData.password);
+        }
+
+        const now = new Date().toISOString();
+        const created = await prisma.user.create({
+          data: {
+            email: userData.email.toLowerCase(),
+            password: hashedPassword,
+            name: userData.name,
+            company: userData.company || null,
+            avatar: userData.avatar || null,
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+
+        return { user: formatPrismaUser(created), exists: false };
+      } catch (prismaError) {
+        console.error('Error creating user via Prisma fallback:', prismaError);
+        throw error;
+      }
     }
   }
 
   static async authenticateUser(email: string, password?: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-      });
+      // Primary: Neon HTTP via DatabaseService (reliable, stateless)
+      let user = await DatabaseService.getUserByEmail(email);
+
+      // Fallback: Prisma
+      if (!user) {
+        try {
+          const prismaUser = await prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+          });
+          if (prismaUser) {
+            user = formatPrismaUser(prismaUser);
+          }
+        } catch (prismaError) {
+          // Prisma connection dropped, ignore and continue
+        }
+      }
+
       if (!user) return null;
 
       if (password && user.password) {
@@ -129,35 +172,56 @@ export class AuthService {
         }
       }
 
-      return formatPrismaUser(user);
+      const { password: _, ...userWithoutPassword } = user;
+      return userWithoutPassword;
     } catch (error) {
-      console.error('Error authenticating user via Prisma:', error);
+      console.error('Error authenticating user:', error);
       return null;
     }
   }
 
   static async getUserById(id: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-      });
-      if (!user) return null;
-      return formatPrismaUser(user);
+      // Primary: Neon HTTP via DatabaseService (never drops idle connection)
+      const dbUser = await DatabaseService.getUserById(id);
+      if (dbUser) {
+        const { password: _, ...userWithoutPassword } = dbUser;
+        return userWithoutPassword;
+      }
+
+      // Fallback: Prisma
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id },
+        });
+        if (user) return formatPrismaUser(user);
+      } catch (prismaError) {
+        // Prisma connection dropped, ignore
+      }
+
+      return null;
     } catch (error) {
-      console.error('Error getting user by id via Prisma:', error);
+      console.error('Error getting user by id:', error);
       return null;
     }
   }
 
   static async userExists(email: string): Promise<boolean> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-        select: { id: true },
-      });
-      return !!user;
+      const user = await DatabaseService.getUserByEmail(email);
+      if (user) return true;
+
+      try {
+        const prismaUser = await prisma.user.findUnique({
+          where: { email: email.toLowerCase() },
+          select: { id: true },
+        });
+        return !!prismaUser;
+      } catch (e) {
+        return false;
+      }
     } catch (error) {
-      console.error('Error checking user existence via Prisma:', error);
+      console.error('Error checking user existence:', error);
       return false;
     }
   }
@@ -169,38 +233,41 @@ export class AuthService {
   }): Promise<User> {
     try {
       const email = data.email.toLowerCase();
-      const existing = await prisma.user.findUnique({
-        where: { email },
-      });
-
+      const existing = await DatabaseService.getUserByEmail(email);
       const now = new Date().toISOString();
 
       if (existing) {
-        const updated = await prisma.user.update({
-          where: { id: existing.id },
-          data: {
+        // Update user
+        try {
+          const updated = await prisma.user.update({
+            where: { id: existing.id },
+            data: {
+              name: existing.name || data.name,
+              avatar: existing.avatar || data.avatar || null,
+              updatedAt: now,
+            },
+          });
+          return formatPrismaUser(updated);
+        } catch {
+          return {
+            id: existing.id,
+            email: existing.email,
             name: existing.name || data.name,
-            avatar: existing.avatar || data.avatar || null,
+            avatar: existing.avatar || data.avatar,
+            createdAt: existing.createdAt || now,
             updatedAt: now,
-          },
-        });
-        return formatPrismaUser(updated);
+          };
+        }
       }
 
-      const created = await prisma.user.create({
-        data: {
-          email,
-          name: data.name || email.split('@')[0],
-          password: '',
-          avatar: data.avatar || null,
-          createdAt: now,
-          updatedAt: now,
-        },
+      const created = await DatabaseService.createUser({
+        email,
+        name: data.name || email.split('@')[0],
       });
 
-      return formatPrismaUser(created);
+      return created.user;
     } catch (error) {
-      console.error('Error upserting Google user via Prisma:', error);
+      console.error('Error upserting Google user:', error);
       throw error;
     }
   }

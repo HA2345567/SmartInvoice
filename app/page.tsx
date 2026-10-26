@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
-import Grainient from '@/components/Grainient';
-import { FileText, ArrowRight, Sparkles, Zap, Shield, ChartBar as BarChart3, Star, TrendingUp, DollarSign, Users, Clock, Globe, ChevronDown, ChevronRight, Play, Check, X, Menu, Lock, Repeat, Send, Download, Activity, Building, Twitter, Linkedin, Github, Headphones } from 'lucide-react';
+import { FileText, ArrowRight, Sparkles, Zap, Shield, ChartBar as BarChart3, DollarSign, Users, Clock, Globe, ChevronDown, ChevronRight, Play, Check, X, Menu, Lock, Repeat, Send, Download, Building, Twitter, Linkedin, Github, Headphones } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SPOTIFY DESIGN SYSTEM - Exact Implementation
@@ -515,53 +515,30 @@ export default function LandingPage() {
 
       {/* ═══ HERO ═══ */}
       <section
-        className="relative min-h-screen pt-36 sm:pt-40 pb-24 px-6 overflow-hidden transition-all duration-500"
+        className="relative flex min-h-screen items-center pt-36 sm:pt-40 pb-24 px-6 overflow-hidden transition-all duration-500"
       >
         <div className="absolute inset-0" aria-hidden="true">
-          <Grainient
-            color1="#125b2b"
-            color2="#063a19"
-            color3="#023214"
-            timeSpeed={0.25}
-            colorBalance={0}
-            warpStrength={1}
-            warpFrequency={5}
-            warpSpeed={2}
-            warpAmplitude={50}
-            blendAngle={0}
-            blendSoftness={0.05}
-            rotationAmount={500}
-            noiseScale={2}
-            grainAmount={0.1}
-            grainScale={2}
-            grainAnimated={false}
-            contrast={1.5}
-            gamma={1}
-            saturation={1}
-            centerX={0}
-            centerY={0}
-            zoom={0.9}
-            className="grainient-container"
-          />
+          <Image src="/landing-hero.webp" alt="" fill priority sizes="100vw" className="object-cover object-center" />
         </div>
         {/* Ambient Gradient Overlay for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/35 via-[#050806]/10 to-[#050806]/55 pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto text-center z-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050806]/95 via-[#050806]/75 to-[#050806]/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/45 via-transparent to-[#050806]/75 pointer-events-none" />
+        <div className="relative max-w-6xl w-full mx-auto text-left z-10">
 
           {/* Headline - 24px Section Title weight */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight mb-6 max-w-2xl">
             <span className="text-white">Invoice smarter.</span>
             <br />
             <span style={{ color: spotify.green }}>Get paid faster.</span>
           </h1>
 
           {/* Body text - 16px weight 400 */}
-          <p className="text-base max-w-xl mx-auto mb-10" style={{ color: spotify.textMuted }}>
-            Create and download stunning PDF invoices instantly as a guest. No credit card, password, or registration needed.
+          <p className="text-base max-w-xl mb-10" style={{ color: spotify.textMuted }}>
+            Create and download polished PDF invoices as a guest, or create an account to manage invoices, clients, expenses, and payment status.
           </p>
 
           {/* CTAs - Pill buttons with dead-centered text and right-aligned arrow */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-start gap-3.5 sm:gap-4 mb-6">
             <PillButton href="/dashboard/create" variant="green" size="lg" className="w-full sm:w-[270px] relative justify-center whitespace-nowrap">
               <span className="text-center mx-auto">Create Free Invoice</span>
               <ArrowRight className="w-4 h-4 absolute right-5 flex-shrink-0" />
@@ -574,28 +551,10 @@ export default function LandingPage() {
 
           <p className="text-xs text-gray-400 mb-10">Instant PDF download • No sign up required • 100% Free</p>
 
-          {/* Social proof */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12" style={{ color: spotify.textMuted }}>
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {['JS', 'MC', 'ER', 'AK'].map((initials, i) => (
-                  <div
-                    key={i}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold"
-                    style={{ background: '#222222', border: `2px solid ${spotify.nearBlack}`, color: '#1ed760' }}
-                  >
-                    {initials}
-                  </div>
-                ))}
-              </div>
-              <span className="text-xs">10,000+ professionals</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5" fill={spotify.warning} style={{ color: spotify.warning }} />
-              ))}
-              <span className="text-xs ml-1">4.9/5</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-start gap-x-6 gap-y-3 mb-12 text-xs" style={{ color: spotify.textMuted }}>
+            <span className="inline-flex items-center gap-2"><FileText className="w-4 h-4" style={{ color: spotify.green }} /> Invoice PDFs</span>
+            <span className="inline-flex items-center gap-2"><Zap className="w-4 h-4" style={{ color: spotify.green }} /> AI-assisted tools</span>
+            <span className="inline-flex items-center gap-2"><Download className="w-4 h-4" style={{ color: spotify.green }} /> CSV exports</span>
           </div>
         </div>
       </section>
@@ -964,10 +923,10 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { val: '1,000+', label: 'Invoices processed', icon: FileText },
-              { val: '200+', label: 'Active users', icon: Users },
-              { val: '40%', label: 'Faster payments', icon: TrendingUp },
-              { val: '99.99%', label: 'Uptime SLA', icon: Activity },
+              { val: 'Create', label: 'Invoices & proposals', icon: FileText },
+              { val: 'Track', label: 'Payments & reminders', icon: Clock },
+              { val: 'Review', label: 'Expenses & reports', icon: BarChart3 },
+              { val: 'Export', label: 'PDFs & CSV records', icon: Download },
             ].map(({ val, label, icon: Icon }) => (
               <div key={label} className="text-center">
                 <div className="flex justify-center mb-2">
@@ -991,11 +950,11 @@ export default function LandingPage() {
 
           <div className="space-y-3">
             {[
-              { q: 'Is SmartInvoice really free?', a: 'Yes. Our free plan includes unlimited invoices for up to 3 clients. No credit card required, no time limits.' },
-              { q: 'How does AI invoice generation work?', a: 'Simply describe your work in plain language. Our AI parses the description, creates line items, calculates totals, and generates a professional invoice instantly.' },
-              { q: 'What payment methods do you support?', a: 'We support Stripe (cards, Apple Pay, Google Pay), Razorpay (UPI, wallets, net banking), and direct bank transfers.' },
-              { q: 'Is my financial data secure?', a: 'Absolutely. SOC 2 Type II compliant, end-to-end encrypted, and we never store payment card data directly.' },
-              { q: 'Can I import existing clients?', a: 'Yes. Import clients via CSV or manually add them. We support tax IDs and custom fields.' },
+              { q: 'Can I try it without an account?', a: 'Yes. You can create and download an invoice PDF as a guest. An account is needed to save and manage business records.' },
+              { q: 'What do the AI tools do?', a: 'AI can help improve invoice descriptions and scan receipt images for details. Review extracted information before saving it.' },
+              { q: 'Can customers pay invoices through SmartInvoice?', a: 'The app supports recording payment status and details. Integrated card or bank payment processing is not currently available.' },
+              { q: 'How is account access protected?', a: 'Accounts use password hashing and signed session tokens. Configure a private JWT secret and secure database connection before deployment.' },
+              { q: 'Can I import existing clients?', a: 'Clients can be added and managed in the app. Invoice and client CSV export is available; CSV import is not currently supported.' },
             ].map((item, i) => (
               <FaqItem key={i} q={item.q} a={item.a} />
             ))}
@@ -1014,7 +973,7 @@ export default function LandingPage() {
               Ready to transform your billing?
             </h2>
             <p className="text-sm mb-8 max-w-md mx-auto" style={{ color: spotify.textMuted }}>
-              Join 10,000+ professionals getting paid faster with SmartInvoice.
+              Create a polished invoice in minutes and keep your records organized.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <PillButton href="/dashboard/create" variant="green" size="lg" className="w-full sm:w-[310px] relative justify-center whitespace-nowrap">
@@ -1024,13 +983,13 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-5 mt-6">
               <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
-                <Check className="w-4 h-4" style={{ color: spotify.green }} /> Free forever
+                <Check className="w-4 h-4" style={{ color: spotify.green }} /> Guest invoice builder
               </span>
               <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
-                <Lock className="w-4 h-4" style={{ color: spotify.green }} /> No card required
+                <Lock className="w-4 h-4" style={{ color: spotify.green }} /> No account to download
               </span>
               <span className="flex items-center gap-1.5 text-xs" style={{ color: spotify.textMuted }}>
-                <Shield className="w-4 h-4" style={{ color: spotify.green }} /> GDPR compliant
+                <Shield className="w-4 h-4" style={{ color: spotify.green }} /> Manage invoices in an account
               </span>
             </div>
           </Card>

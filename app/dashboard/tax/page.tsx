@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -220,14 +221,11 @@ export default function TaxCenterPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[420px]">
-        <div className="text-center">
-          <Loader2 className="w-9 h-9 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
-          <p className="text-sm font-medium tracking-wide" style={{ color: '#b3b3b3' }}>
-            Compiling GST/VAT liabilities & tax schedules...
-          </p>
-        </div>
-      </div>
+      <LuxuryLoader 
+        label="Compiling GST/VAT liabilities & tax schedules..." 
+        sublabel="Fiscal Ledger" 
+        minHeight="min-h-[420px]" 
+      />
     );
   }
 

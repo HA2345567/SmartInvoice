@@ -14,7 +14,10 @@ export async function GET() {
         // Let's implement a simple local challenge generation using the secret
         // This is faster and doesn't depend on external uptime for every pageload.
 
-        const secret = process.env.ALTCHA_API_SECRET || 'default-secret';
+        const secret = process.env.ALTCHA_API_SECRET;
+        if (!secret || secret.length < 32) {
+            return NextResponse.json({ error: 'Challenge service is not configured' }, { status: 503 });
+        }
         const salt = crypto.randomBytes(12).toString('hex');
         const algorithm = 'SHA-256';
         const maxnumber = 50000; // Work difficulty
