@@ -3,44 +3,22 @@
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard,
-  FilePlus2,
-  ReceiptText,
-  ScrollText,
-  Building2,
-  WalletCards,
-  Landmark,
-  LineChart,
-  BarChart3,
-  Crown,
-  SlidersHorizontal,
-  LogOut, 
-  Menu, 
-  X, 
-  Download, 
-  FileDown, 
-  Bell, 
-  Loader2,
-  Gem,
-  Plus
-} from 'lucide-react';
+import { FileText, Chrome as Home, Plus, Users, Settings, LogOut, Menu, X, ChartBar as BarChart3, Download, Sparkles, FileDown, Bell, Zap, Receipt, Calculator, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
-// SmartInvoice 2.0 Editorial System Colors & Tokens
-const brandTokens = {
+// Spotify design system colors
+const spotify = {
   nearBlack: '#121212',
   darkSurface: '#181818',
   midDark: '#1f1f1f',
   green: '#1ed760',
   textBase: '#ffffff',
-  textMuted: '#a1a1aa',
-  borderHairline: 'rgba(255, 255, 255, 0.08)',
+  textMuted: '#b3b3b3',
+  borderGray: '#4d4d4d',
 };
 
 export default function DashboardLayout({
@@ -63,17 +41,17 @@ export default function DashboardLayout({
   }, [user, loading, pathname, router]);
 
   const navigation = useMemo(() => [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Create Invoice', href: '/dashboard/create', icon: FilePlus2 },
-    { name: 'Invoices', href: '/dashboard/invoices', icon: ReceiptText },
-    { name: 'Proposals', href: '/dashboard/proposals', icon: ScrollText, badge: 'PRO' },
-    { name: 'Clients', href: '/dashboard/clients', icon: Building2 },
-    { name: 'Expenses', href: '/dashboard/expenses', icon: WalletCards, badge: 'PRO' },
-    { name: 'Tax Center', href: '/dashboard/tax', icon: Landmark },
-    { name: 'Reports', href: '/dashboard/reports', icon: LineChart },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Create Invoice', href: '/dashboard/create', icon: Plus },
+    { name: 'Invoices', href: '/dashboard/invoices', icon: FileText },
+    { name: 'Proposals', href: '/dashboard/proposals', icon: FileText, badge: 'AI' },
+    { name: 'Clients', href: '/dashboard/clients', icon: Users },
+    { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, badge: 'AI' },
+    { name: 'Tax Center', href: '/dashboard/tax', icon: Calculator },
+    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-    { name: 'Payment Concierge', href: '/dashboard/agent', icon: Crown, badge: 'PREMIUM' },
-    { name: 'Settings', href: '/dashboard/settings', icon: SlidersHorizontal },
+    { name: 'AI Payment Agent', href: '/dashboard/agent', icon: Zap, badge: 'NEW' },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ], []);
 
   const handleExportInvoices = useCallback(async () => {
@@ -143,40 +121,47 @@ export default function DashboardLayout({
 
   // Loading state
   if (loading) {
-    return <LuxuryLoader label="Loading SmartInvoice..." sublabel="Securing Session" fullScreen />;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: spotify.nearBlack }}>
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p className="text-sm" style={{ color: '#b3b3b3' }}>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   // Not authenticated & on protected route
   if (!user && !pathname.startsWith('/dashboard/create')) {
-    return <LuxuryLoader label="Redirecting to sign in..." sublabel="Authentication Required" fullScreen />;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: spotify.nearBlack }}>
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p className="text-sm" style={{ color: '#b3b3b3' }}>Redirecting to sign in...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: brandTokens.nearBlack }}>
+    <div className="min-h-screen flex" style={{ background: spotify.nearBlack }}>
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 lg:hidden"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          style={{ background: 'rgba(0,0,0,0.5)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 lg:transform-none flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-        style={{ 
-          background: brandTokens.darkSurface, 
-          borderRight: `1px solid ${brandTokens.borderHairline}` 
-        }}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 lg:transform-none flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
+        style={{ background: spotify.darkSurface, borderRight: `1px solid ${spotify.borderGray}` }}
       >
         {/* Sidebar Header */}
-        <div 
-          className="flex items-center justify-between h-16 px-5 flex-shrink-0" 
-          style={{ borderBottom: `1px solid ${brandTokens.borderHairline}` }}
-        >
+        <div className="flex items-center justify-between h-16 px-4 sm:px-5 flex-shrink-0" style={{ borderBottom: `1px solid ${spotify.borderGray}` }}>
           <Link href="/dashboard" className="flex items-center">
             <Logo variant="full" size="md" />
           </Link>
@@ -184,107 +169,129 @@ export default function DashboardLayout({
             className="lg:hidden p-2 rounded-full hover:bg-white/5"
             onClick={() => setSidebarOpen(false)}
           >
-            <X className="w-5 h-5" style={{ color: brandTokens.textMuted }} />
+            <X className="w-5 h-5" style={{ color: spotify.textMuted }} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
-          {navigation.map((item) => {
-            const isActive = isActiveRoute(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${
-                  isActive 
-                    ? 'text-white bg-[#1f1f1f] shadow-sm border border-white/[0.08]' 
-                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#1ed760]' : 'text-zinc-400'}`} />
-                <span className="flex-1 tracking-wide">{item.name}</span>
-                {item.badge && (
-                  <span
-                    className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide"
-                    style={{ background: 'rgba(30,215,96,0.12)', color: brandTokens.green, border: '1px solid rgba(30,215,96,0.2)' }}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <div className="space-y-1">
+            {navigation.map((item) => {
+              const isActive = isActiveRoute(item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-bold transition-colors"
+                  style={{
+                    background: isActive ? spotify.midDark : 'transparent',
+                    color: isActive ? spotify.textBase : spotify.textMuted
+                  }}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span
+                      className="px-2 py-0.5 rounded text-[10px] font-bold"
+                      style={{ background: 'rgba(30,215,96,0.15)', color: spotify.green }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
 
-          {/* Quick Export Actions */}
-          <div className="mt-6 pt-5" style={{ borderTop: `1px solid ${brandTokens.borderHairline}` }}>
-            <h3 className="text-[10px] font-medium uppercase tracking-widest mb-2 px-3 text-zinc-500">
-              Data Management
+          {/* Smart Features */}
+          <div className="mt-6 pt-6" style={{ borderTop: `1px solid ${spotify.borderGray}` }}>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 px-3" style={{ color: spotify.textMuted }}>
+              Smart Features
             </h3>
-            <div className="space-y-0.5">
+            <div className="space-y-2">
+              <div className="px-3 py-2.5 rounded" style={{ background: 'rgba(30,215,96,0.1)', border: `1px solid rgba(30,215,96,0.2)` }}>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4" style={{ color: spotify.green }} />
+                  <span className="text-xs font-medium text-white">AI Auto-Suggestions</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Export */}
+          <div className="mt-6 pt-6" style={{ borderTop: `1px solid ${spotify.borderGray}` }}>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 px-3" style={{ color: spotify.textMuted }}>
+              Export Data
+            </h3>
+            <div className="space-y-1">
               <button
                 onClick={handleExportInvoices}
                 disabled={isExporting}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 transition-colors hover:text-white hover:bg-white/[0.03]"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-bold transition-colors hover:bg-white/5"
+                style={{ color: spotify.textMuted }}
               >
-                <FileDown className="w-4 h-4 text-zinc-500" />
-                <span>{isExporting ? 'Exporting...' : 'Export Invoices (CSV)'}</span>
+                <FileDown className="w-4 h-4" />
+                <span>{isExporting ? 'Exporting...' : 'Export Invoices'}</span>
               </button>
               <button
                 onClick={handleExportClients}
                 disabled={isExporting}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 transition-colors hover:text-white hover:bg-white/[0.03]"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-bold transition-colors hover:bg-white/5"
+                style={{ color: spotify.textMuted }}
               >
-                <Download className="w-4 h-4 text-zinc-500" />
-                <span>{isExporting ? 'Exporting...' : 'Export Clients (CSV)'}</span>
+                <Download className="w-4 h-4" />
+                <span>{isExporting ? 'Exporting...' : 'Export Clients'}</span>
               </button>
             </div>
           </div>
         </nav>
 
-        {/* User Profile Footer */}
-        <div className="p-4 flex-shrink-0" style={{ borderTop: `1px solid ${brandTokens.borderHairline}` }}>
+        {/* User Profile */}
+        <div className="p-4 flex-shrink-0" style={{ borderTop: `1px solid ${spotify.borderGray}` }}>
           {user ? (
             <>
-              <div className="flex items-center gap-3 mb-3 px-1">
+              <div className="flex items-center gap-3 mb-3">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: brandTokens.green, color: '#000' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: spotify.green, color: '#000' }}
                 >
                   {(user.name || 'U').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-white truncate">{user.name || 'User'}</p>
-                  <p className="text-[11px] text-zinc-500 truncate">{user.email || ''}</p>
+                  <p className="text-sm font-bold text-white truncate">{user.name || 'User'}</p>
+                  <p className="text-xs truncate" style={{ color: spotify.textMuted }}>{user.email || ''}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5 text-rose-400/80 hover:text-rose-400"
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded text-xs font-bold transition-colors hover:bg-white/5"
+                style={{ color: 'rgba(243,114,127,0.9)' }}
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
                 <span>Log out</span>
               </button>
             </>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span className="text-xs font-medium text-amber-400">Guest Studio</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-xs font-bold text-amber-400">Guest Mode</span>
               </div>
-              <p className="text-[11px] text-zinc-500 mb-3">Create and export invoices. Sign in to store records.</p>
+              <p className="text-[11px] text-gray-400 mb-3">Sign in to save invoices to cloud & unlock all features.</p>
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/auth/login"
-                  className="px-3 py-2 rounded-full text-center text-xs font-medium transition-colors border border-white/10 hover:bg-white/5 text-white"
+                  className="px-3 py-2 rounded text-center text-xs font-bold transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid ${spotify.borderGray}` }}
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="px-3 py-2 rounded-full text-center text-xs font-semibold transition-colors bg-[#1ed760] text-black hover:bg-[#1fdf64]"
+                  className="px-3 py-2 rounded text-center text-xs font-bold transition-colors"
+                  style={{ background: spotify.green, color: '#000' }}
                 >
                   Sign Up
                 </Link>
@@ -297,47 +304,46 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Nav */}
-        <header 
-          className="sticky top-0 z-30 h-16 flex items-center justify-between px-6 bg-[#121212]/90 backdrop-blur-md" 
-          style={{ borderBottom: `1px solid ${brandTokens.borderHairline}` }}
-        >
+        <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-6" style={{ background: spotify.nearBlack, borderBottom: `1px solid ${spotify.borderGray}` }}>
           <button
             className="lg:hidden p-2 rounded-full hover:bg-white/5"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="w-5 h-5 text-zinc-400" />
+            <Menu className="w-5 h-5" style={{ color: spotify.textMuted }} />
           </button>
 
           {!user && (
-            <div className="hidden md:flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
-              <span>Guest Session — Download invoices freely!</span>
-              <Link href="/auth/signup" className="underline font-semibold ml-1 text-white hover:text-amber-300">
-                Create account
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)' }}>
+              <span>Guest Mode — Create and download invoices freely!</span>
+              <Link href="/auth/signup" className="underline font-black ml-1 text-white hover:text-amber-400">
+                Sign up to save
               </Link>
             </div>
           )}
 
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3">
             <Link
               href="/dashboard/reminders"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-zinc-300 border border-white/10 hover:bg-white/5 transition-colors"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-colors hover:bg-white/5"
+              style={{ color: spotify.textMuted, border: `1px solid ${spotify.borderGray}` }}
             >
-              <Bell className="w-3.5 h-3.5 text-zinc-400" />
+              <Bell className="w-4 h-4" />
               <span>Reminders</span>
             </Link>
             <Link
               href="/dashboard/create"
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all bg-[#1ed760] text-black hover:bg-[#1fdf64] active:scale-[0.98]"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-transform hover:scale-[1.02]"
+              style={{ background: spotify.green, color: '#000', textTransform: 'uppercase', letterSpacing: '1.4px' }}
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               <span>New Invoice</span>
             </Link>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6 lg:p-10">
-          <div className="max-w-[1280px] mx-auto">
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
@@ -346,10 +352,10 @@ export default function DashboardLayout({
       {/* Mobile FAB */}
       <Link
         href="/dashboard/create"
-        className="lg:hidden fixed bottom-6 right-6 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 bg-[#1ed760] text-black"
-        style={{ boxShadow: '0 4px 16px rgba(30,215,96,0.3)' }}
+        className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+        style={{ background: spotify.green, boxShadow: '0 4px 12px rgba(30,215,96,0.4)' }}
       >
-        <Plus className="w-5 h-5" />
+        <Plus className="w-6 h-6" style={{ color: '#000' }} />
       </Link>
 
       <FeedbackWidget />

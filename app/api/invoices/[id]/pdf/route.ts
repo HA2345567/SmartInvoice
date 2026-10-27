@@ -39,11 +39,11 @@ export async function GET(
       taxRate: invoice.taxRate,
       discountRate: invoice.discountRate,
       paymentLink: invoice.paymentLink,
-      companyName: user.company || user.name || 'SmartInvoice',
-      companyAddress: user.companyAddress || (user as any).address || '',
-      companyGST: user.companyGST || (user as any).gstNumber || '',
-      companyEmail: user.email || '',
-      companyPhone: user.companyPhone || (user as any).phone || '',
+      companyName: user.company || 'SmartInvoice',
+      companyAddress: user.companyAddress || 'Your Company Address\nCity, State - PIN',
+      companyGST: user.companyGST || 'Your GST Number',
+      companyEmail: '',
+      companyPhone: user.companyPhone || '',
       companyWebsite: user.companyWebsite || '',
       invoiceStatus: (() => {
         switch (invoice.status) {
@@ -57,7 +57,7 @@ export async function GET(
       theme: (invoice.theme || 'ultra-luxury') as any,
       invoiceType: (invoice.invoiceType || 'sales') as any,
       customColors: invoice.customColors || undefined,
-      companyLogo: (invoice as any).companyLogo || user.avatar || undefined,
+      companyLogo: (invoice as any).companyLogo || undefined,
       whiteLabelMode: (invoice as any).whiteLabelMode || false,
     };
 

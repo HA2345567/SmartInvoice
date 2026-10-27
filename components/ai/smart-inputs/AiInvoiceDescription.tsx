@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Crown, Gem, Briefcase, RefreshCw, Check } from 'lucide-react';
+import { Sparkles, Wand2, RefreshCw, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -85,19 +85,19 @@ export function AiInvoiceDescription({ value, onChange, placeholder, className }
                             {isEnhancing ? (
                                 <RefreshCw className="w-4 h-4 animate-spin text-green-500" />
                             ) : (
-                                <Crown className="w-4 h-4 text-amber-400" />
+                                <Sparkles className="w-4 h-4 text-purple-400" />
                             )}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-black/90 border-green-500/20 backdrop-blur-xl text-white">
                         <DropdownMenuItem onClick={() => enhanceText('formal')} className="cursor-pointer hover:bg-green-500/20 focus:bg-green-500/20">
-                            <Briefcase className="w-4 h-4 mr-2 text-slate-300" /> Executive Formal
+                            <Wand2 className="w-4 h-4 mr-2 text-blue-400" /> Make Formal
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => enhanceText('friendly')} className="cursor-pointer hover:bg-green-500/20 focus:bg-green-500/20">
-                            <Gem className="w-4 h-4 mr-2 text-amber-400" /> Refined Conversational
+                            <Sparkles className="w-4 h-4 mr-2 text-yellow-400" /> Make Friendly
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => enhanceText('detailed')} className="cursor-pointer hover:bg-green-500/20 focus:bg-green-500/20">
-                            <Check className="w-4 h-4 mr-2 text-green-400" /> Comprehensive Itemized
+                            <Check className="w-4 h-4 mr-2 text-green-400" /> Make Detailed
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -110,8 +110,8 @@ export function AiInvoiceDescription({ value, onChange, placeholder, className }
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-green-500/30 flex items-center gap-2"
                     >
-                        <Gem className="w-4 h-4 text-green-400 animate-pulse" />
-                        <span className="text-xs font-medium text-green-100">Polishing Document Copy...</span>
+                        <Sparkles className="w-4 h-4 text-green-400 animate-pulse" />
+                        <span className="text-xs font-medium text-green-100">AI Rewriting...</span>
                     </motion.div>
                 </div>
             )}

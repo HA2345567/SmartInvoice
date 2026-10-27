@@ -1,28 +1,21 @@
 'use client';
 
 import React from 'react';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingStateProps {
   message?: string;
-  sublabel?: string;
   className?: string;
-  fullScreen?: boolean;
 }
 
-export function LoadingState({
-  message = 'Loading...',
-  sublabel,
-  className = 'min-h-[400px]',
-  fullScreen = false,
-}: LoadingStateProps) {
+export function LoadingState({ message = 'Loading...', className = 'min-h-[400px]' }: LoadingStateProps) {
   return (
-    <LuxuryLoader 
-      label={message}
-      sublabel={sublabel}
-      minHeight={className}
-      fullScreen={fullScreen}
-    />
+    <div className={`flex items-center justify-center ${className}`}>
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+        <p style={{ color: '#b3b3b3' }}>{message}</p>
+      </div>
+    </div>
   );
 }
 

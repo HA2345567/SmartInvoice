@@ -27,108 +27,97 @@ export const ClientInformationCard = React.memo(({
     handleClientSearch
 }: ClientInformationCardProps) => {
     return (
-        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
-                <CardTitle className="text-lg font-normal tracking-tight text-white flex items-center gap-2">
-                    <User className="w-4 h-4 text-white/40" />
-                    <span>Client Details</span>
+        <Card className="card-green-mist animate-slide-in" style={{ animationDelay: '0.1s' }}>
+            <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                    <User className="w-5 h-5 mr-2 text-green-primary" />
+                    Client Information
                 </CardTitle>
-                <CardDescription className="text-xs text-white/40 mt-0.5">
-                    Select a saved client from your directory or input new recipient info
-                </CardDescription>
+                <CardDescription className="text-green-muted">Select existing client or enter new details</CardDescription>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-4">
+            <CardContent className="space-y-4">
                 {/* Client Search/Selection */}
-                <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                        <Label htmlFor="clientSearch" className="text-xs font-normal text-white/60">Client Name *</Label>
-                        <span className="text-[11px] text-white/30">Type name or choose existing</span>
-                    </div>
+                <div className="space-y-2">
+                    <Label htmlFor="clientSearch" className="text-white">Client *</Label>
                     <AiClientSelector
                         clients={clients}
-                        onSelect={(client: any) => {
-                            selectClient(client);
-                        }}
-                        value={invoiceData.clientName || clientSearch || ''}
-                        onChange={(value: string) => {
-                            handleClientSearch(value);
-                            setInvoiceData((prev: any) => ({ ...prev, clientName: value }));
-                        }}
+                        onSelect={selectClient}
+                        value={clientSearch}
+                        onChange={handleClientSearch}
                     />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="clientEmail" className="text-xs font-normal text-white/60">Client Email *</Label>
+                    <div className="space-y-2">
+                        <Label htmlFor="clientEmail" className="text-white">Client Email *</Label>
                         <Input
                             id="clientEmail"
                             type="email"
                             value={invoiceData.clientEmail}
                             onChange={(e: any) => setInvoiceData((prev: any) => ({ ...prev, clientEmail: e.target.value }))}
-                            placeholder="client@company.com"
-                            className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                            placeholder="client@example.com"
+                            className="input-green"
                             required
                         />
                     </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="clientCompany" className="text-xs font-normal text-white/60">Company Name</Label>
+                    <div className="space-y-2">
+                        <Label htmlFor="clientCompany" className="text-white">Company</Label>
                         <Input
                             id="clientCompany"
                             value={invoiceData.clientCompany}
                             onChange={(e: any) => setInvoiceData((prev: any) => ({ ...prev, clientCompany: e.target.value }))}
-                            placeholder="Organization / Brand (optional)"
-                            className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                            placeholder="Company name (optional)"
+                            className="input-green"
                         />
                     </div>
                 </div>
 
-                <div className="space-y-1.5">
-                    <Label htmlFor="clientAddress" className="text-xs font-normal text-white/60">Billing Address</Label>
+                <div className="space-y-2">
+                    <Label htmlFor="clientAddress" className="text-white">Client Address</Label>
                     <Textarea
                         id="clientAddress"
                         value={invoiceData.clientAddress}
                         onChange={(e: any) => setInvoiceData((prev: any) => ({ ...prev, clientAddress: e.target.value }))}
-                        placeholder="Street, suite, city, state, postal code, country"
-                        rows={2}
-                        className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
+                        placeholder="Enter client address"
+                        rows={3}
+                        className="input-green"
                     />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="clientGST" className="text-xs font-normal text-white/60">Tax ID / VAT / GST</Label>
+                    <div className="space-y-2">
+                        <Label htmlFor="clientGST" className="text-white">GST/VAT Number</Label>
                         <Input
                             id="clientGST"
                             value={invoiceData.clientGST}
                             onChange={(e: any) => setInvoiceData((prev: any) => ({ ...prev, clientGST: e.target.value }))}
-                            placeholder="Tax identifier (optional)"
-                            className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                            placeholder="GST/VAT number (optional)"
+                            className="input-green"
                         />
                     </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="clientCurrency" className="text-xs font-normal text-white/60">Currency</Label>
+                    <div className="space-y-2">
+                        <Label htmlFor="clientCurrency" className="text-white">Currency</Label>
                         <Select
                             value={invoiceData.clientCurrency}
                             onValueChange={(value) => setInvoiceData((prev: any) => ({ ...prev, clientCurrency: value }))}
                         >
-                            <SelectTrigger className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60">
+                            <SelectTrigger className="input-green">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
-                                <SelectItem value="$">USD ($) - US Dollar</SelectItem>
-                                <SelectItem value="€">EUR (€) - Euro</SelectItem>
-                                <SelectItem value="£">GBP (£) - British Pound</SelectItem>
-                                <SelectItem value="₹">INR (₹) - Indian Rupee</SelectItem>
-                                <SelectItem value="C$">CAD (C$) - Canadian Dollar</SelectItem>
-                                <SelectItem value="A$">AUD (A$) - Australian Dollar</SelectItem>
+                            <SelectContent className="bg-green-900 border-green-500/30">
+                                <SelectItem value="$">USD - US Dollar</SelectItem>
+                                <SelectItem value="€">EUR - Euro</SelectItem>
+                                <SelectItem value="£">GBP - British Pound</SelectItem>
+                                <SelectItem value="₹">INR - Indian Rupee</SelectItem>
+                                <SelectItem value="C$">CAD - Canadian Dollar</SelectItem>
+                                <SelectItem value="A$">AUD - Australian Dollar</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 });
 
 ClientInformationCard.displayName = 'ClientInformationCard';
-

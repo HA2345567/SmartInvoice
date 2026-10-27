@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Layout, Download, Save, Send, Sparkles } from 'lucide-react';
+import { Plus, Eye, Save, Send, Layout, Download, Sparkles, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
@@ -23,38 +23,65 @@ export const InvoiceFormHeader = React.memo(({
 
     return (
         <div className="space-y-4 mb-8">
-            {/* Editorial Studio Toolbar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
-                <div className="flex items-center gap-3">
-                    <Link
-                        href="/dashboard/invoices"
-                        className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        <span>Invoices</span>
-                    </Link>
-                    <span className="text-zinc-600">/</span>
-                    <h1 className="text-lg font-medium text-white tracking-tight">Invoice Studio</h1>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-white/[0.08]">
-                        Draft
-                    </span>
+            {!user && (
+                <div 
+                    className="p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border shadow-xl relative overflow-hidden transition-all duration-300 hover:border-green-500/40"
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(30,215,96,0.08) 0%, rgba(18,18,18,0.95) 50%, rgba(30,215,96,0.04) 100%)',
+                        borderColor: 'rgba(30,215,96,0.25)',
+                        backdropFilter: 'blur(16px)'
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500/10 border border-green-500/30 text-green-400">
+                            <Sparkles className="w-5 h-5 animate-pulse" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-extrabold text-white">Free Guest Mode</span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/30">
+                                    No Sign In Required
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-0.5">Fill details below and click <strong className="text-green-400">Quick PDF</strong> to download immediately.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <Link 
+                            href="/auth/signup"
+                            className="px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:scale-[1.03]"
+                        >
+                            Sign Up to Save Cloud History
+                        </Link>
+                    </div>
                 </div>
+            )}
 
-                <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-white flex items-center">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-br from-green-400 to-green-600 text-black shadow-lg shadow-green-500/20">
+                            <Plus className="w-6 h-6 stroke-[3]" />
+                        </div>
+                        Create New Invoice
+                    </h1>
+                    <p className="text-green-muted mt-1 text-sm">Generate a professional, high-conversion invoice in seconds</p>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
                     <Button
                         variant="outline"
                         onClick={() => setShowTemplateDialog(true)}
-                        className="border-white/10 hover:bg-white/5 text-zinc-300 text-xs font-medium rounded-full px-3.5 h-9"
+                        className="btn-green-secondary text-xs h-10 px-3.5"
                     >
-                        <Layout className="w-3.5 h-3.5 mr-1.5 text-zinc-400" />
+                        <Layout className="w-4 h-4 mr-2" />
                         Templates
                     </Button>
                     <Button
                         variant="outline"
                         onClick={handleSimplePDF}
-                        className="border-white/10 hover:bg-white/5 text-zinc-300 text-xs font-medium rounded-full px-3.5 h-9"
+                        className="btn-green-secondary text-xs h-10 px-4 border-green-500/40 text-green-400 hover:bg-green-500/10 font-bold"
                     >
-                        <Download className="w-3.5 h-3.5 mr-1.5 text-zinc-400" />
+                        <Download className="w-4 h-4 mr-2 text-green-400" />
                         Download PDF
                     </Button>
                     {user ? (
@@ -63,47 +90,33 @@ export const InvoiceFormHeader = React.memo(({
                                 variant="outline"
                                 onClick={() => handleSave('draft')}
                                 disabled={loading}
-                                className="border-white/10 hover:bg-white/5 text-zinc-300 text-xs font-medium rounded-full px-3.5 h-9"
+                                className="btn-green-secondary text-xs h-10 px-3.5"
                             >
-                                <Save className="w-3.5 h-3.5 mr-1.5 text-zinc-400" />
+                                <Save className="w-4 h-4 mr-2" />
                                 Save Draft
                             </Button>
                             <Button
                                 onClick={() => handleSave('sent')}
                                 disabled={loading}
-                                className="bg-[#1ed760] text-black font-semibold text-xs rounded-full px-5 h-9 hover:bg-[#1fdf64] transition-all active:scale-[0.98]"
+                                className="btn-green-primary dark-glow text-xs h-10 px-4 font-bold"
                             >
-                                <Send className="w-3.5 h-3.5 mr-1.5" />
-                                Issue & Send
+                                <Send className="w-4 h-4 mr-2" />
+                                {loading ? 'Creating...' : 'Save & Send'}
                             </Button>
                         </>
                     ) : (
-                        <Link href="/auth/signup">
-                            <Button
-                                className="bg-[#1ed760] text-black font-semibold text-xs rounded-full px-5 h-9 hover:bg-[#1fdf64] transition-all"
-                            >
-                                Sign Up to Save
-                            </Button>
-                        </Link>
+                        <Button
+                            onClick={handleSimplePDF}
+                            className="bg-gradient-to-r from-green-400 to-green-500 text-black hover:from-green-500 hover:to-green-600 font-extrabold text-xs h-10 px-5 rounded-full shadow-lg shadow-green-500/25 transition-transform hover:scale-[1.03]"
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Invoice Now
+                        </Button>
                     )}
                 </div>
             </div>
-
-            {/* Guest Notice if unauthenticated */}
-            {!user && (
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-200/90">
-                    <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                        <span>Guest Studio Mode — Fill details and click <strong>Download PDF</strong> freely.</span>
-                    </div>
-                    <Link href="/auth/signup" className="underline text-white font-medium hover:text-amber-300">
-                        Create account to save records
-                    </Link>
-                </div>
-            )}
         </div>
     );
 });
 
 InvoiceFormHeader.displayName = 'InvoiceFormHeader';
-export default InvoiceFormHeader;

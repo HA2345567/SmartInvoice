@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
-import { getTemplate, TemplateContext, renderItemsTable, renderTotals, renderAdditionalInformation, renderStandardFooter, drawWatermark } from './templates';
 
 export interface InvoiceItem {
   id: string;
@@ -31,10 +30,6 @@ export interface InvoiceData {
   amount: number;
   taxRate: number;
   discountRate: number;
-  includeGST?: boolean;
-  gstRate?: number;
-  includeTDS?: boolean;
-  tdsRate?: number;
   paymentLink?: string;
   companyName?: string;
   companyAddress?: string;
@@ -501,44 +496,23 @@ export class PremiumPDFGenerator {
       this.doc.setFillColor(...(this.colors.bg as [number, number, number]));
       this.doc.rect(0, 0, this.pageWidth, this.pageHeight, 'F');
 
-      const template = getTemplate(invoiceData.theme);
-      const rightMargin = this.pageWidth - this.margin;
-      const templateContext: TemplateContext = {
-        pageWidth: this.pageWidth,
-        pageHeight: this.pageHeight,
-        margin: this.margin,
-        colors: {
-          primary: this.colors.primary as [number, number, number],
-          secondary: this.colors.secondary as [number, number, number],
-          accent: this.colors.accent as [number, number, number],
-          bg: this.colors.bg as [number, number, number],
-        },
-        drawLogo: (logoUrl, x, y, maxW, maxH, alignRight) => this.drawLogo(logoUrl, x, y, maxW, maxH, alignRight),
-        drawWatermark: (type) => drawWatermark(this.doc, type || invoiceData.invoiceType, this.pageWidth, this.pageHeight),
-        renderSpecializedSection: (data, startY) => this.renderSpecializedSection(data, startY),
-        renderStandardItemsTable: (data, startY, opts) => renderItemsTable(this.doc, data, startY, {
-          margin: this.margin,
-          pageWidth: this.pageWidth,
-          ...opts,
-        }),
-        renderTotalsBlock: (data, tableEndY, opts) => renderTotals(this.doc, data, tableEndY, {
-          margin: this.margin,
-          pageWidth: this.pageWidth,
-          pageHeight: this.pageHeight,
-          ...opts,
-        }),
-        renderAdditionalInformation: (data, totalsEndY) => renderAdditionalInformation(this.doc, data, totalsEndY, {
-          margin: this.margin,
-          pageWidth: this.pageWidth,
-          pageHeight: this.pageHeight,
-        }),
-        renderFooter: (data) => renderStandardFooter(this.doc, data, rightMargin),
-        hexToRgb: (hex) => this.hexToRgb(hex),
-        getInvoiceTypeLabel: (type) => this.getInvoiceTypeLabel(type),
-        getInvoiceTypeColor: (type) => this.getInvoiceTypeColor(type),
-      };
+      const theme = (invoiceData.theme || 'ultra-luxury').toLowerCase();
 
-      template.render(this.doc, invoiceData, templateContext);
+      if (theme === 'ultra-luxury' || theme === 'luxury' || theme === 'minimal' || theme === 'professional') {
+        this.renderUltraLuxuryLayout(invoiceData);
+      } else if (theme === 'microsoft') {
+        this.renderMicrosoftLayout(invoiceData);
+      } else if (theme === 'amazon') {
+        this.renderAmazonLayout(invoiceData);
+      } else if (theme === 'financial' || theme === 'stripe' || theme === 'google' || theme === 'salesforce') {
+        this.renderFinancialLayout(invoiceData);
+      } else if (theme === 'creative-agency' || theme === 'shopify' || theme === 'slack') {
+        this.renderCreativeAgencyLayout(invoiceData);
+      } else if (theme === 'professional-services' || theme === 'notion') {
+        this.renderProfessionalServicesLayout(invoiceData);
+      } else {
+        this.renderUltraLuxuryLayout(invoiceData);
+      }
 
       return this.doc.output('arraybuffer') as unknown as Uint8Array;
     } catch (error) {
@@ -553,18 +527,18 @@ export class PremiumPDFGenerator {
     const leftMargin = 20; // PRD says 60px ~ 21mm
     const rightMargin = this.pageWidth - leftMargin;
 
-    // 1. Company Logo in Top Corner Right Side
+    // 1. Company Logo or Name
+    let drawnLogo = false;
     if (data.companyLogo) {
-      const logoW = 45;
-      const logoH = 22;
-      this.drawLogo(data.companyLogo, rightMargin - logoW, 18, logoW, logoH);
+      drawnLogo = this.drawLogo(data.companyLogo, leftMargin, 18, 50, 22);
     }
     
-    // 2. Company Name on Top Left
-    this.doc.setFontSize(28);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(29, 29, 31);
-    this.doc.text(data.companyName || 'SmartInvoice', leftMargin, 32);
+    if (!drawnLogo) {
+      this.doc.setFontSize(28);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(29, 29, 31);
+      this.doc.text(data.companyName || 'SmartInvoice', leftMargin, 32);
+    }
 
     // Address Block below Company Name / Logo
     this.doc.setFontSize(9);
@@ -785,35 +759,31 @@ export class PremiumPDFGenerator {
     this.doc.rect(this.margin, 20, this.pageWidth - (2 * this.margin), 5, 'F');
 
     const startY = 40;
-    const rightMargin = this.pageWidth - this.margin;
 
-    // Header Logo in Top Right Corner
-    let hasLogo = false;
+    // Header Logo or Company Name
+    let drawnLogo = false;
     if (data.companyLogo) {
-      const logoW = 42;
-      const logoH = 18;
-      hasLogo = this.drawLogo(data.companyLogo, rightMargin - logoW, 28, logoW, logoH);
+      drawnLogo = this.drawLogo(data.companyLogo, this.margin, startY - 10, 45, 20);
     }
 
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(24);
-    this.doc.setTextColor(50, 49, 48); // #323130
-    this.doc.text(data.companyName || 'SmartInvoice', this.margin, startY);
+    if (!drawnLogo) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setFontSize(24);
+      this.doc.setTextColor(50, 49, 48); // #323130
+      this.doc.text(data.companyName || 'SmartInvoice', this.margin, startY);
+    }
 
     // Invoice Type Label & Number (dynamic)
     const typeLabel = this.getInvoiceTypeLabel(data.invoiceType);
     const typeColor = this.getInvoiceTypeColor(data.invoiceType);
 
-    const typeLabelY = hasLogo ? 52 : startY;
-    const invNumberY = hasLogo ? 59 : startY + 8;
-
-    this.doc.setFontSize(hasLogo ? 18 : 24);
+    this.doc.setFontSize(24);
     this.doc.setTextColor(...typeColor);
-    this.doc.text(typeLabel, rightMargin, typeLabelY, { align: 'right' });
+    this.doc.text(typeLabel, this.pageWidth - this.margin, startY, { align: 'right' });
 
     this.doc.setFontSize(10);
     this.doc.setTextColor(96, 94, 92); // #605E5C
-    this.doc.text(data.invoiceNumber || '', rightMargin, invNumberY, { align: 'right' });
+    this.doc.text(data.invoiceNumber || '', this.pageWidth - this.margin, startY + 8, { align: 'right' });
 
     // Watermark for Proforma/Past Due
     const watermark = this.shouldShowWatermark(data.invoiceType);
@@ -840,19 +810,19 @@ export class PremiumPDFGenerator {
     this.doc.text(companyInfo, this.margin, startY + 10);
 
     // Dates (aligned right)
-    let dateY = hasLogo ? 67 : startY + 20;
-    const dateColX = rightMargin - 50;
+    let dateY = startY + 20;
+    const dateColX = this.pageWidth - this.margin - 50;
 
     this.doc.text('Date:', dateColX, dateY);
-    this.doc.text(data.date ? format(new Date(data.date), 'MMM dd, yyyy') : '', rightMargin, dateY, { align: 'right' });
+    this.doc.text(data.date ? format(new Date(data.date), 'MMM dd, yyyy') : '', this.pageWidth - this.margin, dateY, { align: 'right' });
 
     dateY += 6;
     this.doc.text('Due:', dateColX, dateY);
-    this.doc.text(data.dueDate ? format(new Date(data.dueDate), 'MMM dd, yyyy') : '', rightMargin, dateY, { align: 'right' });
+    this.doc.text(data.dueDate ? format(new Date(data.dueDate), 'MMM dd, yyyy') : '', this.pageWidth - this.margin, dateY, { align: 'right' });
 
 
     // Bill To Section (Gray Box)
-    const billToY = hasLogo ? 86 : startY + 40;
+    const billToY = startY + 40;
     this.doc.setFillColor(243, 242, 241); // #F3F2F1
     this.doc.rect(this.margin, billToY, 80, 40, 'F');
 
@@ -884,6 +854,7 @@ export class PremiumPDFGenerator {
 
     // Items Table
     const tableY = nextSectionY + 5;
+    const rightMargin = this.pageWidth - this.margin;
 
     // Table Header Box
     this.doc.setDrawColor(200, 200, 200);
@@ -989,16 +960,8 @@ export class PremiumPDFGenerator {
   // --- Amazon Efficient (Template 3) Renderer ---
   private renderAmazonLayout(data: InvoiceData) {
     const accentColor = [255, 153, 0]; // #FF9900
-    const startY = 20;
-    const rightMargin = this.pageWidth - this.margin;
 
-    // Header Logo in Top Right Corner
-    let hasLogo = false;
-    const logoW = 42;
-    const logoH = 18;
-    if (data.companyLogo) {
-      hasLogo = this.drawLogo(data.companyLogo, rightMargin - logoW, 14, logoW, logoH);
-    }
+    const startY = 20;
 
     // Header Section
     this.doc.setFont('helvetica', 'bold');
@@ -1009,33 +972,20 @@ export class PremiumPDFGenerator {
     // Orange Line
     this.doc.setDrawColor(255, 153, 0);
     this.doc.setLineWidth(0.5);
-    const lineEndX = hasLogo ? rightMargin - logoW - 6 : rightMargin;
-    this.doc.line(this.margin + 80, startY + 5, lineEndX, startY + 5);
+    this.doc.line(this.margin + 80, startY + 5, this.pageWidth - this.margin, startY + 5);
 
     // Invoice Type Label (dynamic)
     const typeLabel = this.getInvoiceTypeLabel(data.invoiceType);
     const typeColor = this.getInvoiceTypeColor(data.invoiceType);
 
-    if (hasLogo) {
-      this.doc.setFontSize(11);
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.setTextColor(...typeColor);
-      this.doc.text(typeLabel, rightMargin, 36, { align: 'right' });
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(...typeColor);
+    this.doc.text(typeLabel, this.pageWidth - this.margin - 40, startY + 3);
 
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.setFontSize(9);
-      this.doc.setTextColor(100, 100, 100);
-      this.doc.text(data.invoiceNumber || '', rightMargin, 42, { align: 'right' });
-    } else {
-      this.doc.setFontSize(10);
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.setTextColor(...typeColor);
-      this.doc.text(typeLabel, rightMargin - 40, startY + 3);
-
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.setTextColor(17, 17, 17);
-      this.doc.text(data.invoiceNumber || '', rightMargin, startY + 10, { align: 'right' });
-    }
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(17, 17, 17);
+    this.doc.text(data.invoiceNumber || '', this.pageWidth - this.margin, startY + 10, { align: 'right' });
 
     // Watermark for Proforma/Past Due
     const watermark = this.shouldShowWatermark(data.invoiceType);
@@ -1057,7 +1007,7 @@ export class PremiumPDFGenerator {
     this.doc.text(companyInfo, this.margin, startY + 16);
 
     // Boxed Sections
-    const boxY = hasLogo ? startY + 28 : startY + 30;
+    const boxY = startY + 30;
     const boxHeight = 25;
     const col2X = this.margin + 90;
 
@@ -1169,13 +1119,6 @@ export class PremiumPDFGenerator {
     this.doc.rect(10, 10, this.pageWidth - 20, this.pageHeight - 20); // Outer
     this.doc.setLineWidth(0.2);
     this.doc.rect(12, 12, this.pageWidth - 24, this.pageHeight - 24); // Inner
-
-    // Top Right Logo inside inner border
-    if (data.companyLogo) {
-      const logoW = 38;
-      const logoH = 18;
-      this.drawLogo(data.companyLogo, this.pageWidth - 16 - logoW, 15, logoW, logoH);
-    }
 
     const startY = 30;
 
@@ -1385,24 +1328,11 @@ export class PremiumPDFGenerator {
     const companyMeta = [data.companyAddress, data.companyWebsite].filter(Boolean).join('  |  ');
     this.doc.text(companyMeta.toUpperCase(), margin, currentY);
 
-    // Top Right Logo
-    let hasLogo = false;
-    if (data.companyLogo) {
-      const logoW = 42;
-      const logoH = 18;
-      hasLogo = this.drawLogo(data.companyLogo, rightMargin - logoW, 10, logoW, logoH);
-    }
-
     // INVOICE Label (Top Right, overlapping the color)
+    this.doc.setFontSize(42);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(255, 255, 255);
-    if (hasLogo) {
-      this.doc.setFontSize(32);
-      this.doc.text('INVOICE', rightMargin, 42, { align: 'right' });
-    } else {
-      this.doc.setFontSize(42);
-      this.doc.text('INVOICE', rightMargin, 35, { align: 'right' });
-    }
+    this.doc.text('INVOICE', rightMargin, 35, { align: 'right' });
 
     // 2. HERO SECTION: Client & Details Grid
     currentY += 40;
@@ -1572,18 +1502,11 @@ export class PremiumPDFGenerator {
     this.doc.setTextColor(80, 80, 80);
     if (data.companyAddress) this.doc.text(data.companyAddress, margin, currentY);
 
-    // Right: Invoice Meta Box & Top Right Logo
-    let hasLogo = false;
-    if (data.companyLogo) {
-      const logoW = 42;
-      const logoH = 18;
-      hasLogo = this.drawLogo(data.companyLogo, rightMargin - logoW, 22, logoW, logoH);
-    }
-
+    // Right: Invoice Meta Box
     const boxWidth = 70;
     const boxX = rightMargin - boxWidth;
-    const boxY = hasLogo ? 44 : 25;
-    const boxHeight = hasLogo ? 30 : 35;
+    const boxY = 25;
+    const boxHeight = 35;
 
     // Light gray background box
     this.doc.setFillColor(248, 248, 250);
@@ -1591,18 +1514,18 @@ export class PremiumPDFGenerator {
     this.doc.rect(boxX, boxY, boxWidth, boxHeight, 'FD');
 
     this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(hasLogo ? 12 : 14);
+    this.doc.setFontSize(14);
     this.doc.setTextColor(...(this.colors.primary as [number, number, number]));
-    this.doc.text('INVOICE', boxX + 10, boxY + (hasLogo ? 10 : 12));
+    this.doc.text('INVOICE', boxX + 10, boxY + 12);
 
-    this.doc.setFontSize(hasLogo ? 9 : 10);
+    this.doc.setFontSize(10);
     this.doc.setTextColor(0, 0, 0);
-    this.doc.text(`# ${data.invoiceNumber || ''}`, boxX + 10, boxY + (hasLogo ? 18 : 22));
+    this.doc.text(`# ${data.invoiceNumber}`, boxX + 10, boxY + 22);
 
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(8);
     this.doc.setTextColor(100, 100, 100);
-    this.doc.text(data.date ? format(new Date(data.date), 'MMMM dd, yyyy') : '', boxX + 10, boxY + (hasLogo ? 25 : 29));
+    this.doc.text(data.date ? format(new Date(data.date), 'MMMM dd, yyyy') : '', boxX + 10, boxY + 29);
 
     currentY += 25;
 
@@ -2140,14 +2063,7 @@ export class PremiumPDFGenerator {
     this.doc.text(lines.slice(0, 3), this.margin, y + 7);
   }
 
-  private drawLogo(
-    logoUrl: string | undefined,
-    x: number,
-    y: number,
-    maxW: number = 45,
-    maxH: number = 22,
-    alignRight: boolean = true
-  ): boolean {
+  private drawLogo(logoUrl: string | undefined, x: number, y: number, maxW: number = 40, maxH: number = 20): boolean {
     if (!logoUrl) return false;
     try {
       let format = 'PNG';
@@ -2156,38 +2072,7 @@ export class PremiumPDFGenerator {
       } else if (logoUrl.startsWith('data:image/webp')) {
         format = 'WEBP';
       }
-
-      let renderW = maxW;
-      let renderH = maxH;
-      let renderX = x;
-      let renderY = y;
-
-      try {
-        const imgProps = (this.doc as any).getImageProperties(logoUrl);
-        if (imgProps && imgProps.width && imgProps.height) {
-          const imgAspect = imgProps.width / imgProps.height;
-          const boxAspect = maxW / maxH;
-
-          if (imgAspect > boxAspect) {
-            // Image is wider than the target box
-            renderW = maxW;
-            renderH = maxW / imgAspect;
-          } else {
-            // Image is taller or squarer than the target box
-            renderH = maxH;
-            renderW = maxH * imgAspect;
-          }
-
-          if (alignRight) {
-            renderX = (x + maxW) - renderW;
-          }
-          renderY = y + (maxH - renderH) / 2;
-        }
-      } catch (propErr) {
-        console.warn('Could not extract image properties, using default sizing:', propErr);
-      }
-
-      this.doc.addImage(logoUrl, format, renderX, renderY, renderW, renderH);
+      this.doc.addImage(logoUrl, format, x, y, maxW, maxH);
       return true;
     } catch (e) {
       console.warn('Failed to render logo in PDF:', e);

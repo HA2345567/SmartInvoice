@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
@@ -27,41 +28,26 @@ export const InvoiceItemsCard = React.memo(({
     setItemSuggestions
 }: InvoiceItemsCardProps) => {
     return (
-        <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <Card className="card-green-mist animate-slide-in" style={{ animationDelay: '0.2s' }}>
+            <CardHeader>
+                <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle className="text-lg font-normal tracking-tight text-white">Line Items</CardTitle>
-                        <CardDescription className="text-xs text-white/40 mt-0.5">
-                            Products, deliverables, or billable services included in this document
-                        </CardDescription>
+                        <CardTitle className="text-white">Invoice Items</CardTitle>
+                        <CardDescription className="text-green-muted">Add products or services</CardDescription>
                     </div>
-                    <Button
-                        onClick={addItem}
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white text-xs h-8 px-3 inline-flex items-center gap-1.5"
-                    >
-                        <Plus className="w-3.5 h-3.5" />
-                        Add Line Item
+                    <Button onClick={addItem} size="sm" className="btn-green-secondary">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Item
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="p-6 pt-2">
-                <div className="overflow-x-auto">
-                    {/* Header Row */}
-                    <div className="min-w-[600px] grid grid-cols-12 gap-3 pb-2 border-b border-white/[0.06] text-[11px] font-medium uppercase tracking-wider text-white/40">
-                        <div className="col-span-6">Description</div>
-                        <div className="col-span-2">Quantity</div>
-                        <div className="col-span-2">Rate ({invoiceData.clientCurrency || '$'})</div>
-                        <div className="col-span-2 text-right pr-8">Amount</div>
-                    </div>
-
-                    {/* Item Rows */}
-                    <div className="min-w-[600px] divide-y divide-white/[0.04]">
-                        {invoiceData.items.map((item: any, index: number) => (
-                            <div key={item.id || index} className="grid grid-cols-12 gap-3 py-3 items-center group">
-                                <div className="col-span-6 relative">
+            <CardContent>
+                <div className="space-y-4">
+                    {invoiceData.items.map((item: any) => (
+                        <div key={item.id} className="grid grid-cols-12 gap-4 items-end p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+                            <div className="col-span-5">
+                                <Label htmlFor={`description-${item.id}`} className="text-white">Description *</Label>
+                                <div className="relative">
                                     <Input
                                         id={`description-${item.id}`}
                                         value={item.description}
@@ -69,16 +55,16 @@ export const InvoiceItemsCard = React.memo(({
                                             updateItem(item.id, 'description', e.target.value);
                                             fetchItemSuggestions(e.target.value);
                                         }}
-                                        placeholder="Item or service description"
-                                        className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white placeholder:text-white/20 focus:border-[#1ed760]/60 focus:bg-[#151515]"
+                                        placeholder="Item description"
+                                        className="input-green"
                                         required
                                     />
                                     {itemSuggestions.length > 0 && item.description && (
-                                        <div className="absolute z-20 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-lg shadow-2xl max-h-40 overflow-y-auto backdrop-blur-md">
+                                        <div className="absolute z-10 w-full mt-1 bg-green-900/95 border border-green-500/30 rounded-lg shadow-lg max-h-40 overflow-y-auto backdrop-blur-sm">
                                             {itemSuggestions.map((suggestion: any, idx: number) => (
                                                 <div
                                                     key={idx}
-                                                    className="px-3 py-2 hover:bg-white/[0.06] cursor-pointer text-xs text-white/90 transition-colors"
+                                                    className="p-2 hover:bg-green-500/20 cursor-pointer text-sm text-white"
                                                     onClick={() => {
                                                         updateItem(item.id, 'description', suggestion.description);
                                                         setItemSuggestions([]);
@@ -90,65 +76,66 @@ export const InvoiceItemsCard = React.memo(({
                                         </div>
                                     )}
                                 </div>
-
-                                <div className="col-span-2">
+                            </div>
+                            <div className="col-span-2">
+                                <Label htmlFor={`quantity-${item.id}`} className="text-white">Qty *</Label>
+                                <Input
+                                    id={`quantity-${item.id}`}
+                                    type="number"
+                                    value={item.quantity}
+                                    onChange={(e: any) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                                    min="0"
+                                    step="0.01"
+                                    className="input-green"
+                                    required
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <Label htmlFor={`rate-${item.id}`} className="text-white text-xs font-bold mb-1.5 block">Rate *</Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-extrabold text-green-400 select-none">
+                                        {invoiceData.clientCurrency || '$'}
+                                    </span>
                                     <Input
-                                        id={`quantity-${item.id}`}
+                                        id={`rate-${item.id}`}
                                         type="number"
-                                        value={item.quantity}
-                                        onChange={(e: any) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                                        value={item.rate || ''}
+                                        onChange={(e: any) => updateItem(item.id, 'rate', parseFloat(e.target.value) || 0)}
                                         min="0"
                                         step="0.01"
-                                        className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 text-center"
+                                        className="input-green pl-7 font-bold text-white text-sm"
+                                        placeholder="0.00"
                                         required
                                     />
                                 </div>
-
-                                <div className="col-span-2">
-                                    <div className="relative">
-                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-white/40 select-none">
-                                            {invoiceData.clientCurrency || '$'}
-                                        </span>
-                                        <Input
-                                            id={`rate-${item.id}`}
-                                            type="number"
-                                            value={item.rate || ''}
-                                            onChange={(e: any) => updateItem(item.id, 'rate', parseFloat(e.target.value) || 0)}
-                                            min="0"
-                                            step="0.01"
-                                            className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white pl-6 focus:border-[#1ed760]/60"
-                                            placeholder="0.00"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="col-span-2 flex items-center justify-between pl-2">
-                                    <span className="text-xs font-mono font-medium text-white/90 tracking-tight">
-                                        {invoiceData.clientCurrency || '$'}{Number(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="col-span-2">
+                                <Label className="text-white text-xs font-bold mb-1.5 block">Amount</Label>
+                                <div className="h-10 px-3 rounded-md bg-green-500/10 border border-green-500/30 text-white font-extrabold text-sm flex items-center justify-between shadow-sm">
+                                    <span className="text-xs text-green-400 font-bold">{invoiceData.clientCurrency || '$'}</span>
+                                    <span className="text-sm font-extrabold text-green-300 font-mono tracking-wide">
+                                        {Number(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
-                                    {invoiceData.items.length > 1 ? (
-                                        <Button
-                                            onClick={() => removeItem(item.id)}
-                                            size="sm"
-                                            variant="ghost"
-                                            className="h-7 w-7 p-0 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                                            title="Delete line item"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
-                                    ) : (
-                                        <div className="w-7" />
-                                    )}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="col-span-1">
+                                {invoiceData.items.length > 1 && (
+                                    <Button
+                                        onClick={() => removeItem(item.id)}
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-red-400 hover:text-red-300 border-red-500/30 hover:bg-red-500/10"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 });
 
 InvoiceItemsCard.displayName = 'InvoiceItemsCard';
-

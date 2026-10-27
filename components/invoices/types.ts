@@ -67,19 +67,15 @@ export type InvoiceType =
     | 'expense';
 
 export type InvoiceStyle =
-    | 'luxury'
-    | 'minimal'
-    | 'apple'
-    | 'stripe'
-    | 'amazon'
-    | 'microsoft'
-    | 'google'
-    | 'shopify'
-    | 'custom'
     | 'ultra-luxury'
     | 'financial'
+    | 'microsoft'
+    | 'amazon'
     | 'creative-agency'
     | 'professional-services'
+    | 'stripe'
+    | 'google'
     | 'salesforce'
+    | 'shopify'
     | 'slack'
     | 'notion';

@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TriangleAlert as AlertTriangle, Clock, Send, Phone, Scale, Trash2, Mail, DollarSign, Calendar, TrendingUp, Users, Zap, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Loader2, RotateCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
-import { useToast } from '@/hooks/use-toast';
 
 interface OverdueInvoice {
   id: string;
@@ -207,7 +206,14 @@ export default function RemindersPage() {
   };
 
   if (loading) {
-    return <LuxuryLoader label="Loading reminder data..." sublabel="Payment Follow-ups" minHeight="min-h-[400px]" />;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Loading reminder data...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

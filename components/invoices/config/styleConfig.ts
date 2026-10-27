@@ -59,35 +59,10 @@ export const DESIGN_STYLES: StyleDefinition[] = [
         category: 'productivity',
         tags: ['Minimal', 'Documentation', 'Block-based']
     },
-    // 8 Modular Themes
-    {
-        id: 'apple',
-        name: 'Apple Style',
-        description: 'Ultra-clean, minimal design with broad whitespace and elegant typography.',
-        preview: '/previews/ultra-luxury.png',
-        category: 'tech',
-        tags: ['Minimal', 'Premium', 'Luxury']
-    },
-    {
-        id: 'minimal',
-        name: 'Minimal Style',
-        description: 'Pure typography and monochrome elegance with maximum clarity.',
-        preview: '/previews/ultra-luxury.png',
-        category: 'creative',
-        tags: ['Clean', 'Monochrome', 'Simple']
-    },
-    {
-        id: 'custom',
-        name: 'Custom Theme',
-        description: 'Personalized invoice design driven dynamically by your brand color palette.',
-        preview: '/previews/creative-agency.png',
-        category: 'creative',
-        tags: ['Custom', 'Dynamic', 'Colors']
-    },
     // Original Premium Styles
     {
         id: 'ultra-luxury',
-        name: 'Apple Style (Legacy)',
+        name: 'Apple Style',
         description: 'Ultra-clean, minimal design with broad whitespace and elegant typography.',
         preview: '/previews/ultra-luxury.png',
         category: 'tech',

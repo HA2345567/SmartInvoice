@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo, { LogoMarkOnly } from '@/components/Logo';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -97,7 +96,11 @@ function LoginContent() {
 
   // Show loading while checking auth state
   if (loading) {
-    return <LuxuryLoader label="Securing authentication..." sublabel="SmartInvoice Studio" fullScreen={true} />;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+      </div>
+    );
   }
 
   return (
@@ -208,7 +211,7 @@ function LoginContent() {
             </form>
 
             <p className="text-center text-xs sm:text-sm pt-1" style={{ color: '#b3b3b3' }}>
-              Don&apos;t have an account?{' '}
+              Don't have an account?{' '}
               <Link href="/auth/signup" className="font-bold" style={{ color: '#1ed760' }}>
                 Sign up
               </Link>
@@ -268,7 +271,7 @@ function LoginContent() {
                   </div>
                 ))}
               </div>
-              <span>Sign in to manage your invoices</span>
+              <span>Trusted by 10,000+ users</span>
             </div>
           </div>
         </div>
@@ -279,7 +282,11 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LuxuryLoader label="Securing authentication..." sublabel="SmartInvoice Studio" fullScreen={true} />}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+      </div>
+    }>
       <LoginContent />
     </Suspense>
   );

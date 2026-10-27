@@ -1,6 +1,5 @@
 import React from 'react';
 import { InvoiceData } from '../../types';
-import { FileText, ShieldCheck, Layers, MessageSquare, Package, Check, CreditCard, Star } from 'lucide-react';
 
 interface SalesInvoiceProps {
   data: InvoiceData;
@@ -35,7 +34,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <FileText className="w-5 h-5 text-zinc-300" />
+            <span>&#128196;</span>
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Invoice</p>
@@ -63,7 +62,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.calloutBlock}>
             <div className={styleClass.calloutIcon}>
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>&#128161;</span>
             </div>
             <div className={styleClass.calloutContent}>
               <h3>Payment Instructions</h3>
@@ -93,7 +92,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <Layers className="w-4 h-4 inline-block mr-1.5 text-zinc-400" />
+              <span className={styleClass.tableTitleIcon}>&#128203;</span>
               Line Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -143,7 +142,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
           {data.notes && (
             <div className={getClasses('toggleSection', 'notes')}>
               <div className={styleClass.toggleHeader}>
-                <MessageSquare className="w-3.5 h-3.5 inline-block mr-1.5 text-zinc-400" />
+                <span className={styleClass.toggleIcon}>&#128172;</span>
                 <span className={styleClass.toggleText}>Notes</span>
               </div>
               <div className={styleClass.toggleContent}>{data.notes}</div>
@@ -152,7 +151,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <MessageSquare className="w-3.5 h-3.5 inline-block mr-1 text-zinc-400" />
+              <span className={styleClass.commentsIcon}>&#128483;</span>
               <span>Comments (0)</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -172,18 +171,14 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
         <div className={styleClass.invoiceCard}>
           <div className={styleClass.header}>
             <div className={styleClass.shopifyBrand}>
-              {data?.from?.logoUrl ? (
-                <img src={data.from.logoUrl} alt="Company Logo" className="h-10 w-auto max-w-[140px] object-contain mr-2" />
-              ) : (
-                <div className={styleClass.shopifyLogo}>{(data?.from?.name || 'S').charAt(0)}</div>
-              )}
-              <span className={styleClass.shopifyText}>{data?.from?.name || 'Shopify'}</span>
+              <div className={styleClass.shopifyLogo}>S</div>
+              <span className={styleClass.shopifyText}>Shopify</span>
             </div>
             <div className={styleClass.invoiceMeta}>
               <h3 className={styleClass.title}>Invoice</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
               <div className={styleClass.orderTag}>
-                <Package className="w-3 h-3 inline-block mr-1 text-zinc-400" />
+                <span>&#128230;</span>
                 Order #{data.invoiceNumber.split('-').pop()}
               </div>
             </div>
@@ -206,7 +201,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
               <h3>Payment Due</h3>
               <div className={styleClass.name}>{data.dueDate}</div>
               <div className={styleClass.statusPill}>
-                <Check className="w-3 h-3 inline-block mr-1 text-emerald-400" /> Unpaid
+                <span>&#10003;</span> Unpaid
               </div>
             </div>
           </div>
@@ -263,14 +258,14 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.paymentSection}>
             <div className={styleClass.paymentInfo}>
-              <div className={styleClass.paymentIcon}><CreditCard className="w-4 h-4" /></div>
+              <div className={styleClass.paymentIcon}>&#128179;</div>
               <div className={styleClass.paymentDetails}>
                 <h4>Payment Method</h4>
                 <span>Due by {data.dueDate}</span>
               </div>
             </div>
             <button className={styleClass.payNowBtn}>
-              <CreditCard className="w-3.5 h-3.5 mr-1.5 inline-block" /> Pay Now
+              <span>&#10003;</span> Pay Now
             </button>
           </div>
 
@@ -282,11 +277,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
                 <a href="#" className={styleClass.footerLink}>Contact</a>
               </div>
               <div className={styleClass.socialProof}>
-                <span className={`${styleClass.starRating} inline-flex items-center gap-0.5`}>
-                  {[...Array(5)].map((_, idx) => (
-                    <Star key={idx} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </span>
+                <span className={styleClass.starRating}>&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                 <span>4.9/5</span>
               </div>
             </div>
@@ -427,7 +418,7 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
                 <p>Due by {data.dueDate}</p>
               </div>
               <div className={styleClass.payButton}>
-                <CreditCard className="w-4 h-4 mr-1.5 inline-block" /> Pay Now
+                <span>&#128179;</span> Pay Now
               </div>
             </div>
           )}
@@ -451,16 +442,12 @@ const SalesInvoice: React.FC<SalesInvoiceProps> = ({ data, styleClass }) => {
   // Default Salesforce/Financial-style layout
   return (
     <div className={styleClass.container}>
-      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
-        <div>
-          <div className={styleClass.title}>{data?.from?.name || 'Company Name'}</div>
-          <div className={getClasses('subtitle', 'subHeader', 'subHeader')}>INVOICE</div>
-        </div>
+      <header className={styleClass.header}>
         {data?.from?.logoUrl ? (
-          <div className="flex justify-end items-center">
-            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
-          </div>
+          <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain mb-2" />
         ) : null}
+        <div className={styleClass.title}>{data?.from?.name || 'Company Name'}</div>
+        <div className={getClasses('subtitle', 'subHeader', 'subHeader')}>INVOICE</div>
       </header>
 
       <div className={getClasses('metaGrid', 'metaSection', 'detailsGrid', 'meta')}>

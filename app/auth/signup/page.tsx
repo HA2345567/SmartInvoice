@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
 import GoogleIcon from '@/components/icons/GoogleIcon';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -108,7 +107,11 @@ export default function SignupPage() {
 
   // Show loading while checking auth state
   if (loading) {
-    return <LuxuryLoader label="Preparing onboarding..." sublabel="SmartInvoice Studio" fullScreen={true} />;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#121212' }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#1ed760' }} />
+      </div>
+    );
   }
 
   return (
@@ -332,7 +335,7 @@ export default function SignupPage() {
 
           <div className="text-left">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-              Create invoices and keep your business records organized
+              Join 10,000+ Professionals
             </h2>
             <p className="text-xs sm:text-sm mb-4" style={{ color: '#b3b3b3' }}>
               Access professional tools and manage invoices like a pro.

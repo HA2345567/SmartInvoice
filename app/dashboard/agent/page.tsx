@@ -5,12 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Gem, Briefcase, Mail, CheckCircle, AlertCircle, RefreshCw, Send, Shield, ChevronRight, Loader2, ShieldCheck } from 'lucide-react';
+import { Bot, Mail, CheckCircle, AlertCircle, RefreshCw, Send, Sparkles, Zap, Shield, ChevronRight, Loader2 } from 'lucide-react';
 import type { FollowUpAction } from '@/lib/ai-agent';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 
 export default function AgentPage() {
     const { session, user } = useAuth();
@@ -141,7 +140,7 @@ export default function AgentPage() {
                     {/* Agent Status Card */}
                     <Card className="card-green-mist overflow-hidden relative group">
                         <div className="absolute top-0 right-0 p-4 opacity-5">
-                            <Crown className="w-32 h-32 text-green-500" />
+                            <Bot className="w-32 h-32 text-green-500" />
                         </div>
                         <CardHeader>
                             <CardTitle className="text-white flex items-center gap-2">
@@ -173,9 +172,9 @@ export default function AgentPage() {
 
                             <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 text-sm">
                                 <p className="flex items-start gap-3">
-                                    <Gem className="w-5 h-5 text-green-400 mt-0.5 shrink-0" />
+                                    <Sparkles className="w-5 h-5 text-green-400 mt-0.5 shrink-0" />
                                     <span className="text-gray-300 italic">
-                                        &quot;I&apos;ve scanned your portfolio. There are <span className="text-white font-bold">{actions.length}</span> overdue items requiring immediate intervention.&quot;
+                                        "I've scanned your portfolio. There are <span className="text-white font-bold">{actions.length}</span> overdue items requiring immediate intervention."
                                     </span>
                                 </p>
                             </div>
@@ -190,7 +189,7 @@ export default function AgentPage() {
                         <CardContent className="space-y-6">
                             {[
                                 { step: 1, text: "Detect overdue invoices > 3 days", icon: AlertCircle },
-                                { step: 2, text: "Analyze client relationship & history", icon: Briefcase },
+                                { step: 2, text: "Analyze client relationship & history", icon: Bot },
                                 { step: 3, text: "Draft dynamic negotiation emails", icon: Mail },
                                 { step: 4, text: "Execute sending upon approval", icon: Send }
                             ].map((item, i) => (
@@ -224,7 +223,7 @@ export default function AgentPage() {
                                         disabled={processing}
                                         className="bg-green-500 hover:bg-green-600 text-white font-medium shadow-lg shadow-green-500/20 border-none px-6"
                                     >
-                                        <Crown className="w-4 h-4 mr-2" />
+                                        <Zap className="w-4 h-4 mr-2 fill-current" />
                                         {processing ? 'Executing Sequence...' : 'Auto-Resolve All'}
                                     </Button>
                                 </motion.div>
@@ -233,11 +232,12 @@ export default function AgentPage() {
                     </div>
 
                     {loading ? (
-                        <LuxuryLoader 
-                            label="Analyzing payment patterns..." 
-                            sublabel="Payment Concierge" 
-                            minHeight="min-h-[300px]" 
-                        />
+                        <div className="flex items-center justify-center min-h-[300px]">
+                            <div className="text-center">
+                                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+                                <p style={{ color: '#b3b3b3' }}>Analyzing payment patterns...</p>
+                            </div>
+                        </div>
                     ) : actions.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -295,7 +295,7 @@ export default function AgentPage() {
                                                 {/* AI Draft Preview */}
                                                 <div className="p-6 bg-white/[0.02]">
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <Gem className="w-4 h-4 text-green-500" />
+                                                        <Sparkles className="w-4 h-4 text-green-500" />
                                                         <span className="text-xs font-semibold text-green-500 uppercase tracking-wider">AI Generated Draft</span>
                                                     </div>
                                                     <div className="bg-black/30 rounded-lg p-4 border border-white/5 text-sm text-gray-300 font-light leading-relaxed">

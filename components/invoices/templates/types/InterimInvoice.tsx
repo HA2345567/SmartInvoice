@@ -1,6 +1,5 @@
 import React from 'react';
 import { InvoiceData } from '../../types';
-import { TrendingUp, Layers, Compass } from 'lucide-react';
 
 interface InterimInvoiceProps {
   data: InvoiceData;
@@ -32,7 +31,7 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
+            <span>&#128200;</span>
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Interim Invoice{projectInfo && ` - ${projectInfo.projectName}`}</p>
@@ -61,7 +60,7 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
           {projectInfo && (
             <div className={styleClass.calloutBlock}>
               <div className={styleClass.calloutIcon}>
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <span>&#128200;</span>
               </div>
               <div className={styleClass.calloutContent}>
                 <h3>Project Progress</h3>
@@ -106,7 +105,7 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <Layers className="w-4 h-4 inline-block mr-1.5 text-zinc-400" />
+              <span className={styleClass.tableTitleIcon}>&#128203;</span>
               Milestone Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -155,7 +154,7 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <Compass className="w-3.5 h-3.5 inline-block mr-1 text-zinc-400" />
+              <span className={styleClass.commentsIcon}>&#128483;</span>
               <span>Invoiced to Date: ${invoicedToDate.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -181,7 +180,7 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
               <h3 className={styleClass.title}>Interim Invoice</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
               <div className={styleClass.orderTag}>
-                <TrendingUp className="w-3 h-3 inline-block mr-1 text-zinc-400" />
+                <span>&#128200;</span>
                 {projectInfo?.milestone || 'Milestone'}
               </div>
             </div>
@@ -426,16 +425,9 @@ const InterimInvoice: React.FC<InterimInvoiceProps> = ({ data, styleClass }) => 
 
   return (
     <div className={styleClass.container}>
-      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
-        <div>
-          <div className={styleClass.title}>{data.from.name}</div>
-          <div className={getClasses('subtitle', 'subHeader')}>INTERIM INVOICE</div>
-        </div>
-        {data?.from?.logoUrl ? (
-          <div className="flex justify-end items-center">
-            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
-          </div>
-        ) : null}
+      <header className={styleClass.header}>
+        <div className={styleClass.title}>{data.from.name}</div>
+        <div className={getClasses('subtitle', 'subHeader')}>INTERIM INVOICE</div>
       </header>
 
       {projectInfo && (

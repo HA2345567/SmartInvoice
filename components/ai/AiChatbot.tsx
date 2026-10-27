@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Crown, Gem, Send, Loader2, User as UserIcon, Minimize2, Check } from 'lucide-react';
+import { Bot, Send, Loader2, Sparkles, User as UserIcon, Minimize2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -207,7 +207,7 @@ export function AiChatbot() {
                     onClick={() => setIsOpen(true)}
                     className="h-14 w-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-110 p-0 flex items-center justify-center border border-white/10"
                 >
-                    <Crown className="h-6 w-6 text-white" />
+                    <Bot className="h-7 w-7 text-white" />
                     <span className="absolute -top-1 -right-1 flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
@@ -225,13 +225,13 @@ export function AiChatbot() {
                 <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-green-900/20 to-transparent">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center shadow-lg border border-white/10">
-                            <Crown className="h-5 w-5 text-white" />
+                            <Bot className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white text-sm">Luxury Concierge</h3>
+                            <h3 className="font-semibold text-white text-sm">SmartInvoice Assistant</h3>
                             <p className="text-xs text-green-400 flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                                Active
+                                Online
                             </p>
                         </div>
                     </div>
@@ -256,7 +256,7 @@ export function AiChatbot() {
                                 "h-8 w-8 rounded-full flex items-center justify-center shrink-0 border border-white/10 shadow-sm",
                                 msg.role === 'assistant' ? "bg-green-900/30 text-green-400" : "bg-zinc-800 text-gray-300"
                             )}>
-                                {msg.role === 'assistant' ? <Crown className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
+                                {msg.role === 'assistant' ? <Sparkles className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
                             </div>
 
                             <div className="flex flex-col gap-2.5 w-full">
@@ -339,8 +339,8 @@ export function AiChatbot() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Crown className="h-3.5 w-3.5 mr-1" />
-                                                    Generate Luxury Draft
+                                                    <Sparkles className="h-3.5 w-3.5" />
+                                                    Create Draft Invoice
                                                 </>
                                             )}
                                         </Button>
@@ -353,7 +353,7 @@ export function AiChatbot() {
                     {isTyping && (
                         <div className="flex items-start gap-3 max-w-[85%]">
                             <div className="h-8 w-8 rounded-full bg-green-900/30 text-green-400 flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
-                                <Gem className="h-4 w-4" />
+                                <Sparkles className="h-4 w-4" />
                             </div>
                             <div className="bg-zinc-900/80 border border-white/5 text-gray-200 rounded-2xl rounded-tl-none p-4 flex items-center gap-2 h-10">
                                 <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Gem, Globe, Receipt, Clock, Wallet, FileSpreadsheet } from 'lucide-react';
+import { Sparkles, Globe, Receipt, Clock, Wallet, FileSpreadsheet } from 'lucide-react';
 
 interface SpecializedFieldsProps {
     invoiceType: string;
@@ -25,7 +25,7 @@ export const SpecializedFields = React.memo(({ invoiceType, invoiceData, setInvo
         <Card className="card-green-mist animate-slide-in border-blue-500/30">
             <CardHeader>
                 <CardTitle className="text-white flex items-center text-lg">
-                    <Gem className="w-5 h-5 mr-2 text-blue-400" />
+                    <Sparkles className="w-5 h-5 mr-2 text-blue-400" />
                     Specialized {invoiceType.replace('-', ' ')} Details
                 </CardTitle>
                 <CardDescription className="text-green-muted text-xs">Extra details required for this invoice type</CardDescription>
@@ -57,7 +57,7 @@ export const SpecializedFields = React.memo(({ invoiceType, invoiceData, setInvo
                                 checked={invoiceData.notForPaymentNote}
                                 onCheckedChange={(checked) => updateField('notForPaymentNote', checked)}
                             />
-                            <Label className="text-white text-xs cursor-pointer">Show &quot;Not for Payment&quot; note</Label>
+                            <Label className="text-white text-xs cursor-pointer">Show "Not for Payment" note</Label>
                         </div>
                     </div>
                 )}

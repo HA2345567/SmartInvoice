@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -295,33 +294,40 @@ export default function SettingsPage() {
   };
 
   if (loading) {
-    return <LuxuryLoader label="Loading settings..." sublabel="Account & Preferences" minHeight="min-h-[400px]" />;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1ed760' }} />
+          <p style={{ color: '#b3b3b3' }}>Loading settings...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Editorial Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-4 pb-2 border-b border-white/[0.06]">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-white">System Settings</h1>
-          <p className="text-xs text-white/40 mt-1">
-            Configure entity profile, default invoice parameters, automated notifications, and AI providers
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Settings</h1>
+          <p className="text-base text-dark-muted">
+            Configure your SmartInvoice preferences, company branding, and AI integration
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-full bg-[#1ed760] text-black hover:bg-[#1fdf64] text-xs font-medium h-9 px-5 inline-flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
+          className="font-bold text-sm bg-[#1ed760] text-black hover:bg-[#1abe53] rounded-full uppercase tracking-wider px-6 h-11"
         >
           {saving ? (
             <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Saving...</span>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
             </>
           ) : (
             <>
-              <Save className="w-3.5 h-3.5" />
-              <span>Save Changes</span>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
             </>
           )}
         </Button>
@@ -329,64 +335,64 @@ export default function SettingsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-[#181818] p-1 rounded-full border border-white/[0.08]">
-          <TabsTrigger value="profile" className="rounded-full data-[state=active]:bg-[#242424] data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/10 text-xs py-2 text-white/60">
-            <User className="w-3.5 h-3.5 mr-1.5" />
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-[#181818] p-1 rounded-xl border border-white/10">
+          <TabsTrigger value="profile" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-[#1ed760] text-xs sm:text-sm py-2.5">
+            <User className="w-4 h-4 mr-2" />
             <span>Profile</span>
           </TabsTrigger>
-          <TabsTrigger value="business" className="rounded-full data-[state=active]:bg-[#242424] data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/10 text-xs py-2 text-white/60">
-            <Building className="w-3.5 h-3.5 mr-1.5" />
+          <TabsTrigger value="business" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-[#1ed760] text-xs sm:text-sm py-2.5">
+            <Building className="w-4 h-4 mr-2" />
             <span>Business</span>
           </TabsTrigger>
-          <TabsTrigger value="invoices" className="rounded-full data-[state=active]:bg-[#242424] data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/10 text-xs py-2 text-white/60">
-            <SettingsIcon className="w-3.5 h-3.5 mr-1.5" />
+          <TabsTrigger value="invoices" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-[#1ed760] text-xs sm:text-sm py-2.5">
+            <SettingsIcon className="w-4 h-4 mr-2" />
             <span>Invoices</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-full data-[state=active]:bg-[#242424] data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/10 text-xs py-2 text-white/60">
-            <Bell className="w-3.5 h-3.5 mr-1.5" />
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-[#1ed760] text-xs sm:text-sm py-2.5">
+            <Bell className="w-4 h-4 mr-2" />
             <span>Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="ai" className="rounded-full data-[state=active]:bg-[#242424] data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/10 text-xs py-2 text-white/60">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-[#1ed760]" />
-            <span>AI Provider</span>
+          <TabsTrigger value="ai" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-[#1ed760] text-xs sm:text-sm py-2.5">
+            <Sparkles className="w-4 h-4 mr-2 text-[#1ed760]" />
+            <span>AI Settings</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
-          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
+          <Card className="card-dark-mist border-[#4d4d4d]">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04] border border-white/10 text-white/60">
-                  <User className="w-4 h-4" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1ed760]/10 border border-[#1ed760]/20">
+                  <User className="w-5 h-5 text-[#1ed760]" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-normal tracking-tight text-white">Profile Information</CardTitle>
-                  <CardDescription className="text-xs text-white/40 mt-0.5">
-                    Your personal account details and brand avatar
+                  <CardTitle className="text-white">Profile Information</CardTitle>
+                  <CardDescription className="text-dark-muted">
+                    Your personal account details and branding avatar
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-6">
-              <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-xl bg-white/[0.01] border border-white/[0.06]">
+            <CardContent className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-[#1f1f1f] border border-white/5">
                 <div className="relative group">
                   {settings.avatar ? (
                     <img
                       src={settings.avatar}
                       alt="Avatar"
-                      className="w-16 h-16 rounded-full object-cover border border-white/20"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-[#1ed760]"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-white/[0.06] text-white border border-white/10 font-mono text-xl flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-[#1ed760] text-black font-bold text-2xl flex items-center justify-center shadow-lg">
                       {(settings.name || user?.email || 'U').charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-base font-normal text-white">{settings.name || 'Your Name'}</p>
-                  <p className="text-xs text-white/40 mt-0.5">{user?.email}</p>
-                  <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
+                  <p className="text-lg font-bold text-white">{settings.name || 'Your Name'}</p>
+                  <p className="text-sm text-dark-muted">{user?.email}</p>
+                  <div className="flex items-center justify-center sm:justify-start gap-3 mt-3">
                     <label className="cursor-pointer">
                       <Input
                         type="file"
@@ -400,18 +406,18 @@ export default function SettingsPage() {
                         variant="outline"
                         size="sm"
                         disabled={uploadingLogo}
-                        className="rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white text-xs h-8 px-3.5"
+                        className="bg-[#282828] border-white/10 hover:bg-[#333] text-white text-xs"
                         onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
                       >
                         {uploadingLogo ? (
                           <>
-                            <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                            <span>Uploading...</span>
+                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                            Uploading...
                           </>
                         ) : (
                           <>
-                            <Upload className="w-3 h-3 mr-1.5 text-white/60" />
-                            <span>Upload Avatar</span>
+                            <Upload className="w-3.5 h-3.5 mr-1.5 text-[#1ed760]" />
+                            Upload Photo / Logo
                           </>
                         )}
                       </Button>
@@ -421,70 +427,58 @@ export default function SettingsPage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="rounded-full text-red-400/80 hover:text-red-400 hover:bg-red-500/10 text-xs h-8 px-3"
+                        className="text-red-400 hover:text-red-300 text-xs hover:bg-red-500/10"
                         onClick={() => handleInputChange('avatar', '')}
                       >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        <span>Remove</span>
+                        <Trash2 className="w-3.5 h-3.5 mr-1" />
+                        Remove
                       </Button>
                     )}
                   </div>
                 </div>
               </div>
 
-              <Separator className="bg-white/[0.06]" />
+              <Separator className="bg-[#4d4d4d]" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-xs font-normal text-white/60">Full Name</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-bold text-dark-muted">Full Name</Label>
                   <Input
                     id="name"
                     value={settings.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
-                    placeholder="Your legal or brand name"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
+                    placeholder="Your name"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="company" className="text-xs font-normal text-white/60">Company Name</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="company" className="text-sm font-bold text-dark-muted">Company Name</Label>
                   <Input
                     id="company"
                     value={settings.company}
                     onChange={(e) => handleInputChange('company', e.target.value)}
-                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
-                    placeholder="Studio / Agency / Organization"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
+                    placeholder="Your company name"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="phone" className="text-xs font-normal text-white/60">Phone Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-bold text-dark-muted">Phone Number</Label>
                   <Input
                     id="phone"
                     value={settings.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
                     placeholder="+1 234 567 8900"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-normal text-white/60">Account Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-bold text-dark-muted">Account Email</Label>
                   <Input
                     id="email"
                     value={user?.email || ''}
                     disabled
-                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212]/50 text-white/40 cursor-not-allowed"
+                    className="h-12 text-gray-400 bg-[#141414] border-[#333] cursor-not-allowed"
                   />
-                </div>
-                <div className="space-y-1.5 md:col-span-2">
-                  <Label htmlFor="profile-address" className="text-xs font-normal text-white/60">Company / Business Address</Label>
-                  <Textarea
-                    id="profile-address"
-                    value={settings.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    rows={2}
-                    className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
-                    placeholder="123 Innovation Drive, Suite 400, New York, NY 10001"
-                  />
-                  <p className="text-[11px] text-white/30">Displayed in the header of issued invoices and downloaded PDFs.</p>
                 </div>
               </div>
             </CardContent>
@@ -493,84 +487,84 @@ export default function SettingsPage() {
 
         {/* Business Tab */}
         <TabsContent value="business" className="space-y-6">
-          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
+          <Card className="card-dark-mist border-[#4d4d4d]">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04] border border-white/10 text-white/60">
-                  <Building className="w-4 h-4" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1ed760]/10 border border-[#1ed760]/20">
+                  <Building className="w-5 h-5 text-[#1ed760]" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-normal tracking-tight text-white">Business Details & Tax Information</CardTitle>
-                  <CardDescription className="text-xs text-white/40 mt-0.5">
+                  <CardTitle className="text-white">Business Details & Tax Information</CardTitle>
+                  <CardDescription className="text-dark-muted">
                     Official business address, tax IDs, and default currency for issued invoices
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-xs font-normal text-white/60">Business Address</Label>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-bold text-dark-muted">Business Address</Label>
                 <Textarea
                   id="address"
                   value={settings.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  rows={2}
-                  className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
+                  rows={3}
+                  className="text-white bg-[#1f1f1f] border-[#4d4d4d]"
                   placeholder="Street address, City, State, ZIP, Country"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="gstNumber" className="text-xs font-normal text-white/60">Tax ID / GST / VAT</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="gstNumber" className="text-sm font-bold text-dark-muted">GST / Tax Identification Number</Label>
                   <Input
                     id="gstNumber"
                     value={settings.gstNumber}
                     onChange={(e) => handleInputChange('gstNumber', e.target.value)}
-                    className="h-9 text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
                     placeholder="e.g. 22AAAAA0000A1Z5"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="currency" className="text-xs font-normal text-white/60">Default Currency</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="currency" className="text-sm font-bold text-dark-muted">Default Invoice Currency</Label>
                   <select
                     id="currency"
                     value={settings.currency}
                     onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="w-full h-9 px-3 text-xs rounded-lg border border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 outline-none"
+                    className="w-full h-12 px-3 text-white bg-[#1f1f1f] border border-[#4d4d4d] rounded-md focus:outline-none focus:ring-1 focus:ring-[#1ed760]"
                   >
-                    <option value="USD" className="bg-[#181818] text-white">USD - US Dollar ($)</option>
-                    <option value="EUR" className="bg-[#181818] text-white">EUR - Euro (€)</option>
-                    <option value="GBP" className="bg-[#181818] text-white">GBP - British Pound (£)</option>
-                    <option value="INR" className="bg-[#181818] text-white">INR - Indian Rupee (₹)</option>
-                    <option value="AUD" className="bg-[#181818] text-white">AUD - Australian Dollar ($)</option>
-                    <option value="CAD" className="bg-[#181818] text-white">CAD - Canadian Dollar ($)</option>
-                    <option value="SGD" className="bg-[#181818] text-white">SGD - Singapore Dollar ($)</option>
+                    <option value="USD">USD - US Dollar ($)</option>
+                    <option value="EUR">EUR - Euro (€)</option>
+                    <option value="GBP">GBP - British Pound (£)</option>
+                    <option value="INR">INR - Indian Rupee (₹)</option>
+                    <option value="AUD">AUD - Australian Dollar ($)</option>
+                    <option value="CAD">CAD - Canadian Dollar ($)</option>
+                    <option value="SGD">SGD - Singapore Dollar ($)</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="defaultGstRate" className="text-xs font-normal text-white/60">Default GST Rate (%)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultGstRate" className="text-sm font-bold text-dark-muted">Default GST Rate (%)</Label>
                   <Input
                     id="defaultGstRate"
                     type="number"
                     step="0.01"
                     value={settings.defaultGstRate}
                     onChange={(e) => handleInputChange('defaultGstRate', e.target.value === '' ? 0 : parseFloat(e.target.value))}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="defaultTaxRate" className="text-xs font-normal text-white/60">Default Tax Rate (%)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultTaxRate" className="text-sm font-bold text-dark-muted">Default Tax Rate (%)</Label>
                   <Input
                     id="defaultTaxRate"
                     type="number"
                     step="0.01"
                     value={settings.defaultTaxRate}
                     onChange={(e) => handleInputChange('defaultTaxRate', e.target.value === '' ? 0 : parseFloat(e.target.value))}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
                   />
                 </div>
               </div>
@@ -580,63 +574,65 @@ export default function SettingsPage() {
 
         {/* Invoices Tab */}
         <TabsContent value="invoices" className="space-y-6">
-          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
+          <Card className="card-dark-mist border-[#4d4d4d]">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04] border border-white/10 text-white/60">
-                  <SettingsIcon className="w-4 h-4" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1ed760]/10 border border-[#1ed760]/20">
+                  <SettingsIcon className="w-5 h-5 text-[#1ed760]" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-normal tracking-tight text-white">Invoice Preset Defaults</CardTitle>
-                  <CardDescription className="text-xs text-white/40 mt-0.5">
+                  <CardTitle className="text-white">Invoice Preset Defaults</CardTitle>
+                  <CardDescription className="text-dark-muted">
                     Configure default numbering formats, terms & conditions, and footer notes
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-4">
+            <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="invoicePrefix" className="text-xs font-normal text-white/60">Invoice Prefix</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="invoicePrefix" className="text-sm font-bold text-dark-muted">Invoice Number Prefix</Label>
                   <Input
                     id="invoicePrefix"
                     value={settings.invoicePrefix}
                     onChange={(e) => handleInputChange('invoicePrefix', e.target.value)}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
                     placeholder="INV"
                   />
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <div>
-                    <Label className="text-xs font-normal text-white/80">Auto-Generate Numbers</Label>
-                    <p className="text-[11px] text-white/40">Sequentially increment invoice numbers</p>
+                <div className="flex items-end p-4 rounded-lg bg-[#1f1f1f] border border-white/5">
+                  <div className="flex items-center justify-between w-full">
+                    <div>
+                      <Label className="text-sm font-bold text-white">Auto-Generate Numbers</Label>
+                      <p className="text-xs text-dark-muted">Automatically increment sequential invoice numbers</p>
+                    </div>
+                    <Switch
+                      checked={settings.autoGenerateNumbers}
+                      onCheckedChange={(checked) => handleInputChange('autoGenerateNumbers', checked)}
+                    />
                   </div>
-                  <Switch
-                    checked={settings.autoGenerateNumbers}
-                    onCheckedChange={(checked) => handleInputChange('autoGenerateNumbers', checked)}
-                  />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="defaultTerms" className="text-xs font-normal text-white/60">Default Terms & Conditions</Label>
+              <div className="space-y-2">
+                <Label htmlFor="defaultTerms" className="text-sm font-bold text-dark-muted">Default Terms & Conditions</Label>
                 <Textarea
                   id="defaultTerms"
                   value={settings.defaultTerms}
                   onChange={(e) => handleInputChange('defaultTerms', e.target.value)}
-                  rows={2}
-                  className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
+                  rows={3}
+                  className="text-white bg-[#1f1f1f] border-[#4d4d4d]"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="defaultNotes" className="text-xs font-normal text-white/60">Default Client Notes</Label>
+              <div className="space-y-2">
+                <Label htmlFor="defaultNotes" className="text-sm font-bold text-dark-muted">Default Invoice Notes / Thank You Message</Label>
                 <Textarea
                   id="defaultNotes"
                   value={settings.defaultNotes}
                   onChange={(e) => handleInputChange('defaultNotes', e.target.value)}
                   rows={2}
-                  className="text-xs rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 resize-none py-2"
+                  className="text-white bg-[#1f1f1f] border-[#4d4d4d]"
                 />
               </div>
             </CardContent>
@@ -645,54 +641,60 @@ export default function SettingsPage() {
 
         {/* Notifications Tab */}
         <TabsContent value="notifications" className="space-y-6">
-          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
+          <Card className="card-dark-mist border-[#4d4d4d]">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04] border border-white/10 text-white/60">
-                  <Mail className="w-4 h-4" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1ed760]/10 border border-[#1ed760]/20">
+                  <Mail className="w-5 h-5 text-[#1ed760]" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-normal tracking-tight text-white">Email & Notifications</CardTitle>
-                  <CardDescription className="text-xs text-white/40 mt-0.5">
-                    Configure automated email delivery and payment reminder triggers
+                  <CardTitle className="text-white">Email Dispatch & Automated Reminders</CardTitle>
+                  <CardDescription className="text-dark-muted">
+                    Configure automated email delivery and client reminder triggers
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-4">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
-                <div>
-                  <Label className="text-xs font-normal text-white/80">Email Delivery Notifications</Label>
-                  <p className="text-[11px] text-white/40">Dispatch invoice PDF directly to client email upon issuance</p>
+            <CardContent className="space-y-6">
+              <div className="p-4 rounded-xl bg-[#1f1f1f] border border-white/5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-bold text-white">Email Delivery Notifications</Label>
+                    <p className="text-xs text-dark-muted">Automatically dispatch invoice emails to clients when issued</p>
+                  </div>
+                  <Switch
+                    checked={settings.emailNotifications}
+                    onCheckedChange={(checked) => handleInputChange('emailNotifications', checked)}
+                  />
                 </div>
-                <Switch
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => handleInputChange('emailNotifications', checked)}
-                />
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
-                <div>
-                  <Label className="text-xs font-normal text-white/80">Automated Payment Reminders</Label>
-                  <p className="text-[11px] text-white/40">Send automated notifications before and after due date</p>
+              <Separator className="bg-[#4d4d4d]" />
+
+              <div className="p-4 rounded-xl bg-[#1f1f1f] border border-white/5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-bold text-white">Automated Payment Reminders</Label>
+                    <p className="text-xs text-dark-muted">Send automated email reminders before and after due dates</p>
+                  </div>
+                  <Switch
+                    checked={settings.reminderEmails}
+                    onCheckedChange={(checked) => handleInputChange('reminderEmails', checked)}
+                  />
                 </div>
-                <Switch
-                  checked={settings.reminderEmails}
-                  onCheckedChange={(checked) => handleInputChange('reminderEmails', checked)}
-                />
               </div>
 
               {settings.reminderEmails && (
-                <div className="space-y-1.5 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <Label htmlFor="reminderDays" className="text-xs font-normal text-white/60">Reminder Lead Time (Days Before Due)</Label>
+                <div className="space-y-2 p-4 rounded-xl bg-[#1f1f1f] border border-white/5">
+                  <Label htmlFor="reminderDays" className="text-sm font-bold text-dark-muted">Reminder Threshold (Days Before Due Date)</Label>
                   <Input
                     id="reminderDays"
                     type="number"
                     value={settings.reminderDays}
                     onChange={(e) => handleInputChange('reminderDays', parseInt(e.target.value) || 7)}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 max-w-[200px]"
+                    className="h-12 text-white bg-[#141414] border-[#4d4d4d]"
                   />
-                  <p className="text-[11px] text-white/30">Dispatches an alert this many days prior to payment maturity.</p>
+                  <p className="text-xs text-dark-muted">Send payment reminder exactly this many days before the due date</p>
                 </div>
               )}
             </CardContent>
@@ -701,23 +703,23 @@ export default function SettingsPage() {
 
         {/* AI Settings Tab */}
         <TabsContent value="ai" className="space-y-6">
-          <Card className="rounded-2xl border border-white/[0.08] bg-[#181818]">
-            <CardHeader className="p-6 pb-4">
+          <Card className="card-dark-mist border-[#4d4d4d]">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04] border border-white/10 text-white/60">
-                  <Sparkles className="w-4 h-4 text-[#1ed760]" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#1ed760]/10 border border-[#1ed760]/20">
+                  <Sparkles className="w-5 h-5 text-[#1ed760]" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-normal tracking-tight text-white">AI Provider Integration (BYOK)</CardTitle>
-                  <CardDescription className="text-xs text-white/40 mt-0.5">
-                    Connect your own API key to power AI line items, description refinement, and invoice parsing
+                  <CardTitle className="text-white">Bring Your Own Key (BYOK) AI Integration</CardTitle>
+                  <CardDescription className="text-dark-muted">
+                    Configure your AI provider API Key to power invoice generation, item suggestions, and cash flow analysis
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="aiProvider" className="text-xs font-normal text-white/60">AI Provider</Label>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="aiProvider" className="text-sm font-bold text-dark-muted">AI Provider</Label>
                 <select
                   id="aiProvider"
                   value={settings.aiProvider}
@@ -737,38 +739,40 @@ export default function SettingsPage() {
                       aiModel: defaultModel
                     }));
                   }}
-                  className="w-full h-9 px-3 text-xs rounded-lg border border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60 outline-none"
+                  className="w-full h-12 px-3 text-white bg-[#1f1f1f] border border-[#4d4d4d] rounded-md focus:outline-none focus:ring-1 focus:ring-[#1ed760]"
                 >
-                  <option value="gemini" className="bg-[#181818] text-white">Google Gemini (Recommended - Free Tier)</option>
-                  <option value="openai" className="bg-[#181818] text-white">OpenAI (GPT-4o / GPT-4o-mini)</option>
-                  <option value="claude" className="bg-[#181818] text-white">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
-                  <option value="groq" className="bg-[#181818] text-white">Groq Cloud (Ultra Fast - Llama 3.3 / Mixtral)</option>
-                  <option value="openrouter" className="bg-[#181818] text-white">OpenRouter (model catalog)</option>
-                  <option value="deepseek" className="bg-[#181818] text-white">DeepSeek (DeepSeek V3 / R1)</option>
-                  <option value="custom" className="bg-[#181818] text-white">Custom / Local OpenAI Spec (Ollama, LM Studio)</option>
+                  <option value="gemini">Google Gemini (Recommended - Free Tier)</option>
+                  <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+                  <option value="claude">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
+                  <option value="groq">Groq Cloud (Ultra Fast - Llama 3.3 / Mixtral)</option>
+                  <option value="openrouter">OpenRouter (Access 200+ AI Models)</option>
+                  <option value="deepseek">DeepSeek (DeepSeek V3 / R1)</option>
+                  <option value="custom">Custom / Local OpenAI Spec (Ollama, vLLM, LM Studio)</option>
                 </select>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="aiApiKey" className="text-xs font-normal text-white/60">API Key</Label>
-                  <button
+                  <Label htmlFor="aiApiKey" className="text-sm font-bold text-dark-muted">API Key</Label>
+                  <Button
                     type="button"
-                    className="text-xs text-white/40 hover:text-white inline-flex items-center gap-1 transition-colors"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-dark-muted hover:text-white"
                     onClick={() => setShowApiKey(!showApiKey)}
                   >
                     {showApiKey ? (
                       <>
-                        <EyeOff className="w-3 h-3" />
-                        <span>Hide</span>
+                        <EyeOff className="w-3.5 h-3.5 mr-1" />
+                        Hide Key
                       </>
                     ) : (
                       <>
-                        <Eye className="w-3 h-3" />
-                        <span>Show</span>
+                        <Eye className="w-3.5 h-3.5 mr-1" />
+                        Show Key
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
                 <div className="relative">
                   <Input
@@ -776,7 +780,7 @@ export default function SettingsPage() {
                     type={showApiKey ? 'text' : 'password'}
                     value={settings.aiApiKey}
                     onChange={(e) => handleInputChange('aiApiKey', e.target.value)}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white pr-24 focus:border-[#1ed760]/60"
+                    className="h-12 text-white font-mono bg-[#1f1f1f] border-[#4d4d4d] pr-28"
                     placeholder={
                       settings.aiProvider === 'gemini' ? 'AIzaSy...' :
                       settings.aiProvider === 'claude' ? 'sk-ant-...' :
@@ -787,45 +791,61 @@ export default function SettingsPage() {
                   />
                   <Button
                     type="button"
-                    size="sm"
-                    variant="ghost"
                     onClick={handleTestAiKey}
                     disabled={testingAi}
-                    className="absolute right-1 top-1 h-7 text-xs rounded-md text-white/60 hover:text-white hover:bg-white/[0.06] border border-white/10 px-2.5"
+                    className="absolute right-1.5 top-1.5 h-9 text-xs font-bold bg-[#282828] hover:bg-[#333] text-[#1ed760] border border-[#1ed760]/30"
                   >
                     {testingAi ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <>
+                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        Testing...
+                      </>
                     ) : (
-                      <span className="flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-[#1ed760]" />
-                        Test
-                      </span>
+                      <>
+                        <Zap className="w-3 h-3 mr-1" />
+                        Test Key
+                      </>
                     )}
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="aiModel" className="text-xs font-normal text-white/60">Model Identifier</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="aiModel" className="text-sm font-bold text-dark-muted">Model Name</Label>
                   <Input
                     id="aiModel"
                     value={settings.aiModel}
                     onChange={(e) => handleInputChange('aiModel', e.target.value)}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
-                    placeholder="gemini-2.0-flash"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
+                    placeholder={
+                      settings.aiProvider === 'gemini' ? 'gemini-2.0-flash' :
+                      settings.aiProvider === 'openai' ? 'gpt-4o-mini' :
+                      settings.aiProvider === 'claude' ? 'claude-3-5-sonnet-20241022' :
+                      settings.aiProvider === 'groq' ? 'llama-3.3-70b-versatile' :
+                      settings.aiProvider === 'openrouter' ? 'google/gemini-2.5-flash' :
+                      settings.aiProvider === 'deepseek' ? 'deepseek-chat' : 'custom-model'
+                    }
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="aiBaseUrl" className="text-xs font-normal text-white/60">
-                    Custom Base URL <span className="text-[10px] text-white/30">(Optional)</span>
+                <div className="space-y-2">
+                  <Label htmlFor="aiBaseUrl" className="text-sm font-bold text-dark-muted">
+                    Custom Base URL <span className="text-xs font-normal text-gray-500">(Optional)</span>
                   </Label>
                   <Input
                     id="aiBaseUrl"
                     value={settings.aiBaseUrl}
                     onChange={(e) => handleInputChange('aiBaseUrl', e.target.value)}
-                    className="h-9 text-xs font-mono rounded-lg border-white/10 bg-[#121212] text-white focus:border-[#1ed760]/60"
-                    placeholder="https://api.openai.com/v1"
+                    className="h-12 text-white bg-[#1f1f1f] border-[#4d4d4d]"
+                    placeholder={
+                      settings.aiProvider === 'gemini' ? 'https://generativelanguage.googleapis.com/v1beta/models' :
+                      settings.aiProvider === 'openai' ? 'https://api.openai.com/v1' :
+                      settings.aiProvider === 'claude' ? 'https://api.anthropic.com/v1' :
+                      settings.aiProvider === 'groq' ? 'https://api.groq.com/openai/v1' :
+                      settings.aiProvider === 'openrouter' ? 'https://openrouter.ai/api/v1' :
+                      settings.aiProvider === 'deepseek' ? 'https://api.deepseek.com/v1' :
+                      'http://localhost:11434/v1'
+                    }
                   />
                 </div>
               </div>
@@ -836,4 +856,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

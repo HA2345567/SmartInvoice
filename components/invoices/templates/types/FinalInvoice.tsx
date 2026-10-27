@@ -1,5 +1,4 @@
 import React from 'react';
-import { ShieldCheck, Layers, MessageSquare, CreditCard } from 'lucide-react';
 import { InvoiceData } from '../../types';
 
 interface FinalInvoiceProps {
@@ -27,7 +26,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <span>&#9989;</span>
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Final Invoice</p>
@@ -55,7 +54,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.calloutBlock}>
             <div className={styleClass.calloutIcon}>
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <span>&#9989;</span>
             </div>
             <div className={styleClass.calloutContent}>
               <h3>Project Completion</h3>
@@ -85,7 +84,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <Layers className="w-4 h-4 text-slate-500 inline mr-1" />
+              <span className={styleClass.tableTitleIcon}>&#128203;</span>
               Final Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -135,7 +134,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
           {data.notes && (
             <div className={getClasses('toggleSection', 'notes')}>
               <div className={styleClass.toggleHeader}>
-                <MessageSquare className="w-4 h-4 text-slate-500 inline mr-1" />
+                <span className={styleClass.toggleIcon}>&#128172;</span>
                 <span className={styleClass.toggleText}>Project Notes</span>
               </div>
               <div className={styleClass.toggleContent}>{data.notes}</div>
@@ -144,7 +143,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <ShieldCheck className="w-4 h-4 text-emerald-600 inline mr-1" />
+              <span className={styleClass.commentsIcon}>&#9989;</span>
               <span>Project Complete</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -169,17 +168,15 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
             <div className={styleClass.invoiceMeta}>
               <h3 className={styleClass.title}>Final Invoice</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
-              <div className={styleClass.orderTag} style={{ background: '#dcfce7', color: '#166534', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <ShieldCheck className="w-3.5 h-3.5" /> Project Complete
+              <div className={styleClass.orderTag} style={{ background: '#dcfce7', color: '#166534' }}>
+                <span>&#9989;</span> Project Complete
               </div>
             </div>
           </div>
 
           <div style={{ padding: '16px', background: '#dcfce7', borderBottom: '1px solid #bbf7d0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', background: '#166534', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
+              <div style={{ width: '40px', height: '40px', background: '#166534', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px' }}>&#9989;</div>
               <div>
                 <div style={{ fontWeight: '600', color: '#166534' }}>All Milestones Completed</div>
                 <div style={{ fontSize: '12px', color: '#15803d' }}>Final invoice for this project</div>
@@ -252,14 +249,14 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
           <div className={styleClass.paymentSection}>
             <div className={styleClass.paymentInfo}>
-              <div className={styleClass.paymentIcon}><CreditCard className="w-5 h-5 text-slate-700" /></div>
+              <div className={styleClass.paymentIcon}>&#128179;</div>
               <div className={styleClass.paymentDetails}>
                 <h4>Final Payment</h4>
                 <span>Due by {data.dueDate}</span>
               </div>
             </div>
-            <button className={styleClass.payNowBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck className="w-4 h-4" /> Pay Final Balance
+            <button className={styleClass.payNowBtn}>
+              <span>&#9989;</span> Pay Final Balance
             </button>
           </div>
 
@@ -299,9 +296,7 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
           <div style={{ padding: '24px', background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', borderRadius: '12px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', background: '#0f7b6c', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                <ShieldCheck className="w-6 h-6 text-white" />
-              </div>
+              <div style={{ width: '48px', height: '48px', background: '#0f7b6c', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '24px' }}>&#9989;</div>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '18px', color: '#166534' }}>All Milestones Delivered</div>
                 <div style={{ color: '#15803d', fontSize: '14px' }}>This is the final invoice for this project. All deliverables have been completed and approved.</div>
@@ -403,21 +398,14 @@ const FinalInvoice: React.FC<FinalInvoiceProps> = ({ data, styleClass }) => {
 
   return (
     <div className={styleClass.container}>
-      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
-        <div>
-          <div className={styleClass.title}>{data.from.name}</div>
-          <div className={getClasses('subtitle', 'subHeader')}>FINAL INVOICE</div>
-        </div>
-        {data?.from?.logoUrl ? (
-          <div className="flex justify-end items-center">
-            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
-          </div>
-        ) : null}
+      <header className={styleClass.header}>
+        <div className={styleClass.title}>{data.from.name}</div>
+        <div className={getClasses('subtitle', 'subHeader')}>FINAL INVOICE</div>
       </header>
 
       <div style={{ marginBottom: '24px', padding: '16px', background: '#dcfce7', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <ShieldCheck className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+          <span style={{ fontSize: '24px' }}>&#9989;</span>
           <div>
             <h4 style={{ margin: '0 0 4px 0', color: '#166534' }}>Project Completion Summary</h4>
             <p style={{ margin: 0, color: '#15803d', fontSize: '14px' }}>All milestones have been delivered and approved.</p>

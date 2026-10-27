@@ -5,7 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'SmartInvoice - Professional Invoice Management',
-  description: 'Create and download professional invoices, manage clients and expenses, and track payment status with SmartInvoice.',
+  description: 'Create professional invoices with AI, payment tracking, and automated reminders. Join 10,000+ professionals getting paid faster.',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

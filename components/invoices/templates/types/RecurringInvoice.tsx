@@ -1,6 +1,5 @@
 import React from 'react';
 import { InvoiceData } from '../../types';
-import { Repeat, Layers, Clock } from 'lucide-react';
 
 interface RecurringInvoiceProps {
   data: InvoiceData;
@@ -29,7 +28,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
         </div>
         <div className={styleClass.pageContent}>
           <div className={styleClass.pageIcon}>
-            <Repeat className="w-5 h-5 text-indigo-400" />
+            <span>&#128257;</span>
           </div>
           <h1 className={styleClass.title}>{data.invoiceNumber}</h1>
           <p className={styleClass.subtitle}>Recurring Invoice</p>
@@ -58,7 +57,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
           {subscription && (
             <div className={styleClass.calloutBlock}>
               <div className={styleClass.calloutIcon}>
-                <Repeat className="w-4 h-4 text-indigo-400" />
+                <span>&#128257;</span>
               </div>
               <div className={styleClass.calloutContent}>
                 <h3>Subscription Details</h3>
@@ -85,7 +84,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
 
           <div className={styleClass.tableSection}>
             <div className={styleClass.tableTitle}>
-              <Layers className="w-4 h-4 inline-block mr-1.5 text-zinc-400" />
+              <span className={styleClass.tableTitleIcon}>&#128203;</span>
               Subscription Items
             </div>
             <div className={styleClass.tableWrapper}>
@@ -134,7 +133,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
 
           <div className={styleClass.footer}>
             <div className={styleClass.commentsIndicator}>
-              <Clock className="w-3.5 h-3.5 inline-block mr-1 text-zinc-400" />
+              <span className={styleClass.commentsIcon}>&#128257;</span>
               <span>Next: {subscription?.nextBillingDate || data.dueDate}</span>
             </div>
             <div className={styleClass.breadcrumbs}>
@@ -160,7 +159,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
               <h3 className={styleClass.title}>Recurring Invoice</h3>
               <div className={styleClass.invoiceNumber}>{data.invoiceNumber}</div>
               <div className={styleClass.orderTag} style={{ background: '#e0e7ff', color: '#3730a3' }}>
-                <Repeat className="w-3 h-3 inline-block mr-1" /> {subscription?.subscriptionPeriod || 'Monthly'}
+                <span>&#128257;</span> {subscription?.subscriptionPeriod || 'Monthly'}
               </div>
             </div>
           </div>
@@ -245,14 +244,14 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
 
           <div className={styleClass.paymentSection}>
             <div className={styleClass.paymentInfo}>
-              <div className={styleClass.paymentIcon}><Repeat className="w-4 h-4" /></div>
+              <div className={styleClass.paymentIcon}>&#128257;</div>
               <div className={styleClass.paymentDetails}>
                 <h4>Auto-Pay Active</h4>
                 <span>Next charge: {subscription?.nextBillingDate || data.dueDate}</span>
               </div>
             </div>
             <button className={styleClass.payNowBtn} style={{ background: '#4f46e5' }}>
-              <Repeat className="w-3.5 h-3.5 mr-1.5 inline-block" /> Manage Plan
+              <span>&#128257;</span> Manage Plan
             </button>
           </div>
 
@@ -293,7 +292,7 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
 
           {subscription && (
             <div style={{ display: 'flex', gap: '16px', padding: '20px', background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', borderRadius: '12px', marginBottom: '24px' }}>
-              <div style={{ width: '48px', height: '48px', background: '#4f46e5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><Repeat className="w-5 h-5" /></div>
+              <div style={{ width: '48px', height: '48px', background: '#4f46e5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px' }}>&#128257;</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>Subscription Active</div>
                 <div style={{ color: '#6b7280', fontSize: '14px', marginBottom: '12px' }}>{subscription.subscriptionDetails || 'Your subscription automatically renews each billing period.'}</div>
@@ -401,16 +400,9 @@ const RecurringInvoice: React.FC<RecurringInvoiceProps> = ({ data, styleClass })
 
   return (
     <div className={styleClass.container}>
-      <header className={`${styleClass.header || ''} flex justify-between items-start`}>
-        <div>
-          <div className={styleClass.title}>{data.from.name}</div>
-          <div className={getClasses('subtitle', 'subHeader')}>RECURRING INVOICE</div>
-        </div>
-        {data?.from?.logoUrl ? (
-          <div className="flex justify-end items-center">
-            <img src={data.from.logoUrl} alt="Company Logo" className="h-12 w-auto max-w-[180px] object-contain" />
-          </div>
-        ) : null}
+      <header className={styleClass.header}>
+        <div className={styleClass.title}>{data.from.name}</div>
+        <div className={getClasses('subtitle', 'subHeader')}>RECURRING INVOICE</div>
       </header>
 
       {subscription && (
